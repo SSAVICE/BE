@@ -8,11 +8,11 @@ assignees: ''
 ---
 
 ---
-name: Feature request
-about: Suggest an idea for this project
+name: Issue template
+about: Suggest an Issue for this project.
 title: ''
 labels: ''
-assignees: ppochaco
+assignees: hjinshin
 
 ---
 
