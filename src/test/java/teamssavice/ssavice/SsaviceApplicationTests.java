@@ -1,10 +1,10 @@
-package teamssavice.be;
+package teamssavice.ssavice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BeApplicationTests {
+class SsaviceApplicationTests {
 
 	@Test
 	void contextLoads() {
