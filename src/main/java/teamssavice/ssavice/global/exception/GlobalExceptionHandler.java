@@ -1,0 +1,64 @@
+package teamssavice.ssavice.global.exception;
+
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ProblemDetail> methodArgumentNotValidException(
+            MethodArgumentNotValidException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        Map<String, Object> errors = new HashMap<>();
+        e.getAllErrors()
+                .forEach(
+                        field -> errors.put(((FieldError) field).getField(), field.getDefaultMessage()));
+
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setProperties(errors);
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> constraintViolationException(
+            ConstraintViolationException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        Map<String, Object> errors = new HashMap<>();
+        e.getConstraintViolations()
+                .forEach(
+                        violation -> errors.put(violation.getPropertyPath().toString(),
+                                violation.getMessage()));
+
+        problemDetail.setTitle("Validation Error");
+        problemDetail.setProperties(errors);
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    private ProblemDetail setCustomProblemDetail(CustomException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatus());
+        problemDetail.setTitle(e.getTitle());
+        problemDetail.setDetail(e.getMessage());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> authenticationException(AuthenticationException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+}
