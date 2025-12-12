@@ -21,10 +21,6 @@ public class UserController {
     ) {
         UserModel.Login model = userService.register(request.token());
 
-        return ResponseEntity.ok(UserResponse.Token.builder()
-                .accessToken(model.accessToken())
-                .expiresIn(model.expiresIn())
-                .refreshToken(model.refreshToken())
-                .build());
+        return ResponseEntity.ok(UserResponse.Token.from(model));
     }
 }

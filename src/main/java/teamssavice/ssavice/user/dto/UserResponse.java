@@ -1,6 +1,7 @@
 package teamssavice.ssavice.user.dto;
 
 import lombok.Builder;
+import teamssavice.ssavice.user.service.dto.UserModel;
 
 public class UserResponse {
 
@@ -10,5 +11,12 @@ public class UserResponse {
             Long expiresIn,
             String refreshToken
     ) {
+        public static UserResponse.Token from(UserModel.Login model) {
+            return Token.builder()
+                    .accessToken(model.accessToken())
+                    .expiresIn(model.expiresIn())
+                    .refreshToken(model.refreshToken())
+                    .build();
+        }
     }
 }
