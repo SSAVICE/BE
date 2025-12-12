@@ -1,7 +1,7 @@
 package teamssavice.ssavice.user.service.dto;
 
 import lombok.Builder;
-import teamssavice.ssavice.global.auth.JwtToken;
+import teamssavice.ssavice.global.auth.Token;
 
 public class UserModel {
 
@@ -11,8 +11,8 @@ public class UserModel {
             Long expiresIn,
             String refreshToken
     ) {
-        public static Login from(JwtToken token) {
-            return UserModel.Login.builder()
+        public static Login from(Token token) {
+            return Login.builder()
                     .accessToken(token.accessToken())
                     .expiresIn(token.expiresIn())
                     .refreshToken(token.refreshToken())

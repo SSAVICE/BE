@@ -12,7 +12,7 @@ public class UserResponse {
             String refreshToken
     ) {
         public static UserResponse.Token from(UserModel.Login model) {
-            return Token.builder()
+            return UserResponse.Token.builder()
                     .accessToken(model.accessToken())
                     .expiresIn(model.expiresIn())
                     .refreshToken(model.refreshToken())

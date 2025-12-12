@@ -23,4 +23,5 @@ public class UserController {
 
         return ResponseEntity.ok(UserResponse.Token.from(model));
     }
+
 }

@@ -3,7 +3,7 @@ package teamssavice.ssavice.global.auth;
 import lombok.Builder;
 
 @Builder
-public record JwtToken(
+public record Token(
         String accessToken,
         Long expiresIn,
         String refreshToken

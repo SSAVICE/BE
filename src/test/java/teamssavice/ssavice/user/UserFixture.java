@@ -1,6 +1,7 @@
 package teamssavice.ssavice.user;
 
 import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.user.entity.Users;
 
 public class UserFixture {
 

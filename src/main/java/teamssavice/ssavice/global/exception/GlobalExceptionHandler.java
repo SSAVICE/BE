@@ -49,16 +49,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
-    private ProblemDetail setCustomProblemDetail(CustomException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatus());
-        problemDetail.setTitle(e.getTitle());
-        problemDetail.setDetail(e.getMessage());
-        return problemDetail;
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> unexpectedException(Exception e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setDetail("Unknown error");
+        log.error("Internal Server Error", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ProblemDetail> authenticationException(AuthenticationException e) {
         ProblemDetail problemDetail = setCustomProblemDetail(e);
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
+    private ProblemDetail setCustomProblemDetail(CustomException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatus());
+        problemDetail.setTitle(e.getTitle());
+        problemDetail.setDetail(e.getMessage());
+        return problemDetail;
     }
 }

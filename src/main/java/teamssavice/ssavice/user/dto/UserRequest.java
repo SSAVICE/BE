@@ -10,6 +10,6 @@ public class UserRequest {
             @NotNull
             String token
     ) {
-
     }
+
 }
