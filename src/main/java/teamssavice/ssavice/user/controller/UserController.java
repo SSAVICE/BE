@@ -24,4 +24,11 @@ public class UserController {
         return ResponseEntity.ok(UserResponse.Token.from(model));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<UserResponse.Token> refresh(
+        @RequestBody @Valid UserRequest.Refresh request
+    ) {
+        UserModel.Login model = userService.refresh(request.refreshToken());
+        return ResponseEntity.ok(UserResponse.Token.from(model));
+    }
 }

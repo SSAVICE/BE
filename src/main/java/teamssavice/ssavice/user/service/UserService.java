@@ -51,11 +51,30 @@ public class UserService {
         return UserModel.Login.from(token);
     }
 
+    public UserModel.Login refresh(String refreshToken) {
+        RefreshToken entity = getRefreshToken(refreshToken);
+        Users user = userRepository.findById(entity.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-    private void saveRefreshToken(Long userId, Token token) {
+        Token token = tokenProvider.createToken(user.getId(), user.getRole());
+        entity.refresh();
+        saveRefreshToken(user.getId(), token);
+        return UserModel.Login.from(token);
+    }
+
+    public void saveRefreshToken(Long userId, Token token) {
         String hashed = tokenProvider.hashRefreshToken(token.refreshToken());
         RefreshToken refreshToken = RefreshToken.builder().userId(userId).issuedAt(new Date()).expiresIn(token.expiresIn()).build();
         refreshTokenMap.put(hashed, refreshToken);
     }
 
+    public RefreshToken getRefreshToken(String refreshToken) {
+        String hashed = tokenProvider.hashRefreshToken(refreshToken);
+        if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException("유효하지 않은 토큰입니다.");
+        RefreshToken token = refreshTokenMap.get(hashed);
+        if(token.isRevoked()) throw new AuthenticationException("유효하지 않은 토큰입니다.");
+        if(token.isExpired()) throw new AuthenticationException("만료된 토큰입니다.");
+
+        return token;
+    }
 }

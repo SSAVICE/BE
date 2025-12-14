@@ -70,12 +70,12 @@ public class TokenProvider {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
-    public String hashRefreshToken(String token) {
+    public String hashRefreshToken(String refreshToken) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             SecretKeySpec keySpec = new SecretKeySpec(tokenProperties.hashSecretKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
             mac.init(keySpec);
-            byte[] macBytes = mac.doFinal(token.getBytes(StandardCharsets.UTF_8));
+            byte[] macBytes = mac.doFinal(refreshToken.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(macBytes);
         } catch (Exception e) {
             throw new RuntimeException(e);

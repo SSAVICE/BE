@@ -30,6 +30,7 @@ class UserRepositoryTest {
     @DisplayName("email로 조회")
     void findByEmailTest() {
         // given
+        Users user = this.user;
         String email = user.getEmail();
         userRepository.save(user);
 

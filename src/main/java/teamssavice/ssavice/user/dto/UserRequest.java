@@ -12,4 +12,10 @@ public class UserRequest {
     ) {
     }
 
+    @Builder
+    public record Refresh(
+            @NotNull
+            String refreshToken
+    ) {
+    }
 }
