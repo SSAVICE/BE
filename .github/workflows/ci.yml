@@ -4,6 +4,7 @@ name: Java CI Build and Test
 on:
   pull_request:
     branches: [ "develop", "prod" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
