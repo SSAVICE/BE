@@ -8,10 +8,13 @@ on:
 
 permissions:
   contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest # GitHub Actions에서 제공하는 가상 환경
+    timeout-minutes: 15 # 무한루프 방 (15분 넘으면 강제종료)
     steps:
     # 1. 코드 체크아웃
     - name: Checkout code
@@ -43,3 +46,25 @@ jobs:
     # 이 명령이 실패하면 CI 전체가 실패 처리됩니다.
     - name: Run Build and Tests
       run: ./gradlew build --scan
+
+    # 6. 테스트 레포트 - 깃허브
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v4
+      if: always() # 빌드 실패(테스트 실패) 시에도 리포트는 남겨야 함
+      with:
+        report_paths: '**/build/test-results/test/TEST-*.xml'
+
+#    # 7. 디스코드 알림 전송 (성공/실패 여부) - 메신저 알림용 - 아직 디스코드 연결 전 주석처리
+#    - name: Discord Notification
+#      uses: sarisia/actions-status-discord@v1
+#      if: always() # 성공이든 실패든 알림
+#      with:
+#        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+#        status: ${{ job.status }}
+#        title: "Java CI Build Result"
+#        description: |
+#          Build status: ${{ job.status }}
+#          Branch: ${{ github.ref_name }}
+#          Author: ${{ github.actor }}
+#        color: 0x0000ff
+#        url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
