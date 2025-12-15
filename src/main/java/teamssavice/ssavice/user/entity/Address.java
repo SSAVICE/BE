@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user;
+package teamssavice.ssavice.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

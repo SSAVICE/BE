@@ -1,7 +1,7 @@
 package teamssavice.ssavice.user.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import teamssavice.ssavice.user.Users;
+import teamssavice.ssavice.user.entity.Users;
 
 import java.util.Optional;
 

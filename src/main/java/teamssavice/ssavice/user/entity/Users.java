@@ -1,10 +1,11 @@
-package teamssavice.ssavice.user;
+package teamssavice.ssavice.user.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.user.constants.UserRole;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -16,6 +17,9 @@ public class Users extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Column(nullable = false)
+    private UserRole userRole;
     @NotNull
     @Column(nullable = false)
     private Provider provider;
