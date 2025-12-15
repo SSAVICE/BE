@@ -1,4 +1,4 @@
-package teamssavice.ssavice.global.auth;
+package teamssavice.ssavice.auth;
 
 import lombok.Builder;
 

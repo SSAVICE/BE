@@ -1,6 +1,6 @@
-package teamssavice.ssavice.user;
+package teamssavice.ssavice.fixture;
 
-import teamssavice.ssavice.global.auth.Token;
+import teamssavice.ssavice.auth.Token;
 
 public class TokenFixture {
 

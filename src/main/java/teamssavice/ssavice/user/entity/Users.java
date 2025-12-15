@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.user.constants.Provider;
-import teamssavice.ssavice.user.constants.Role;
+import teamssavice.ssavice.user.constants.UserRole;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -19,7 +19,7 @@ public class Users extends BaseEntity {
 
     @NotNull
     @Column(nullable = false)
-    private Role role;
+    private UserRole userRole;
     @NotNull
     @Column(nullable = false)
     private Provider provider;

@@ -1,5 +1,5 @@
 package teamssavice.ssavice.user.constants;
 
-public enum Role {
+public enum UserRole {
     USER, ADMIN
 }

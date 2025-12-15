@@ -1,7 +1,7 @@
 package teamssavice.ssavice.user.service.dto;
 
 import lombok.Builder;
-import teamssavice.ssavice.global.auth.Token;
+import teamssavice.ssavice.auth.Token;
 
 public class UserModel {
 

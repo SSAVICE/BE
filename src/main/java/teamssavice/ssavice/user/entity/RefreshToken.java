@@ -2,6 +2,7 @@ package teamssavice.ssavice.user.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import teamssavice.ssavice.auth.constants.Role;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ public class RefreshToken {
     private Long userId;
     private Date issuedAt;
     private Long expiresIn;
+    private Role role;
     private boolean revoked;
 
     public void refresh() {

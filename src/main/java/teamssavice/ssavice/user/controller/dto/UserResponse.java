@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user.dto;
+package teamssavice.ssavice.user.controller.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.user.service.dto.UserModel;

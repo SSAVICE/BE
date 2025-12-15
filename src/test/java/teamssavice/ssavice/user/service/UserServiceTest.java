@@ -4,15 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import teamssavice.ssavice.global.auth.Token;
-import teamssavice.ssavice.global.auth.TokenProvider;
+import teamssavice.ssavice.auth.Token;
+import teamssavice.ssavice.auth.TokenProvider;
+import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.auth.service.TokenService;
+import teamssavice.ssavice.fixture.TokenFixture;
+import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.exception.AuthenticationException;
-import teamssavice.ssavice.user.TokenFixture;
-import teamssavice.ssavice.user.UserFixture;
-import teamssavice.ssavice.user.entity.RefreshToken;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
 import teamssavice.ssavice.user.service.dto.UserModel;
@@ -26,45 +26,28 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    @InjectMocks
     private UserService userService;
+    private TokenService tokenService;
     @Mock
     private TokenProvider tokenProvider;
     @Mock
     private UserRepository userRepository;
+
 
     private Users user;
     private Token token;
 
     @BeforeEach
     void setUp() {
+        tokenService = new TokenService(tokenProvider);
+        userService = new UserService(userRepository, tokenService);
         user = UserFixture.user();
         token = TokenFixture.token();
     }
 
     @Test
-    @DisplayName("리프레쉬 토큰 저장 테스트")
-    void saveRefreshTokenTest() {
-        // given
-        Users user = this.user;
-        Token token = this.token;
-        String hashed = "hashedRefreshToken";
-
-        // when
-        when(tokenProvider.hashRefreshToken(token.refreshToken())).thenReturn(hashed);
-        userService.saveRefreshToken(user.getId(), token);
-        RefreshToken actual = userService.getRefreshToken(token.refreshToken());
-
-        // then
-        assertAll(
-                () -> assertThat(actual.getUserId()).isEqualTo(user.getId()),
-                () -> assertThat(actual.isRevoked()).isEqualTo(false)
-        );
-    }
-
-    @Test
     @DisplayName("토큰 갱신 시 이전 토큰 취소 테스트")
-    void revokeRefreshTokenTest() {
+    void refreshRevokeTest() {
         // given
         Users user = this.user;
         Token token = this.token;
@@ -72,16 +55,16 @@ class UserServiceTest {
         String hashed = "hashedRefreshToken";
         String newHashed = "newHashedRefreshToken";
         when(tokenProvider.hashRefreshToken(token.refreshToken())).thenReturn(hashed);
-        userService.saveRefreshToken(user.getId(), token);
+        tokenService.saveRefreshToken(user.getId(), token, Role.USER);
 
         // when
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(tokenProvider.createToken(user.getId(), user.getRole())).thenReturn(newToken);
+        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(newToken);
         when(tokenProvider.hashRefreshToken(newToken.refreshToken())).thenReturn(newHashed);
         UserModel.Login actual = userService.refresh(token.refreshToken());
 
         // then
-        assertThrows(AuthenticationException.class, () -> userService.getRefreshToken(token.refreshToken()));
+        assertThrows(AuthenticationException.class, () -> tokenService.getRefreshToken(token.refreshToken()));
         assertAll(
                 () -> assertThat(actual.accessToken()).isEqualTo(newToken.accessToken()),
                 () -> assertThat(actual.refreshToken()).isEqualTo(newToken.refreshToken())

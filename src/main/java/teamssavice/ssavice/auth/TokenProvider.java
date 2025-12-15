@@ -1,12 +1,12 @@
-package teamssavice.ssavice.global.auth;
+package teamssavice.ssavice.auth;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.global.property.TokenProperties;
-import teamssavice.ssavice.user.constants.Role;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
