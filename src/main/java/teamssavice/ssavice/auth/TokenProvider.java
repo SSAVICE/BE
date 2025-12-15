@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.global.property.TokenProperties;
 
@@ -51,15 +52,15 @@ public class TokenProvider {
                     .parseClaimsJws(accessToken)
                     .getBody();
         } catch (SecurityException | MalformedJwtException e) {
-            throw new AuthenticationException("유효하지 않은 토큰입니다.");
+            throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
-            throw new AuthenticationException("만료된 토큰입니다.");
+            throw new AuthenticationException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
-            throw new AuthenticationException("지원되지 않는 토큰입니다.");
+            throw new AuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (IllegalArgumentException e) {
-            throw new AuthenticationException("토큰이 존재하지 않습니다.");
+            throw new AuthenticationException(ErrorCode.EMPTY_TOKEN);
         } catch (Exception e) {
-            throw new AuthenticationException("알 수 없는 토큰 에러");
+            throw new AuthenticationException(ErrorCode.UNKNOWN_TOKEN_ERROR);
         }
     }
 

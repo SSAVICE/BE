@@ -1,16 +1,13 @@
 package teamssavice.ssavice.global.exception;
 
-import org.springframework.http.HttpStatus;
+import teamssavice.ssavice.global.constants.ErrorCode;
 
 public class AuthenticationException extends CustomException {
 
     private static final String DEFAULT_TITLE = "Authentication Error";
 
-    public AuthenticationException(String message) {
-        super(message, HttpStatus.UNAUTHORIZED, DEFAULT_TITLE);
+    public AuthenticationException(ErrorCode errorCode) {
+        super(errorCode, DEFAULT_TITLE);
     }
 
-    public AuthenticationException(String message, HttpStatus status, String title) {
-        super(message, status, title);
-    }
 }

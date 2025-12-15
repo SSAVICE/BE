@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;
@@ -48,7 +49,7 @@ public class UserService {
     public UserModel.Login refresh(String refreshToken) {
         RefreshToken entity = tokenService.getRefreshToken(refreshToken);
         Users user = userRepository.findById(entity.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         Token token = tokenService.createToken(user.getId(), entity.getRole());
         entity.refresh();

@@ -1,16 +1,16 @@
 package teamssavice.ssavice.global.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import teamssavice.ssavice.global.constants.ErrorCode;
 
 @Getter
 public abstract class CustomException extends RuntimeException {
-    private final HttpStatus status;
+    private final ErrorCode errorCode;
     private final String title;
 
-    public CustomException(String message, HttpStatus status, String title) {
-        super(message);
-        this.status = status;
+    public CustomException(ErrorCode errorCode, String title) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
         this.title = title;
     }
 }

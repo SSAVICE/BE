@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.TokenProvider;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.user.entity.RefreshToken;
 
@@ -36,10 +37,10 @@ public class TokenService {
 
     public RefreshToken getRefreshToken(String refreshToken) {
         String hashed = tokenProvider.hashRefreshToken(refreshToken);
-        if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException("유효하지 않은 토큰입니다.");
+        if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
         RefreshToken token = refreshTokenMap.get(hashed);
-        if(token.isRevoked()) throw new AuthenticationException("유효하지 않은 토큰입니다.");
-        if(token.isExpired()) throw new AuthenticationException("만료된 토큰입니다.");
+        if(token.isRevoked()) throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
+        if(token.isExpired()) throw new AuthenticationException(ErrorCode.EXPIRED_TOKEN);
 
         return token;
     }
