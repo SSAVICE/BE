@@ -65,9 +65,10 @@ public class GlobalExceptionHandler {
     }
 
     private ProblemDetail setCustomProblemDetail(CustomException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatus());
+        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getErrorCode().getStatus());
         problemDetail.setTitle(e.getTitle());
         problemDetail.setDetail(e.getMessage());
+        problemDetail.setProperty("error_code", e.getErrorCode().getCode());
         return problemDetail;
     }
 }
