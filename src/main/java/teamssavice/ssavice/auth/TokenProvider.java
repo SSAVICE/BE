@@ -58,7 +58,7 @@ public class TokenProvider {
         } catch (UnsupportedJwtException e) {
             throw new AuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (IllegalArgumentException e) {
-            throw new AuthenticationException(ErrorCode.EMPTY_TOKEN);
+            throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
         } catch (Exception e) {
             throw new AuthenticationException(ErrorCode.UNKNOWN_TOKEN_ERROR);
         }

@@ -9,7 +9,7 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "만료된 토큰입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "UNSUPPORTED_TOKEN", "지원되지 않는 토큰입니다."),
-    EMPTY_TOKEN(HttpStatus.UNAUTHORIZED, "EMPTY_TOKEN", "토큰이 존재하지 않습니다."),
+    MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "MISSING_TOKEN", "토큰이 존재하지 않습니다."),
     UNKNOWN_TOKEN_ERROR(HttpStatus.UNAUTHORIZED, "UNKNOWN_TOKEN_ERROR", "알 수 없는 토큰 에러"),
 
     // User
