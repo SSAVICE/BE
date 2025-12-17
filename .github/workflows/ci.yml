@@ -61,17 +61,20 @@ jobs:
       with:
         report_paths: '**/build/test-results/test/TEST-*.xml'
 
-    # 8. 디스코드 알림 전송 (성공/실패 여부) - 메신저 알림용 - 아직 디스코드 연결 전 주석처리
+      # 8. 디스코드 알림 전송 (업그레이드 버전)
     - name: Discord Notification
       uses: sarisia/actions-status-discord@v1
-      if: always() # 성공이든 실패든 알림
+      if: always()
       with:
         webhook: ${{ secrets.DISCORD_WEBHOOK }}
         status: ${{ job.status }}
-        title: "Java CI Build Result"
+        title: " ${{ github.workflow }} 결과 알림"
+
         description: |
-          Build status: ${{ job.status }}
-          Branch: ${{ github.ref_name }}
-          Author: ${{ github.actor }}
-        color: 0x0000ff
+          **결과**: ${{ job.status }}
+          **PR 제목**: ${{ github.event.pull_request.title }}
+          **요청자**: ${{ github.actor }}
+          **브랜치**: ${{ github.head_ref }} -> ${{ github.base_ref }}
+        # 성공이면 초록(0x00FF00), 실패면 빨강(0xFF0000), 취소면 회색
+        color: ${{ job.status == 'success' && '0x00FF00' || job.status == 'failure' && '0xFF0000' || '0x808080' }}
         url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
