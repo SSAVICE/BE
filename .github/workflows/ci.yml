@@ -6,6 +6,11 @@ on:
     branches: [ "develop", "prod" ]
   workflow_dispatch:
 
+# 같은 PR에 새로운 푸쉬오면 기존에 돌던거 취소하고 새걸로
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -47,24 +52,34 @@ jobs:
     - name: Run Build and Tests
       run: ./gradlew build --scan
 
-    # 6. 테스트 레포트 - 깃허브
+    # 6. 테스트 결과를 PR에 코멘트로 등록 (표 형태 요약)
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: "**/build/test-results/test/TEST-*.xml"
+
+    # 7. 깃허브 봇
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v4
       if: always() # 빌드 실패(테스트 실패) 시에도 리포트는 남겨야 함
       with:
         report_paths: '**/build/test-results/test/TEST-*.xml'
 
-#    # 7. 디스코드 알림 전송 (성공/실패 여부) - 메신저 알림용 - 아직 디스코드 연결 전 주석처리
-#    - name: Discord Notification
-#      uses: sarisia/actions-status-discord@v1
-#      if: always() # 성공이든 실패든 알림
-#      with:
-#        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-#        status: ${{ job.status }}
-#        title: "Java CI Build Result"
-#        description: |
-#          Build status: ${{ job.status }}
-#          Branch: ${{ github.ref_name }}
-#          Author: ${{ github.actor }}
-#        color: 0x0000ff
-#        url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      # 8. 디스코드 알림 전송 (업그레이드 버전)
+    - name: Discord Notification
+      uses: sarisia/actions-status-discord@v1
+      if: always()
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
+        title: " ${{ github.workflow }} 결과 알림"
+
+        description: |
+          **결과**: ${{ job.status }}
+          **PR 제목**: ${{ github.event.pull_request.title }}
+          **요청자**: ${{ github.actor }}
+          **브랜치**: ${{ github.head_ref }} -> ${{ github.base_ref }}
+        # 성공이면 초록, 실패면 빨강, 취소면 회색
+        color: ${{ job.status == 'success' && '0x00FF00' || job.status == 'failure' && '0xFF0000' || '0x808080' }}
+        url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
