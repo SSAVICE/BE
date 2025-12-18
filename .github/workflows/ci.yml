@@ -6,6 +6,11 @@ on:
     branches: [ "develop", "prod" ]
   workflow_dispatch:
 
+# 같은 PR에 새로운 푸쉬오면 기존에 돌던거 취소하고 새걸로
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -75,6 +80,6 @@ jobs:
           **PR 제목**: ${{ github.event.pull_request.title }}
           **요청자**: ${{ github.actor }}
           **브랜치**: ${{ github.head_ref }} -> ${{ github.base_ref }}
-        # 성공이면 초록(0x00FF00), 실패면 빨강(0xFF0000), 취소면 회색
+        # 성공이면 초록, 실패면 빨강, 취소면 회색
         color: ${{ job.status == 'success' && '0x00FF00' || job.status == 'failure' && '0xFF0000' || '0x808080' }}
         url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
