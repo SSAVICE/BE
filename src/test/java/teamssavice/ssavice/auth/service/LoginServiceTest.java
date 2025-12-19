@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class TokenServiceTest {
+class LoginServiceTest {
     @InjectMocks
     private TokenService tokenService;
     @Mock
@@ -50,7 +50,7 @@ class TokenServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(actual.getUserId()).isEqualTo(user.getId()),
+                () -> assertThat(actual.getSubject()).isEqualTo(user.getId()),
                 () -> assertThat(actual.isRevoked()).isEqualTo(false)
         );
     }
@@ -69,6 +69,6 @@ class TokenServiceTest {
         RefreshToken actual = tokenService.getRefreshToken(token.refreshToken());
 
         // then
-        assertThat(actual.getUserId()).isEqualTo(user.getId());
+        assertThat(actual.getSubject()).isEqualTo(user.getId());
     }
 }

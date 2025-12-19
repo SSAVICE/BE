@@ -37,14 +37,15 @@ public class UserService {
         return UserModel.Login.from(token);
     }
 
+    @Transactional(readOnly = true)
     public UserModel.Login refresh(String refreshToken) {
-        RefreshToken entity = tokenService.getRefreshToken(refreshToken);
-
-        if (!userRepository.existsById(entity.getUserId())) {
+        RefreshToken token = tokenService.getRefreshToken(refreshToken);
+        if (!userRepository.existsById(token.getSubject())) {
             throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
         }
-        Token token = tokenService.refresh(entity);
-        return UserModel.Login.from(token);
+
+        Token newToken = tokenService.refresh(token);
+        return UserModel.Login.from(newToken);
     }
 
     public Optional<Users> findByEmail(String email) {

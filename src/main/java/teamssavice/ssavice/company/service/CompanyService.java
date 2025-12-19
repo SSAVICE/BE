@@ -3,11 +3,14 @@ package teamssavice.ssavice.company.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.auth.RefreshToken;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserService;
 
@@ -34,5 +37,16 @@ public class CompanyService {
         }
         Token token = tokenService.issueToken(user.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, Role.COMPANY);
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyModel.Refresh refresh(String refreshToken) {
+        RefreshToken token = tokenService.getRefreshToken(refreshToken);
+        if(!companyRepository.existsById(token.getSubject())) {
+            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Token newToken = tokenService.refresh(token);
+        return CompanyModel.Refresh.from(newToken);
     }
 }

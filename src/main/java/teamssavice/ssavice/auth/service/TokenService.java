@@ -28,8 +28,8 @@ public class TokenService {
 
     public Token refresh(RefreshToken refreshToken) {
         refreshToken.revoke();
-        Token token = createToken(refreshToken.getUserId(), refreshToken.getRole());
-        saveRefreshToken(refreshToken.getUserId(), token, refreshToken.getRole());
+        Token token = createToken(refreshToken.getSubject(), refreshToken.getRole());
+        saveRefreshToken(refreshToken.getSubject(), token, refreshToken.getRole());
         return token;
     }
 
@@ -50,7 +50,7 @@ public class TokenService {
     protected void saveRefreshToken(Long userId, Token token, Role role) {
         String hashed = tokenProvider.hashRefreshToken(token.refreshToken());
         RefreshToken refreshToken = RefreshToken.builder()
-                .userId(userId)
+                .subject(userId)
                 .issuedAt(new Date())
                 .expiresIn(token.expiresIn())
                 .role(role)

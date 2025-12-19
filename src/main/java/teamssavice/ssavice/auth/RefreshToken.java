@@ -9,7 +9,7 @@ import java.util.Date;
 @Builder
 @Getter
 public class RefreshToken {
-    private Long userId;
+    private Long subject;
     private Date issuedAt;
     private Long expiresIn;
     private Role role;
