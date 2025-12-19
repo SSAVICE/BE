@@ -13,14 +13,16 @@ import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.fixture.TokenFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.auth.RefreshToken;
+import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.user.entity.Users;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class LoginServiceTest {
+class TokenServiceTest {
     @InjectMocks
     private TokenService tokenService;
     @Mock
@@ -70,5 +72,32 @@ class LoginServiceTest {
 
         // then
         assertThat(actual.getSubject()).isEqualTo(user.getId());
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 테스트")
+    void refreshTest() {
+        // given
+        Users user = this.user;
+        Token token = this.token;
+        String hashed = "hashedRefreshToken";
+        Token newToken = TokenFixture.of("newAccessToken", 3600L, "newRefreshToken");
+        String newHashed = "newHashedRefreshToken";
+        when(tokenProvider.hashRefreshToken(token.refreshToken())).thenReturn(hashed);
+        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(token);
+        tokenService.saveRefreshToken(user.getId(), token, Role.USER);
+
+        // when
+        when(tokenProvider.hashRefreshToken(newToken.refreshToken())).thenReturn(newHashed);
+        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(newToken);
+        var actual = tokenService.refresh(token.refreshToken());
+
+
+        // then
+        assertThrows(AuthenticationException.class, () -> tokenService.getRefreshToken(token.refreshToken()));
+        assertAll(
+                () -> assertThat(actual.accessToken()).isEqualTo(newToken.accessToken()),
+                () -> assertThat(actual.refreshToken()).isEqualTo(newToken.refreshToken())
+        );
     }
 }

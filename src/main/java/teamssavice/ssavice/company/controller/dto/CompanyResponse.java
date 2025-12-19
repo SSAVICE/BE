@@ -22,19 +22,4 @@ public class CompanyResponse {
                     .build();
         }
     }
-
-    @Builder
-    public record Token(
-            String accessToken,
-            Long expiresIn,
-            String refreshToken
-    ) {
-        public static CompanyResponse.Token from(CompanyModel.Refresh model) {
-            return CompanyResponse.Token.builder()
-                    .accessToken(model.accessToken())
-                    .expiresIn(model.expiresIn())
-                    .refreshToken(model.refreshToken())
-                    .build();
-        }
-    }
 }

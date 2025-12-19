@@ -15,13 +15,6 @@ public class CompanyRequest {
     }
 
     @Builder
-    public record Refresh(
-            @NotNull
-            String refreshToken
-    ) {
-    }
-
-    @Builder
     public record Create(
         String companyName,
         String ownerName,

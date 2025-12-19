@@ -22,19 +22,4 @@ public class CompanyModel {
                     .build();
         }
     }
-
-    @Builder
-    public record Refresh(
-            String accessToken,
-            Long expiresIn,
-            String refreshToken
-    ) {
-        public static CompanyModel.Refresh from(Token token) {
-            return CompanyModel.Refresh.builder()
-                    .accessToken(token.accessToken())
-                    .expiresIn(token.expiresIn())
-                    .refreshToken(token.refreshToken())
-                    .build();
-        }
-    }
 }

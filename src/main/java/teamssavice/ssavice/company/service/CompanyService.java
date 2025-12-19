@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.address.service.AddressService;
 import teamssavice.ssavice.address.service.dto.AddressCommand;
-import teamssavice.ssavice.auth.RefreshToken;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
@@ -41,13 +40,6 @@ public class CompanyService {
         }
         Token token = tokenService.issueToken(user.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, Role.COMPANY);
-    }
-
-    @Transactional(readOnly = true)
-    public CompanyModel.Refresh refresh(String refreshToken) {
-        RefreshToken token = tokenService.getRefreshToken(refreshToken);
-        Token newToken = tokenService.refresh(token);
-        return CompanyModel.Refresh.from(newToken);
     }
 
     public void register(CompanyCommand.Create command) {

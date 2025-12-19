@@ -11,11 +11,4 @@ public class UserRequest {
             String token
     ) {
     }
-
-    @Builder
-    public record Refresh(
-            @NotNull
-            String refreshToken
-    ) {
-    }
 }

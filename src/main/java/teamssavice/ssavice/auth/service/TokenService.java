@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.TokenProvider;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.auth.service.dto.AuthModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.auth.RefreshToken;
@@ -26,14 +27,15 @@ public class TokenService {
         return token;
     }
 
-    public Token refresh(RefreshToken refreshToken) {
-        refreshToken.revoke();
-        Token token = createToken(refreshToken.getSubject(), refreshToken.getRole());
-        saveRefreshToken(refreshToken.getSubject(), token, refreshToken.getRole());
-        return token;
+    public AuthModel.Refresh refresh(String refreshToken) {
+        RefreshToken entity = getRefreshToken(refreshToken);
+        entity.revoke();
+        Token token = createToken(entity.getSubject(), entity.getRole());
+        saveRefreshToken(entity.getSubject(), token, entity.getRole());
+        return AuthModel.Refresh.from(token);
     }
 
-    public RefreshToken getRefreshToken(String refreshToken) {
+    protected RefreshToken getRefreshToken(String refreshToken) {
         String hashed = tokenProvider.hashRefreshToken(refreshToken);
         if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
         RefreshToken token = refreshTokenMap.get(hashed);
@@ -41,10 +43,6 @@ public class TokenService {
         if(token.isExpired()) throw new AuthenticationException(ErrorCode.EXPIRED_TOKEN);
 
         return token;
-    }
-
-    private Token createToken(Long userId, Role role) {
-        return tokenProvider.createToken(userId, role);
     }
 
     protected void saveRefreshToken(Long userId, Token token, Role role) {
@@ -56,5 +54,9 @@ public class TokenService {
                 .role(role)
                 .build();
         refreshTokenMap.put(hashed, refreshToken);
+    }
+
+    private Token createToken(Long userId, Role role) {
+        return tokenProvider.createToken(userId, role);
     }
 }

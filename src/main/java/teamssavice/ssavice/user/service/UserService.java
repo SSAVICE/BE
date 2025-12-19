@@ -10,7 +10,6 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;
-import teamssavice.ssavice.auth.RefreshToken;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
 import teamssavice.ssavice.user.service.dto.UserModel;
@@ -35,17 +34,6 @@ public class UserService {
         // 토큰 발행
         Token token = tokenService.issueToken(user.getId(), Role.USER);
         return UserModel.Login.from(token);
-    }
-
-    @Transactional(readOnly = true)
-    public UserModel.Login refresh(String refreshToken) {
-        RefreshToken token = tokenService.getRefreshToken(refreshToken);
-        if (!userRepository.existsById(token.getSubject())) {
-            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        Token newToken = tokenService.refresh(token);
-        return UserModel.Login.from(newToken);
     }
 
     public Optional<Users> findByEmail(String email) {

@@ -28,14 +28,6 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<CompanyResponse.Token> refresh(
-            @RequestBody @Valid CompanyRequest.Refresh request
-    ) {
-        CompanyModel.Refresh model = companyService.refresh(request.refreshToken());
-        return ResponseEntity.ok(CompanyResponse.Token.from(model));
-    }
-
     @PostMapping("/")
     public ResponseEntity<Void> register(
             @Authenticate Long userId,
