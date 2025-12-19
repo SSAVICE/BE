@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.filter.OncePerRequestFilter;
 import teamssavice.ssavice.auth.TokenProvider;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.global.exception.CustomException;
@@ -20,10 +21,12 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final String HEADER_AUTHORIZATION = "Authorization";
+    private static final String TOKEN_PREFIX = "Bearer ";
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/user/login",
             "/api/company/login",
-            "/api/user/refresh",
+            "/api/auth/token/refresh",
             "/api/health"
     );
     private final TokenProvider tokenProvider;
@@ -38,8 +41,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String accessToken = resolveToken(request);
 
             Claims claims = tokenProvider.getClaim(accessToken);
-            request.setAttribute("userId", claims.getSubject());
-            request.setAttribute("role", claims.get("role"));
+            request.setAttribute("sub", claims.getSubject());
+            Role role = Role.valueOf(claims.get("role", String.class));
+            request.setAttribute("role", role);
 
             filterChain.doFilter(request, response);
         } catch (CustomException e) {
@@ -56,9 +60,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(HEADER_AUTHORIZATION);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(TOKEN_PREFIX)) {
             throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
         }
 
