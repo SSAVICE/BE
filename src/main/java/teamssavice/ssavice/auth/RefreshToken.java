@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user.entity;
+package teamssavice.ssavice.auth;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +15,7 @@ public class RefreshToken {
     private Role role;
     private boolean revoked;
 
-    public void refresh() {
+    public void revoke() {
         this.revoked = true;
     }
 

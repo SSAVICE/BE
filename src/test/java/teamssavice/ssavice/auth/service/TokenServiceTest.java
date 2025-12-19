@@ -12,7 +12,7 @@ import teamssavice.ssavice.auth.TokenProvider;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.fixture.TokenFixture;
 import teamssavice.ssavice.fixture.UserFixture;
-import teamssavice.ssavice.user.entity.RefreshToken;
+import teamssavice.ssavice.auth.RefreshToken;
 import teamssavice.ssavice.user.entity.Users;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

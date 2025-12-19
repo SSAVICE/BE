@@ -54,13 +54,14 @@ class UserServiceTest {
         Token newToken = TokenFixture.of("newAccessToken", 3600L, "newRefreshToken");
         String hashed = "hashedRefreshToken";
         String newHashed = "newHashedRefreshToken";
+        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(token);
         when(tokenProvider.hashRefreshToken(token.refreshToken())).thenReturn(hashed);
-        tokenService.saveRefreshToken(user.getId(), token, Role.USER);
+        tokenService.issueToken(user.getId(), Role.USER);
 
         // when
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(newToken);
         when(tokenProvider.hashRefreshToken(newToken.refreshToken())).thenReturn(newHashed);
+        when(userRepository.existsById(user.getId())).thenReturn(true);
+        when(tokenProvider.createToken(user.getId(), Role.USER)).thenReturn(newToken);
         UserModel.Login actual = userService.refresh(token.refreshToken());
 
         // then
