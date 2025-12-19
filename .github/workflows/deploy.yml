@@ -2,7 +2,7 @@ name: Deploy to EC2 with Docker Hub
 
 on:
   push:
-    branches: [ "week2/issue#13" ] # 테스트 한번
+    branches: [ "develop" ]
 
 jobs:
   # [1단계] 빌드 및 도커 허브 푸시
