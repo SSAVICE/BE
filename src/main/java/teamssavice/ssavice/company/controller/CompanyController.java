@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.controller.dto.CompanyResponse;
 import teamssavice.ssavice.company.service.CompanyService;
+import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.global.annotation.Authenticate;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,5 +34,14 @@ public class CompanyController {
     ) {
         CompanyModel.Refresh model = companyService.refresh(request.refreshToken());
         return ResponseEntity.ok(CompanyResponse.Token.from(model));
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<Void> register(
+            @Authenticate Long userId,
+            @RequestBody @Valid CompanyRequest.Create request
+    ) {
+        companyService.register(CompanyCommand.Create.from(userId, request));
+        return ResponseEntity.ok().build();
     }
 }

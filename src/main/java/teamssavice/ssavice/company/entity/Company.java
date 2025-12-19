@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.global.entity.BaseEntity;
-import teamssavice.ssavice.user.entity.Address;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.user.entity.Users;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,16 +19,22 @@ public class Company extends BaseEntity {
 
     @NotNull
     @Column(nullable = false)
-    private String name;
+    private String companyName;
     @NotNull
     @Column(nullable = false)
+    private String ownerName;
+    @NotNull
+    @Column(nullable = false)
+    private String phoneNumber;
+    @NotNull
+    @Column(nullable = true)
     private String imageUrl;
     @NotNull
     @Column(nullable = false)
     private String businessNumber;
     @NotNull
     @Column(nullable = true)
-    private String introduction;
+    private String description;
     @NotNull
     @Column(nullable = false)
     private String depositor;
@@ -39,9 +45,6 @@ public class Company extends BaseEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
     @NotNull
-    @Column(nullable = false)
-    private String ownerName;
-    @NotNull
     @Column(nullable = true)
     private String detail;
 
@@ -49,10 +52,10 @@ public class Company extends BaseEntity {
 
     //주소
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id")
+    @JoinColumn(name = "address_id", nullable = false)
     private Address address;
     //유저
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 }

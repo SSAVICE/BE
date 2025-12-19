@@ -52,6 +52,11 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public Users findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
+
     public Users save(String email) {
         Users user = Users.builder()
                 .userRole(UserRole.USER)
