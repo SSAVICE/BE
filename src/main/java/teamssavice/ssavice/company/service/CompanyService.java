@@ -13,8 +13,12 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserService;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,32 +38,41 @@ public class CompanyService {
                 .orElseGet(() -> userService.save(email));
 
         // 업체가 있으면 업체 토큰, 없으면 유저 토큰
-        if (companyRepository.existsByUserId(user.getId())) {
+        Optional<Company> optionalCompany = companyRepository.findByUser(user);
+        if(optionalCompany.isEmpty()) {
             Token token = tokenService.issueToken(user.getId(), Role.USER);
             return CompanyModel.Login.from(token, Role.USER);
         }
-        Token token = tokenService.issueToken(user.getId(), Role.COMPANY);
+
+        Company company = optionalCompany.get();
+        Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, Role.COMPANY);
     }
 
-    public void register(CompanyCommand.Create command) {
+    public CompanyModel.Login register(CompanyCommand.Create command) {
         Users user = userService.findById(command.userId());
+        if(companyRepository.existsByUser(user)) {
+            throw new ConflictException(ErrorCode.COMPANY_ALREADY_EXISTS);
+        }
         Address address = addressService.save(AddressCommand.Create.from(command));
-        save(command, user, address);
+        Company company = save(command, user, address);
+        Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
+        return CompanyModel.Login.from(token, Role.COMPANY);
     }
 
-    private void save(CompanyCommand.Create command, Users user, Address address) {
+    private Company save(CompanyCommand.Create command, Users user, Address address) {
         Company company = Company.builder()
                 .companyName(command.companyName())
                 .ownerName(command.ownerName())
                 .phoneNumber(command.phoneNumber())
                 .businessNumber(command.businessNumber())
-                .accountNumber(command.accountNumber())
                 .description(command.description())
+                .depositor(command.depositor())
+                .accountNumber(command.accountNumber())
                 .detail(command.detail())
                 .address(address)
                 .user(user)
                 .build();
-        companyRepository.save(company);
+        return companyRepository.save(company);
     }
 }

@@ -7,12 +7,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.controller.dto.CompanyResponse;
 import teamssavice.ssavice.company.service.CompanyService;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
-import teamssavice.ssavice.global.annotation.Authenticate;
+import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.RequireRole;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,12 +30,13 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @PostMapping("/")
-    public ResponseEntity<Void> register(
-            @Authenticate Long userId,
+    @RequireRole(Role.USER)
+    @PostMapping
+    public ResponseEntity<CompanyResponse.Login> register(
+            @CurrentId Long userId,
             @RequestBody @Valid CompanyRequest.Create request
     ) {
-        companyService.register(CompanyCommand.Create.from(userId, request));
-        return ResponseEntity.ok().build();
+        CompanyModel.Login model = companyService.register(CompanyCommand.Create.from(userId, request));
+        return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 }

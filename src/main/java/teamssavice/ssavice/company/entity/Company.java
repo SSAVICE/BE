@@ -26,13 +26,13 @@ public class Company extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private String phoneNumber;
-    @NotNull
+
     @Column(nullable = true)
     private String imageUrl;
     @NotNull
     @Column(nullable = false)
     private String businessNumber;
-    @NotNull
+
     @Column(nullable = true)
     private String description;
     @NotNull
@@ -44,7 +44,7 @@ public class Company extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private boolean isDeleted = false;
-    @NotNull
+
     @Column(nullable = true)
     private String detail;
 

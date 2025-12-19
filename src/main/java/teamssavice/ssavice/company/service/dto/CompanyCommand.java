@@ -14,8 +14,9 @@ public class CompanyCommand {
             String ownerName,
             String phoneNumber,
             String businessNumber,
-            String accountNumber,
             String description,
+            String depositor,
+            String accountNumber,
             String detail,
             String postCode,
             String address,
@@ -24,13 +25,14 @@ public class CompanyCommand {
             BigDecimal latitude
     ) {
         public static CompanyCommand.Create from(Long userId, CompanyRequest.Create request) {
-            return CompanyCommand.Create.builder()
+            return Create.builder()
                     .userId(userId)
                     .companyName(request.companyName())
                     .ownerName(request.ownerName())
                     .phoneNumber(request.phoneNumber())
                     .businessNumber(request.businessNumber())
                     .accountNumber(request.accountNumber())
+                    .depositor(request.depositor())
                     .description(request.description())
                     .detail(request.detail())
                     .postCode(request.postCode())
