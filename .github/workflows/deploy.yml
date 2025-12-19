@@ -61,8 +61,8 @@ jobs:
           script: |
             cd ~/BE
             # 최신 이미지 Pull (도커 허브에서 가져옴)
-            docker-compose pull
+            docker compose pull
             # 서버 재시작
-            docker-compose up -d --build
+            docker compose up -d
             # 불필요한 이미지 정리
             docker image prune -f
