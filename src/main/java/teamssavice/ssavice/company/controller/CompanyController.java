@@ -3,10 +3,7 @@ package teamssavice.ssavice.company.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.controller.dto.CompanyResponse;
@@ -39,4 +36,15 @@ public class CompanyController {
         CompanyModel.Login model = companyService.register(CompanyCommand.Create.from(userId, request));
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
+
+    @RequireRole(Role.COMPANY)
+    @PutMapping
+    public ResponseEntity<CompanyResponse> putCompany(
+            @CurrentId Long companyId,
+            @RequestBody @Valid CompanyRequest.Update request
+    ) {
+        companyService.updateCompany(CompanyCommand.Update.from(companyId, request));
+        return ResponseEntity.ok().build();
+    }
+
 }
