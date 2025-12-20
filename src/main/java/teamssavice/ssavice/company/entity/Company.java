@@ -3,6 +3,8 @@ package teamssavice.ssavice.company.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.user.entity.Users;
@@ -51,11 +53,37 @@ public class Company extends BaseEntity {
     // boolean isApproved; <-- 업체 등록 시 승인 여부
 
     //주소
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
     //유저
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
+
+
+    public void update(CompanyCommand.Update command) {
+        if (command.companyName() != null) {
+            this.companyName = command.companyName();
+        }
+        if(command.ownerName() != null) {
+            this.ownerName = command.ownerName();
+        }
+        if(command.phoneNumber() != null) {
+            this.phoneNumber = command.phoneNumber();
+        }
+        this.description = command.description();
+        if (command.depositor() != null) {
+            this.depositor = command.depositor();
+        }
+        if (command.accountNumber() != null) {
+            this.accountNumber = command.accountNumber();
+        }
+        this.detail = command.detail();
+        address.update(AddressCommand.Update.from(command));
+    }
 }
