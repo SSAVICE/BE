@@ -29,13 +29,13 @@ public class Price {
     public static Price of(Long basePrice, Integer discountRate) {
 
         Integer rate = (discountRate == null) ? 0 : discountRate;
-        Long calculatedPrice = calculate(basePrice, rate);
+        Long discountedPrice = calculate(basePrice, rate);
 
-        return new Price(basePrice, rate, calculatedPrice);
+        return new Price(basePrice, rate, discountedPrice);
     }
 
     private static Long calculate(Long basePrice, Integer rate) {
-        return basePrice * (100 - rate) / 100;
+        return Math.round(basePrice * (100 - rate) / 100.0);
     }
 
 

@@ -3,6 +3,7 @@ package teamssavice.ssavice.serviceItem.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.entity.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -17,10 +18,6 @@ public class ServiceItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotNull
-    @Column(nullable = false)
-    private Long companyId;
 
     @NotNull
     @Column(nullable = false)
@@ -70,5 +67,7 @@ public class ServiceItem extends BaseEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }
