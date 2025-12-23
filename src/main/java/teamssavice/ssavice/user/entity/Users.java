@@ -3,6 +3,7 @@ package teamssavice.ssavice.user.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;

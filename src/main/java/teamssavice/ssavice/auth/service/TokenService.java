@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.TokenProvider;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.auth.service.dto.AuthModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
-import teamssavice.ssavice.user.entity.RefreshToken;
+import teamssavice.ssavice.auth.RefreshToken;
 
 import java.util.Date;
 import java.util.Map;
@@ -20,22 +21,21 @@ public class TokenService {
 
     private final Map<String, RefreshToken> refreshTokenMap = new ConcurrentHashMap<>();
 
-    public Token createToken(Long userId, Role role) {
-        return tokenProvider.createToken(userId, role);
+    public Token issueToken(Long userId, Role role) {
+        Token token = createToken(userId, role);
+        saveRefreshToken(userId, token, role);
+        return token;
     }
 
-    public void saveRefreshToken(Long userId, Token token, Role role) {
-        String hashed = tokenProvider.hashRefreshToken(token.refreshToken());
-        RefreshToken refreshToken = RefreshToken.builder()
-                .userId(userId)
-                .issuedAt(new Date())
-                .expiresIn(token.expiresIn())
-                .role(role)
-                .build();
-        refreshTokenMap.put(hashed, refreshToken);
+    public AuthModel.Refresh refresh(String refreshToken) {
+        RefreshToken entity = getRefreshToken(refreshToken);
+        entity.revoke();
+        Token token = createToken(entity.getSubject(), entity.getRole());
+        saveRefreshToken(entity.getSubject(), token, entity.getRole());
+        return AuthModel.Refresh.from(token);
     }
 
-    public RefreshToken getRefreshToken(String refreshToken) {
+    protected RefreshToken getRefreshToken(String refreshToken) {
         String hashed = tokenProvider.hashRefreshToken(refreshToken);
         if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
         RefreshToken token = refreshTokenMap.get(hashed);
@@ -43,5 +43,20 @@ public class TokenService {
         if(token.isExpired()) throw new AuthenticationException(ErrorCode.EXPIRED_TOKEN);
 
         return token;
+    }
+
+    protected void saveRefreshToken(Long userId, Token token, Role role) {
+        String hashed = tokenProvider.hashRefreshToken(token.refreshToken());
+        RefreshToken refreshToken = RefreshToken.builder()
+                .subject(userId)
+                .issuedAt(new Date())
+                .expiresIn(token.expiresIn())
+                .role(role)
+                .build();
+        refreshTokenMap.put(hashed, refreshToken);
+    }
+
+    private Token createToken(Long userId, Role role) {
+        return tokenProvider.createToken(userId, role);
     }
 }

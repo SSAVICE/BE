@@ -19,19 +19,11 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse.Token> login(
+    public ResponseEntity<UserResponse.Login> login(
             @RequestBody @Valid UserRequest.Login request
     ) {
         UserModel.Login model = userService.register(request.token());
 
-        return ResponseEntity.ok(UserResponse.Token.from(model));
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<UserResponse.Token> refresh(
-        @RequestBody @Valid UserRequest.Refresh request
-    ) {
-        UserModel.Login model = userService.refresh(request.refreshToken());
-        return ResponseEntity.ok(UserResponse.Token.from(model));
+        return ResponseEntity.ok(UserResponse.Login.from(model));
     }
 }

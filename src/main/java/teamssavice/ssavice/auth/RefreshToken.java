@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user.entity;
+package teamssavice.ssavice.auth;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,13 +9,13 @@ import java.util.Date;
 @Builder
 @Getter
 public class RefreshToken {
-    private Long userId;
+    private Long subject;
     private Date issuedAt;
     private Long expiresIn;
     private Role role;
     private boolean revoked;
 
-    public void refresh() {
+    public void revoke() {
         this.revoked = true;
     }
 
