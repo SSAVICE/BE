@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.global.entity.Location;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,9 @@ public class ServiceItem extends BaseEntity {
 
     @Embedded
     private Price price;
+
+    @Embedded
+    private Location location;
 
     @NotNull
     @Column(nullable = false)
