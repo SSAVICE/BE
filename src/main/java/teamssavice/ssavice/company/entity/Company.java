@@ -45,6 +45,7 @@ public class Company extends BaseEntity {
     private String accountNumber;
     @NotNull
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     @Column(nullable = true)
