@@ -38,6 +38,7 @@ public class Users extends BaseEntity {
     private String imageUrl;
     @NotNull
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     @OneToOne(fetch = FetchType.LAZY)
