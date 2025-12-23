@@ -39,12 +39,12 @@ public class CompanyService {
         Optional<Company> optionalCompany = companyRepository.findByUser(user);
         if(optionalCompany.isEmpty()) {
             Token token = tokenService.issueToken(user.getId(), Role.USER);
-            return CompanyModel.Login.from(token, Role.USER);
+            return CompanyModel.Login.from(token, false);
         }
 
         Company company = optionalCompany.get();
         Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
-        return CompanyModel.Login.from(token, Role.COMPANY);
+        return CompanyModel.Login.from(token, true);
     }
 
     public CompanyModel.Login register(CompanyCommand.Create command) {
@@ -54,7 +54,7 @@ public class CompanyService {
         }
         Company company = save(command, user);
         Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
-        return CompanyModel.Login.from(token, Role.COMPANY);
+        return CompanyModel.Login.from(token, true);
     }
 
     @Transactional
