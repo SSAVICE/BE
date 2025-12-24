@@ -1,7 +1,7 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.entity.ServiceStatus;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
 

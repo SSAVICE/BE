@@ -6,6 +6,7 @@ import lombok.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
 

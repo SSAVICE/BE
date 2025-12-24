@@ -1,4 +1,4 @@
-package teamssavice.ssavice.serviceItem.entity;
+package teamssavice.ssavice.serviceItem.constants;
 
 public enum ServiceStatus {
     BEFORE_RECRUITING("모집 예정"),
