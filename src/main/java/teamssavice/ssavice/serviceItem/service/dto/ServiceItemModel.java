@@ -10,6 +10,7 @@ public class ServiceItemModel {
     public record ItemInfo(
             Long id,
             Long companyId,
+            Long addressId,
             String companyName,
             String title,
             String description,
@@ -28,6 +29,7 @@ public class ServiceItemModel {
             return new ItemInfo(
                     entity.getId(),
                     entity.getCompany().getId(),
+                    entity.getAddress().getId(),
                     entity.getCompany().getCompanyName(),
                     entity.getTitle(),
                     entity.getDescription(),

@@ -1,10 +1,8 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
-import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
-import teamssavice.ssavice.serviceItem.entity.Price;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class ServiceItemCommand {
@@ -21,7 +19,12 @@ public class ServiceItemCommand {
             LocalDateTime endDate,
             LocalDateTime deadline,
             String category,
-            String tag
+            String tag,
+            BigDecimal longitude,
+            BigDecimal latitude,
+            String postCode,
+            String address,
+            String detailAddress
     ) {
 
         public static Create from(Long userId, ServiceItemRequest.Create request) {
@@ -37,24 +40,13 @@ public class ServiceItemCommand {
                     request.endDate(),
                     request.deadline(),
                     request.category(),
-                    request.tag()
+                    request.tag(),
+                    request.longitude(),
+                    request.latitude(),
+                    request.postCode(),
+                    request.address(),
+                    request.detailAddress()
             );
-        }
-
-        public ServiceItem toEntity(Company company) {
-            return ServiceItem.builder()
-                    .company(company)
-                    .title(this.title)
-                    .description(this.description)
-                    .price(Price.of(this.basePrice, this.discountRate))
-                    .minimumMember(this.minimumMember)
-                    .maximumMember(this.maximumMember)
-                    .startDate(this.startDate)
-                    .endDate(this.endDate)
-                    .deadline(this.deadline)
-                    .category(this.category)
-                    .tag(this.tag)
-                    .build();
         }
     }
 

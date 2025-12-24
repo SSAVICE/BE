@@ -3,9 +3,9 @@ package teamssavice.ssavice.serviceItem.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.entity.BaseEntity;
-import teamssavice.ssavice.global.entity.Location;
 
 import java.time.LocalDateTime;
 
@@ -30,9 +30,6 @@ public class ServiceItem extends BaseEntity {
 
     @Embedded
     private Price price;
-
-    @Embedded
-    private Location location;
 
     @NotNull
     @Column(nullable = false)
@@ -74,4 +71,8 @@ public class ServiceItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
 }
