@@ -43,4 +43,39 @@ public class CompanyCommand {
                     .build();
         }
     }
+
+    @Builder
+    public record Update(
+            Long companyId,
+            String companyName,
+            String ownerName,
+            String phoneNumber,
+            String description,
+            String depositor,
+            String accountNumber,
+            String detail,
+            String postCode,
+            String address,
+            String detailAddress,
+            BigDecimal longitude,
+            BigDecimal latitude
+    ) {
+        public static CompanyCommand.Update from(Long companyId, CompanyRequest.Update request) {
+            return Update.builder()
+                    .companyId(companyId)
+                    .companyName(request.companyName())
+                    .ownerName(request.ownerName())
+                    .phoneNumber(request.phoneNumber())
+                    .accountNumber(request.accountNumber())
+                    .depositor(request.depositor())
+                    .description(request.description())
+                    .detail(request.detail())
+                    .postCode(request.postCode())
+                    .address(request.address())
+                    .detailAddress(request.detailAddress())
+                    .longitude(request.longitude())
+                    .latitude(request.latitude())
+                    .build();
+        }
+    }
 }
