@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
-import teamssavice.ssavice.address.AddressRepository;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -22,7 +21,7 @@ public class ServiceItemService {
 
     private final ServiceItemRepository serviceItemRepository;
     private final CompanyRepository companyRepository;
-    private final AddressRepository addressRepository;
+
 
     @Transactional
     public ServiceItemModel.ItemInfo register(ServiceItemCommand.Create command) {
@@ -37,7 +36,6 @@ public class ServiceItemService {
                 .address(command.address())
                 .detailAddress(command.detailAddress()).build();
 
-        addressRepository.save(address);
 
         ServiceItem serviceItem = ServiceItem.builder()
                 .company(company)
