@@ -24,7 +24,6 @@ public class CompanyService {
     private final CompanyReadService companyReadService;
     private final CompanyWriteService companyWriteService;
 
-    @Transactional
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
         String email = "company@test.com";

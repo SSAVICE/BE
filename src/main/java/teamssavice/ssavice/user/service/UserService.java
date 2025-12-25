@@ -2,7 +2,6 @@ package teamssavice.ssavice.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
@@ -16,7 +15,6 @@ public class UserService {
     private final UserWriteService userWriteService;
     private final UserReadService userReadService;
 
-    @Transactional
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
         String email = "test@test.com";
