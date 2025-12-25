@@ -15,7 +15,8 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.user.entity.Users;
-import teamssavice.ssavice.user.service.UserService;
+import teamssavice.ssavice.user.service.UserReadService;
+import teamssavice.ssavice.user.service.UserWriteService;
 
 import java.util.Optional;
 
@@ -23,7 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CompanyService {
     private final TokenService tokenService;
-    private final UserService userService;
+    private final UserReadService userReadService;
+    private final UserWriteService userWriteService;
     private final CompanyRepository companyRepository;
 
     @Transactional
@@ -32,8 +34,8 @@ public class CompanyService {
         String email = "company@test.com";
 
         // user 저장 및 중복 체크
-        Users user = userService.findByEmail(email)
-                .orElseGet(() -> userService.save(email));
+        Users user = userReadService.findByEmail(email)
+                .orElseGet(() -> userWriteService.save(email));
 
         // 업체가 있으면 업체 토큰, 없으면 유저 토큰
         Optional<Company> optionalCompany = companyRepository.findByUser(user);
@@ -48,7 +50,7 @@ public class CompanyService {
     }
 
     public CompanyModel.Login register(CompanyCommand.Create command) {
-        Users user = userService.findById(command.userId());
+        Users user = userReadService.findById(command.userId());
         if(companyRepository.existsByUser(user)) {
             throw new ConflictException(ErrorCode.COMPANY_ALREADY_EXISTS);
         }
