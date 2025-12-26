@@ -27,8 +27,8 @@ public class ServiceItemCommand {
             String detailAddress
     ) {
 
-        public static Create from(Long userId, ServiceItemRequest.Create request) {
-            return new Create(
+        public static ServiceItemCommand.Create from(Long userId, ServiceItemRequest.Create request) {
+            return new ServiceItemCommand.Create(
                     userId,
                     request.title(),
                     request.description(),
