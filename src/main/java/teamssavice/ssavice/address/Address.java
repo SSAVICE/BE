@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user;
+package teamssavice.ssavice.address;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,4 +34,22 @@ public class Address extends BaseEntity {
     private String address;
     @Column
     private String detailAddress;
+
+    public void update(AddressCommand.Update command) {
+        if (command.latitude() != null) {
+            this.latitude = command.latitude();
+        }
+        if (command.longitude() != null) {
+            this.longitude = command.longitude();
+        }
+        if (command.postCode() != null) {
+            this.postCode = command.postCode();
+        }
+        if (command.address() != null) {
+            this.address = command.address();
+        }
+        if (command.detailAddress() != null) {
+            this.detailAddress = command.detailAddress();
+        }
+    }
 }

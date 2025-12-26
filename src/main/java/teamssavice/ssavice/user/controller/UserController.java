@@ -3,9 +3,12 @@ package teamssavice.ssavice.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import teamssavice.ssavice.user.dto.UserRequest;
-import teamssavice.ssavice.user.dto.UserResponse;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import teamssavice.ssavice.user.controller.dto.UserRequest;
+import teamssavice.ssavice.user.controller.dto.UserResponse;
 import teamssavice.ssavice.user.service.UserService;
 import teamssavice.ssavice.user.service.dto.UserModel;
 
@@ -16,15 +19,11 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse.Token> login(
+    public ResponseEntity<UserResponse.Login> login(
             @RequestBody @Valid UserRequest.Login request
     ) {
         UserModel.Login model = userService.register(request.token());
 
-        return ResponseEntity.ok(UserResponse.Token.builder()
-                .accessToken(model.accessToken())
-                .expiresIn(model.expiresIn())
-                .refreshToken(model.refreshToken())
-                .build());
+        return ResponseEntity.ok(UserResponse.Login.from(model));
     }
 }

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: ssavice-backend
+    image: bongguscha/ssavice-backend:latest
+    ports:
+      - "8080:8080" # EC2 8080 - 컨테이너 8080
+    depends_on:
+      - mysqldb # DB가 먼저 켜져야 서버 실행
+    environment:
+      SPRING_PROFILES_ACTIVE: ${APP_PROFILE:-dev}
+      DEV_DB_URL: jdbc:mysql://mysqldb:3306/ssavice?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+      DEV_DB_USERNAME: root
+      DEV_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    # 항상 최신
+    pull_policy: always
+
+  mysqldb:
+    image: mysql:8.0
+    container_name: ssavice-db
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ssavice
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./db_data:/var/lib/mysql # 데이터 영구 저장 (프로젝트 폴더 내 db_data 생성됨)

@@ -1,4 +1,4 @@
-package teamssavice.ssavice.user.dto;
+package teamssavice.ssavice.user.controller.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -10,6 +10,5 @@ public class UserRequest {
             @NotNull
             String token
     ) {
-
     }
 }

@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### env
+.env
+
+# Local properties
+application-local.properties
+**/application-local.properties
+
+### 도커 관련
+/db_data
+*.tar

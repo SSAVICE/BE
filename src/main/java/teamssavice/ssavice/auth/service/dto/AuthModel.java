@@ -1,18 +1,18 @@
-package teamssavice.ssavice.user.service.dto;
+package teamssavice.ssavice.auth.service.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.auth.Token;
 
-public class UserModel {
+public class AuthModel {
 
     @Builder
-    public record Login(
+    public record Refresh(
             String accessToken,
             Long expiresIn,
             String refreshToken
     ) {
-        public static Login from(Token token) {
-            return Login.builder()
+        public static Refresh from(Token token) {
+            return Refresh.builder()
                     .accessToken(token.accessToken())
                     .expiresIn(token.expiresIn())
                     .refreshToken(token.refreshToken())
