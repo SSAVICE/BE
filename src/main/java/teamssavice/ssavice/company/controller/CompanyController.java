@@ -47,4 +47,12 @@ public class CompanyController {
         return ResponseEntity.ok().build();
     }
 
+    @RequireRole(Role.COMPANY)
+    @GetMapping
+    public ResponseEntity<CompanyResponse.MyCompany> getCompany(
+            @CurrentId Long companyId
+    ) {
+        CompanyModel.MyCompany model = companyService.getMyCompany(companyId);
+        return ResponseEntity.ok(CompanyResponse.MyCompany.from(model));
+    }
 }
