@@ -30,8 +30,8 @@ public class CompanyReadService {
     }
 
     @Transactional(readOnly = true)
-    public Company findByCompanyIdFetchJoin(Long id) {
-        return companyRepository.findByCompanyIdFetchJoin(id)
+    public Company findByCompanyIdFetchJoinAddress(Long id) {
+        return companyRepository.findByCompanyIdFetchJoinAddress(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND));
     }
 
@@ -40,5 +40,4 @@ public class CompanyReadService {
         return companyRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND));
     }
-
 }

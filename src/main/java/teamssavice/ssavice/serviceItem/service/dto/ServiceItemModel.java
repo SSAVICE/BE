@@ -1,5 +1,6 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
+import lombok.Builder;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
@@ -7,12 +8,15 @@ import java.time.LocalDateTime;
 
 public class ServiceItemModel {
 
-    public record ItemInfo(
-            Long id,
-            Long companyId,
-            Long addressId,
-            String companyName,
+    @Builder
+    public record Summary(
+            Long serviceId,
+            String thumbnailUrl,
+            String category,
             String title,
+            Long currentMember,
+            Long minimumMember,
+            Long maximumMember,
             String description,
             Long basePrice,
             Integer discountRate,
@@ -21,31 +25,28 @@ public class ServiceItemModel {
             LocalDateTime startDate,
             LocalDateTime endDate,
             LocalDateTime deadline,
-            String category,
-            String tag,
-            Long currentMember
+            String tag
     ) {
-        public static ItemInfo from (ServiceItem entity) {
-            return new ItemInfo(
-                    entity.getId(),
-                    entity.getCompany().getId(),
-                    entity.getAddress().getId(),
-                    entity.getCompany().getCompanyName(),
-                    entity.getTitle(),
-                    entity.getDescription(),
-                    entity.getPrice().getBasePrice(),
-                    entity.getPrice().getDiscountRate(),
-                    entity.getPrice().getDiscountedPrice(),
-                    entity.getStatus(),
-                    entity.getStartDate(),
-                    entity.getEndDate(),
-                    entity.getDeadline(),
-                    entity.getCategory(),
-                    entity.getTag(),
-                    entity.getCurrentMember()
-            );
+        public static ServiceItemModel.Summary from (ServiceItem entity) {
+            return Summary.builder()
+                    .serviceId(entity.getId())
+                    .thumbnailUrl(entity.getThumbnailUrl())
+                    .category(entity.getCategory())
+                    .title(entity.getTitle())
+                    .currentMember(entity.getCurrentMember())
+                    .minimumMember(entity.getMinimumMember())
+                    .maximumMember(entity.getMaximumMember())
+                    .description(entity.getDescription())
+                    .basePrice(entity.getPrice().getBasePrice())
+                    .discountRate(entity.getPrice().getDiscountRate())
+                    .discountedPrice(entity.getPrice().getDiscountedPrice())
+                    .status(entity.getStatus())
+                    .startDate(entity.getStartDate())
+                    .endDate(entity.getEndDate())
+                    .deadline(entity.getDeadline())
+                    .tag(entity.getTag())
+                    .build();
         }
     }
-
 
 }
