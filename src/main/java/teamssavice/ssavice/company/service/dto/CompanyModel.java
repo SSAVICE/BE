@@ -64,4 +64,17 @@ public class CompanyModel {
         }
     }
 
+    @Builder
+    public record Info(
+            CompanyModel.MyCompany myCompany,
+            List<String> review
+    ) {
+        public static CompanyModel.Info from(Company company, List<ServiceItem> services, List<String> reviews) {
+            CompanyModel.MyCompany my = CompanyModel.MyCompany.from(company, services);
+            return Info.builder()
+                    .myCompany(my)
+                    .review(reviews)
+                    .build();
+        }
+    }
 }

@@ -43,7 +43,7 @@ public class CompanyResponse {
             List<ServiceItemResponse.Summary> service
     ) {
         public static CompanyResponse.MyCompany from(CompanyModel.MyCompany model) {
-            List<ServiceItemResponse.Summary> responses = model.service().stream().map(ServiceItemResponse.Summary::from).toList();
+            List<ServiceItemResponse.Summary> services = model.service().stream().map(ServiceItemResponse.Summary::from).toList();
             return MyCompany.builder()
                     .companyId(model.companyId())
                     .companyName(model.companyName())
@@ -57,7 +57,45 @@ public class CompanyResponse {
                     .detailAddress(model.detailAddress())
                     .description(model.description())
                     .detail(model.detail())
-                    .service(responses)
+                    .service(services)
+                    .build();
+        }
+    }
+
+    @Builder
+    public record Info(
+            Long companyId,
+            String companyName,
+            String phoneNumber,
+            String imageUrl,
+            String businessNumber,
+            BigDecimal longitude,
+            BigDecimal latitude,
+            String postCode,
+            String address,
+            String detailAddress,
+            String description,
+            String detail,
+            List<ServiceItemResponse.Summary> service,
+            List<String> review
+    ) {
+        public static CompanyResponse.Info from(CompanyModel.Info model) {
+            List<ServiceItemResponse.Summary> services = model.myCompany().service().stream().map(ServiceItemResponse.Summary::from).toList();
+            return Info.builder()
+                    .companyId(model.myCompany().companyId())
+                    .companyName(model.myCompany().companyName())
+                    .phoneNumber(model.myCompany().phoneNumber())
+                    .imageUrl(model.myCompany().imageUrl())
+                    .businessNumber(model.myCompany().businessNumber())
+                    .longitude(model.myCompany().longitude())
+                    .latitude(model.myCompany().latitude())
+                    .postCode(model.myCompany().postCode())
+                    .address(model.myCompany().address())
+                    .detailAddress(model.myCompany().detailAddress())
+                    .description(model.myCompany().description())
+                    .detail(model.myCompany().detail())
+                    .service(services)
+                    .review(model.review())
                     .build();
         }
     }
