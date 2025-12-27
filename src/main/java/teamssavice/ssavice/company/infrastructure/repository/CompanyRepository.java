@@ -1,13 +1,14 @@
 package teamssavice.ssavice.company.infrastructure.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.user.entity.Users;
+
 import java.util.Optional;
 
-public interface CompanyRepository extends CrudRepository<Company, Long> {
+public interface CompanyRepository extends JpaRepository<Company, Long> {
     boolean existsByUser(Users user);
     Optional<Company> findByUser(Users user);
 
