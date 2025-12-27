@@ -15,7 +15,7 @@ public class ServiceItemReadService {
     private final ServiceItemRepository serviceItemRepository;
 
     @Transactional(readOnly = true)
-    public List<ServiceItem> findTop5ByCompanyOrderByDeadlineDESC(Company company) {
+    public List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company) {
         return serviceItemRepository.findTop5ByCompanyOrderByDeadlineDesc(company);
     }
 }

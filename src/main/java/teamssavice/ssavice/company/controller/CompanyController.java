@@ -66,4 +66,12 @@ public class CompanyController {
         CompanyModel.Info model = companyService.getCompanyById(companyId);
         return ResponseEntity.ok(CompanyResponse.Info.from(model));
     }
+
+    @GetMapping("/{company-id}/summary")
+    public ResponseEntity<CompanyResponse.Summary> getCompanySummary(
+            @PathVariable("company-id") @Positive Long companyId
+    ) {
+        CompanyModel.Summary model = companyService.getCompanySummary(companyId);
+        return ResponseEntity.ok(CompanyResponse.Summary.from(model));
+    }
 }

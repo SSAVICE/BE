@@ -77,4 +77,31 @@ public class CompanyModel {
                     .build();
         }
     }
+
+    @Builder
+    public record Summary(
+            Long companyId,
+            String companyName,
+            String address,
+            String description,
+            String phoneNumber,
+            String companyImageUrl,
+            Float companyRate,
+            Long rateCount,
+            List<String> review
+    ) {
+        public static CompanyModel.Summary from(Company company, Float companyRate, Long rateCount, List<String> review) {
+            return Summary.builder()
+                    .companyId(company.getId())
+                    .companyName(company.getCompanyName())
+                    .address(company.getAddress().getAddress())
+                    .description(company.getDescription())
+                    .phoneNumber(company.getPhoneNumber())
+                    .companyImageUrl(company.getImageUrl())
+                    .companyRate(companyRate)
+                    .rateCount(rateCount)
+                    .review(review)
+                    .build();
+        }
+    }
 }

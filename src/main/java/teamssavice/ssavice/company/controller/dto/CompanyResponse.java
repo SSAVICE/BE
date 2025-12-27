@@ -99,4 +99,31 @@ public class CompanyResponse {
                     .build();
         }
     }
+
+    @Builder
+    public record Summary(
+            Long companyId,
+            String companyName,
+            String address,
+            String description,
+            String phoneNumber,
+            String companyImageUrl,
+            Float companyRate,
+            Long rateCount,
+            List<String> review
+    ) {
+        public static CompanyResponse.Summary from(CompanyModel.Summary model) {
+            return Summary.builder()
+                    .companyId(model.companyId())
+                    .companyName(model.companyName())
+                    .address(model.address())
+                    .description(model.description())
+                    .phoneNumber(model.phoneNumber())
+                    .companyImageUrl(model.companyImageUrl())
+                    .companyRate(model.companyRate())
+                    .rateCount(model.rateCount())
+                    .review(model.review())
+                    .build();
+        }
+    }
 }

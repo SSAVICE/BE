@@ -67,15 +67,25 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public CompanyModel.MyCompany getMyCompany(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
-        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDESC(company);
+        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
         return CompanyModel.MyCompany.from(company, services);
     }
 
     @Transactional(readOnly = true)
     public CompanyModel.Info getCompanyById(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
-        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDESC(company);
+        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
         List<String> reviews = new ArrayList<>(); // 임시 리스트
         return CompanyModel.Info.from(company, services, reviews);
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyModel.Summary getCompanySummary(Long id) {
+        Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
+        // 임시 review
+        Float companyRate = 10F;
+        Long rateCount = 100L;
+        List<String> reviews = new ArrayList<>();
+        return CompanyModel.Summary.from(company, companyRate, rateCount, reviews);
     }
 }
