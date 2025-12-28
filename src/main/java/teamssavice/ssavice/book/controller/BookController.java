@@ -17,6 +17,7 @@ import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.PageResponse;
 
 
 @RestController
@@ -28,16 +29,16 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping("/book")
-    public ResponseEntity<Page<BookResponse.Info>> getMyBook(
+    public ResponseEntity<PageResponse<BookResponse.Info>> getMyBook(
             @CurrentId Long userId,
             @PageableDefault(size = 10) Pageable pageable
     ) {
 
-        System.out.println(userId);
         BookCommand.Retrieve command = BookCommand.Retrieve.of(userId, pageable);
 
         Page<BookModel.Info> models = bookService.getMyBooks(command);
+        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
 
-        return ResponseEntity.ok(models.map(BookResponse.Info::from));
+        return ResponseEntity.ok(PageResponse.from(reponsePage));
     }
 }
