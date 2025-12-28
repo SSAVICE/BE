@@ -12,6 +12,7 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
     Optional<Company> findByUser(Users user);
 
     Optional<Company> findByUserId(Long userId);
+
     @Query("SELECT c FROM Company c JOIN FETCH c.address WHERE c.id = :id")
-    Optional<Company> findByCompanyIdFetchJoin(@Param("id") Long id);
+    Optional<Company> findByCompanyIdFetchJoinAddress(@Param("id") Long id);
 }
