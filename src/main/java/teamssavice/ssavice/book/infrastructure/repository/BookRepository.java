@@ -12,12 +12,13 @@ import teamssavice.ssavice.book.entity.Book;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    @Query("SELECT b FROM Book b " +
+    @Query(value = "SELECT b FROM Book b " +
             "JOIN FETCH b.user " +
             "JOIN FETCH b.serviceItem s " +
             "JOIN FETCH s.company " +
             "JOIN FETCH s.address " +
-            "WHERE b.user.id = :userId")
-    Page<Book> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+            "WHERE b.user.id = :userId",
 
+            countQuery = "SELECT count(b) FROM Book b WHERE b.user.id = :userId")
+    Page<Book> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 }
