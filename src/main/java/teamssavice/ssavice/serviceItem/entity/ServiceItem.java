@@ -67,8 +67,6 @@ public class ServiceItem extends BaseEntity {
 
     private String tag; // 엘라스틱 서치 도입 예정
 
-    private String ThumbnailUrl;
-
     @Builder.Default
     @Column(nullable = false)
     private boolean isDeleted = false;
