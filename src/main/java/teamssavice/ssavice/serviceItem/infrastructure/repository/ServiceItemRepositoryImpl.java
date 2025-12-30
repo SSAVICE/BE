@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -22,7 +23,8 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
+    public Slice<ServiceItem>
+    search(ServiceItemCommand.Search command) {
 
         Pageable pageable = command.pageable();
         int pageSize = pageable.getPageSize();
@@ -49,7 +51,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             hasNext = true;
         }
 
-        return new SliceImpl<>(content, pageable, hasNext);
+        return new SliceImpl<>(content, PageRequest.of(0, pageSize), hasNext);
 
     }
 

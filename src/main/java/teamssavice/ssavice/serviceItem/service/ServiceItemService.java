@@ -6,9 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
+import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
+
+import java.awt.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +32,19 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<ServiceItemModel.ItemInfo> search(ServiceItemCommand.Search command) {
+    public CursorResult<ServiceItemModel.ItemInfo> search(ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
-        return items.map(ServiceItemModel.ItemInfo::from);
+        List<ServiceItemModel.ItemInfo> content = items.getContent().stream()
+                .map(ServiceItemModel.ItemInfo::from)
+                .toList();
+
+        Long nextCursor = null;
+        if (!content.isEmpty()) {
+            nextCursor = content.get(content.size() - 1).id();
+        }
+
+        return new CursorResult<>(content, nextCursor, items.hasNext());
     }
 }
