@@ -1,8 +1,10 @@
 package teamssavice.ssavice.company.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
@@ -16,6 +18,7 @@ import teamssavice.ssavice.global.annotation.RequireRole;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/company")
+@Validated
 public class CompanyController {
     private final CompanyService companyService;
 
@@ -47,4 +50,28 @@ public class CompanyController {
         return ResponseEntity.ok().build();
     }
 
+    @RequireRole(Role.COMPANY)
+    @GetMapping
+    public ResponseEntity<CompanyResponse.MyCompany> getCompany(
+            @CurrentId Long companyId
+    ) {
+        CompanyModel.MyCompany model = companyService.getMyCompany(companyId);
+        return ResponseEntity.ok(CompanyResponse.MyCompany.from(model));
+    }
+
+    @GetMapping("/{company-id}")
+    public ResponseEntity<CompanyResponse.Info> getCompanyById(
+            @PathVariable("company-id") @Positive Long companyId
+    ) {
+        CompanyModel.Info model = companyService.getCompanyById(companyId);
+        return ResponseEntity.ok(CompanyResponse.Info.from(model));
+    }
+
+    @GetMapping("/{company-id}/summary")
+    public ResponseEntity<CompanyResponse.Summary> getCompanySummary(
+            @PathVariable("company-id") @Positive Long companyId
+    ) {
+        CompanyModel.Summary model = companyService.getCompanySummary(companyId);
+        return ResponseEntity.ok(CompanyResponse.Summary.from(model));
+    }
 }
