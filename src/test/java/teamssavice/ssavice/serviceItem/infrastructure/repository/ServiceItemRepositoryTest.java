@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
@@ -12,6 +13,7 @@ import teamssavice.ssavice.fixture.AddressFixture;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
+import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
@@ -23,6 +25,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@Import(QueryDSLConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ServiceItemRepositoryTest {
     @Autowired

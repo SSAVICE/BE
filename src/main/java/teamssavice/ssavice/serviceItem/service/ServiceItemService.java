@@ -9,8 +9,8 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
-import java.awt.*;
 import java.util.List;
 
 @Service
@@ -41,7 +41,7 @@ public class ServiceItemService {
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
-            nextCursor = content.get(content.size() - 1).id();
+            nextCursor = content.getLast().id();
         }
 
         return new CursorResult<>(content, nextCursor, items.hasNext());
