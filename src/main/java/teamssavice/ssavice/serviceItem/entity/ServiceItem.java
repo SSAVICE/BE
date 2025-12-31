@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
 
+    private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -65,11 +67,14 @@ public class ServiceItem extends BaseEntity {
 
     private String tag; // 엘라스틱 서치 도입 예정
 
-    private String ThumbnailUrl;
-
     @Builder.Default
     @Column(nullable = false)
     private boolean isDeleted = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private String thumbnailUrl = DEFAULT_IMAGE_URL;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
