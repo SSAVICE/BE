@@ -17,7 +17,6 @@ import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
-import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,9 +33,9 @@ public class ServiceItemController {
     ) {
 
         ServiceItemCommand.Create command = ServiceItemCommand.Create.from(userId, request);
-        ServiceItemModel.ItemInfo model = serviceItemService.register(command);
+        Long serviceId = serviceItemService.register(command);
 
-        return ResponseEntity.ok(ServiceItemResponse.Register.from(model));
+        return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
 
     }
 

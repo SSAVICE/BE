@@ -61,7 +61,7 @@ public class CompanyIntegrationTest {
 
         // when
         companyService.updateCompany(command);
-        Company actual = companyRepository.findByCompanyIdFetchJoin(company.getId()).get();
+        Company actual = companyRepository.findByCompanyIdFetchJoinAddress(company.getId()).get();
         // then
         assertAll(
                 () -> assertThat(actual.getCompanyName()).isEqualTo(command.companyName()),
