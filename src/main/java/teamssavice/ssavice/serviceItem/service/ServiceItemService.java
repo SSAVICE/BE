@@ -18,7 +18,7 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
 
-        Company company = companyReadService.findByUserId(command.userId());
+        Company company = companyReadService.findById(command.companyId());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company);
 
         return savedServiceItem.getId();

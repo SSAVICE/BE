@@ -26,11 +26,11 @@ public class ServiceItemController {
     @PostMapping
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Register> createServiceItem(
-            @CurrentId Long userId,
+            @CurrentId Long companyId,
             @RequestBody @Valid ServiceItemRequest.Create request
     ) {
 
-        ServiceItemCommand.Create command = ServiceItemCommand.Create.from(userId, request);
+        ServiceItemCommand.Create command = ServiceItemCommand.Create.from(companyId, request);
         Long serviceId = serviceItemService.register(command);
 
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));

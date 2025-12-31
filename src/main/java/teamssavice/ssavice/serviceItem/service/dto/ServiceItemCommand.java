@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class ServiceItemCommand {
 
     public record Create(
-            Long userId,
+            Long companyId,
             String title,
             String description,
             Long basePrice,
@@ -27,9 +27,9 @@ public class ServiceItemCommand {
             String detailAddress
     ) {
 
-        public static ServiceItemCommand.Create from(Long userId, ServiceItemRequest.Create request) {
+        public static ServiceItemCommand.Create from(Long companyId, ServiceItemRequest.Create request) {
             return new ServiceItemCommand.Create(
-                    userId,
+                    companyId,
                     request.title(),
                     request.description(),
                     request.basePrice(),
