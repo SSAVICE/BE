@@ -2,6 +2,7 @@ package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.serviceItem.entity.Price;
@@ -11,6 +12,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ServiceItemWriteService {
     private final ServiceItemRepository serviceItemRepository;
 

@@ -1,5 +1,7 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
+import lombok.Builder;
+import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 
 import java.math.BigDecimal;
@@ -50,4 +52,32 @@ public class ServiceItemCommand {
         }
     }
 
+    @Builder
+    public record Search (
+        String category,
+        String query,
+        String region1,
+        String region2,
+        Integer range,
+        Long minPrice,
+        Long maxPrice,
+        Integer sortBy,
+        Long lastId,      // 커서 ID
+        Pageable pageable
+    ) {
+        public static Search of(ServiceItemRequest.Search request, Pageable pageable) {
+            return new Search(
+                    request.getCategory(),
+                    request.getQuery(),
+                    request.getRegion1(),
+                    request.getRegion2(),
+                    request.getRange(),
+                    request.getMinPrice(),
+                    request.getMaxPrice(),
+                    request.getSortBy(),
+                    request.getLastId(),
+                    pageable
+            );
+        }
+    }
 }
