@@ -1,6 +1,9 @@
 package teamssavice.ssavice.serviceItem.controller.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,9 +29,31 @@ public class ServiceItemRequest {
             @NotBlank String postCode,
             @NotBlank String address,
             String detailAddress // 상세주소를 필수로 할 것이냐에 따라서
-
-
-
     ) {
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class Search {
+
+        private String category;
+        private String query;
+
+        private String region1;
+        private String region2;
+
+        private Integer range;
+
+        @PositiveOrZero
+        private Long minPrice;
+        @PositiveOrZero
+        private Long maxPrice;
+
+        private Integer sortBy;
+
+        // 커서 방식 (안드로이드 무한 스크롤과)
+        @PositiveOrZero
+        private Long lastId;
     }
 }

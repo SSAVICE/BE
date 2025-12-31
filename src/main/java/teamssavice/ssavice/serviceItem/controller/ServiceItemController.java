@@ -3,18 +3,19 @@ package teamssavice.ssavice.serviceItem.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +36,21 @@ public class ServiceItemController {
 
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
 
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
+            @ModelAttribute @Valid ServiceItemRequest.Search request,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+        Pageable pageable = PageRequest.of(0, size);
+        ServiceItemCommand.Search command = ServiceItemCommand.Search.of(request, pageable);
+
+        CursorResult<ServiceItemModel.ItemInfo> models = serviceItemService.search(command);
+
+        CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
+
+        return ResponseEntity.ok(response);
     }
 }

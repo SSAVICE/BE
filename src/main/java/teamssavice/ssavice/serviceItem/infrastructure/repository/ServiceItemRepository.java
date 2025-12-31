@@ -6,7 +6,7 @@ import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.util.List;
 
-public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long> {
+public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
     List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company);
 }
