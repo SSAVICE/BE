@@ -53,4 +53,15 @@ public class ServiceItemController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{serviceId}")
+    public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
+            @PathVariable Long serviceId
+    ) {
+
+        ServiceItemModel.ItemInfo model = serviceItemService.getServiceDetail(serviceId);
+
+        return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
+    }
+
 }
