@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.review.entity.Review;
 import teamssavice.ssavice.review.infrastructure.repository.ReviewRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewReadService {
@@ -17,5 +19,10 @@ public class ReviewReadService {
     @Transactional(readOnly = true)
     public Page<Review> findByCompanyIdPaging(Long companyId, Pageable pageable) {
         return reviewRepository.findByCompanyId(companyId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Review> findTop3ByCompanyIdOrderByCreatedAt(Long companyId) {
+        return reviewRepository.findTop3ByCompanyIdOrderByCreatedAtDesc(companyId);
     }
 }

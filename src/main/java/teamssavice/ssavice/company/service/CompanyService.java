@@ -10,7 +10,7 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.review.entity.Review;
-import teamssavice.ssavice.review.entity.UserName;
+import teamssavice.ssavice.review.service.ReviewReadService;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.user.entity.Users;
@@ -29,6 +29,7 @@ public class CompanyService {
     private final CompanyReadService companyReadService;
     private final CompanyWriteService companyWriteService;
     private final ServiceItemReadService serviceItemReadService;
+    private final ReviewReadService reviewReadService;
 
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
@@ -76,24 +77,16 @@ public class CompanyService {
     public CompanyModel.Info getCompanyById(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
-        // 임시 review
-        Review review1 = Review.builder().userName(UserName.of("Temp1")).comment("comment1").serviceName("service1").rating(5).build();
-        Review review2 = Review.builder().userName(UserName.of("Temp2")).comment("comment2").serviceName("service2").rating(4).build();
-        Review review3 = Review.builder().userName(UserName.of("Temp3")).comment("comment3").serviceName("service3").rating(2).build();
-        List<Review> reviews = List.of(review1, review2, review3);
+        List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
         return CompanyModel.Info.from(company, services, reviews);
     }
 
     @Transactional(readOnly = true)
     public CompanyModel.Summary getCompanySummary(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
-        // 임시 review
-        Review review1 = Review.builder().userName(UserName.of("Temp1")).comment("comment1").serviceName("service1").rating(5).build();
-        Review review2 = Review.builder().userName(UserName.of("Temp2")).comment("comment2").serviceName("service2").rating(4).build();
-        Review review3 = Review.builder().userName(UserName.of("Temp3")).comment("comment3").serviceName("service3").rating(2).build();
+        List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
         Float companyRate = 10F;
         Long rateCount = 100L;
-        List<Review> reviews = List.of(review1, review2, review3);
         return CompanyModel.Summary.from(company, companyRate, rateCount, reviews);
     }
 }
