@@ -21,7 +21,7 @@ public enum ErrorCode {
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
 
     // serviceItem
-    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "해당하는 서비스를 찾을 수 없습니다.");
+    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
