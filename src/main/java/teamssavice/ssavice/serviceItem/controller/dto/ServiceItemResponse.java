@@ -133,7 +133,7 @@ public class ServiceItemResponse {
             String tag, //  태그도 ES 도입하면서 수정 예정 - 지금은 그냥 String으로
             LocalDateTime startDate,
             LocalDateTime endDate,
-            Boolean liked,
+            Boolean isLiked,
             String status,
             LocalDateTime createdAt
     ) {
@@ -159,7 +159,7 @@ public class ServiceItemResponse {
                     .tag(model.tag())
                     .startDate(model.startDate())
                     .endDate(model.endDate())
-                    .liked(model.liked())
+                    .isLiked(model.liked())
                     .status(model.status().name())
                     .createdAt(model.createdAt())
                     .build();
