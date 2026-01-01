@@ -9,13 +9,14 @@ import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.review.entity.Review;
+import teamssavice.ssavice.review.service.ReviewReadService;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 import teamssavice.ssavice.user.service.UserWriteService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ public class CompanyService {
     private final CompanyReadService companyReadService;
     private final CompanyWriteService companyWriteService;
     private final ServiceItemReadService serviceItemReadService;
+    private final ReviewReadService reviewReadService;
 
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
@@ -75,17 +77,16 @@ public class CompanyService {
     public CompanyModel.Info getCompanyById(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
-        List<String> reviews = new ArrayList<>(); // 임시 리스트
+        List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
         return CompanyModel.Info.from(company, services, reviews);
     }
 
     @Transactional(readOnly = true)
     public CompanyModel.Summary getCompanySummary(Long id) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
-        // 임시 review
+        List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
         Float companyRate = 10F;
         Long rateCount = 100L;
-        List<String> reviews = new ArrayList<>();
         return CompanyModel.Summary.from(company, companyRate, rateCount, reviews);
     }
 }
