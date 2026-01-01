@@ -3,8 +3,6 @@ package teamssavice.ssavice.company.service.dto;
 import lombok.Builder;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.review.entity.Review;
-import teamssavice.ssavice.review.service.dto.ReviewModel;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
@@ -69,14 +67,13 @@ public class CompanyModel {
     @Builder
     public record Info(
             CompanyModel.MyCompany myCompany,
-            List<ReviewModel.Item> review
+            List<String> review
     ) {
-        public static CompanyModel.Info from(Company company, List<ServiceItem> services, List<Review> reviews) {
+        public static CompanyModel.Info from(Company company, List<ServiceItem> services, List<String> reviews) {
             CompanyModel.MyCompany my = CompanyModel.MyCompany.from(company, services);
-            List<ReviewModel.Item> models = reviews.stream().map(ReviewModel.Item::from).toList();
             return Info.builder()
                     .myCompany(my)
-                    .review(models)
+                    .review(reviews)
                     .build();
         }
     }
@@ -91,10 +88,9 @@ public class CompanyModel {
             String companyImageUrl,
             Float companyRate,
             Long rateCount,
-            List<ReviewModel.Item> review
+            List<String> review
     ) {
-        public static CompanyModel.Summary from(Company company, Float companyRate, Long rateCount, List<Review> reviews) {
-            List<ReviewModel.Item> models = reviews.stream().map(ReviewModel.Item::from).toList();
+        public static CompanyModel.Summary from(Company company, Float companyRate, Long rateCount, List<String> review) {
             return Summary.builder()
                     .companyId(company.getId())
                     .companyName(company.getCompanyName())
@@ -104,7 +100,7 @@ public class CompanyModel {
                     .companyImageUrl(company.getImageUrl())
                     .companyRate(companyRate)
                     .rateCount(rateCount)
-                    .review(models)
+                    .review(review)
                     .build();
         }
     }

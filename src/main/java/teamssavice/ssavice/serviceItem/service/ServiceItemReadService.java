@@ -1,6 +1,7 @@
 package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.company.entity.Company;
@@ -8,13 +9,21 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ServiceItemReadService {
+
     private final ServiceItemRepository serviceItemRepository;
+
+    @Transactional(readOnly = true)
+    public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
+        return serviceItemRepository.search(command);
+    }
 
     @Transactional(readOnly = true)
     public List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company) {
@@ -22,8 +31,8 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItem findById(Long id) {
-        return serviceItemRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_NOT_FOUND));
+    public ServiceItem findById(Long serviceId) {
+        return serviceItemRepository.findById(serviceId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
     }
 }
