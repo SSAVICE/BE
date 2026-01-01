@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -58,6 +59,16 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Invalid Request Body");
         problemDetail.setDetail("요청 바디(JSON) 형식이 올바르지 않습니다.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ProblemDetail> httpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        problemDetail.setTitle("Method Not Allowed");
+        problemDetail.setDetail("지원하지 않는 HTTP Method 입니다.");
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(problemDetail);
     }
 
     @ExceptionHandler(Exception.class)

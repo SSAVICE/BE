@@ -35,6 +35,11 @@ public class TokenService {
         return AuthModel.Refresh.from(token);
     }
 
+    public void logout(String refreshToken) {
+        RefreshToken entity = getRefreshToken(refreshToken);
+        entity.revoke();
+    }
+
     protected RefreshToken getRefreshToken(String refreshToken) {
         String hashed = tokenProvider.hashRefreshToken(refreshToken);
         if(!refreshTokenMap.containsKey(hashed)) throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
