@@ -20,6 +20,22 @@ jobs:
   build:
     runs-on: ubuntu-latest # GitHub Actions에서 제공하는 가상 환경
     timeout-minutes: 15 # 무한루프 방 (15분 넘으면 강제종료)
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb # 테스트에 사용할 DB 이름
+        ports:
+          - 3306:3306
+        # MySQL이 완전히 켜질 때까지 기다리는 헬스 체크
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
     # 1. 코드 체크아웃
     - name: Checkout code
@@ -51,6 +67,16 @@ jobs:
     # 이 명령이 실패하면 CI 전체가 실패 처리됩니다.
     - name: Run Build and Tests
       run: ./gradlew build --scan
+      env:
+        # 스프링 부트 설정을 환경변수로 덮어쓰기
+        # 1. DB 주소: 서비스 컨테이너의 localhost:3306 + DB이름(testdb)
+        SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+        # 2. mysql 서비스에서 설정한 root
+        SPRING_DATASOURCE_USERNAME: root
+        # 3. 비밀번호: mysql 서비스에서 설정한 root
+        SPRING_DATASOURCE_PASSWORD: root
+        # 4. DDL 설정: 테스트 시작 시 테이블 생성, 종료 시 삭제
+        SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
     # 6. 테스트 결과를 PR에 코멘트로 등록 (표 형태 요약)
     - name: Publish Unit Test Results
