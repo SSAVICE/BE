@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.dto.UserCommand;
 import teamssavice.ssavice.user.service.dto.UserModel;
@@ -45,8 +47,9 @@ public class UserService {
         Users user = userReadService.findById(userId);
 
         // 이메일이 변경되는 경우만 중복 체크
-        if (!user.getEmail().equals(command.email())) {
-            userReadService.checkEmailExists(command.email());
+        if (!user.getEmail().equals(command.email()) && userReadService.existsByEmail(
+            command.email())) {
+            throw new ConflictException(ErrorCode.USER_EMAIL_ALREADY_EXISTS);
         }
 
         user.modify(command.name(), command.email(), command.phoneNumber());
