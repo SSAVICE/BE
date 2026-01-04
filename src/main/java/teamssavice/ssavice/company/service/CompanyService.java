@@ -111,7 +111,7 @@ public class CompanyService {
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
         ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
-        if (company.getImageResource() != null) {
+        if (company.hasImageResource()) {
             s3Service.updateIsActiveTag(company.getImageResource().getObjectKey(), false);
         }
         companyWriteService.updateCompanyImage(company, imageResource);
