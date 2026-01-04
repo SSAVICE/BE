@@ -5,11 +5,8 @@ import org.springframework.stereotype.Service;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
-import teamssavice.ssavice.image.constants.ImageContentType;
-import teamssavice.ssavice.image.constants.ImagePath;
-import teamssavice.ssavice.image.service.ImageService;
-import teamssavice.ssavice.s3.PresignedModel;
-import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
+import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.dto.UserModel;
@@ -21,8 +18,7 @@ public class UserService {
     private final UserWriteService userWriteService;
     private final UserReadService userReadService;
     private final S3Service s3Service;
-    private final ImageService imageService;
-    private final S3ObjectKeyGenerator s3ObjectKeyGenerator;
+    private final ImageReadService imageReadService;
 
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
@@ -37,9 +33,13 @@ public class UserService {
         return UserModel.Login.from(token);
     }
 
-    public PresignedModel uploadProfileImage(Long userId, ImageContentType contentType) {
-        String objectKey = s3ObjectKeyGenerator.generator(ImagePath.profile, userId, contentType);
-        imageService.save(objectKey, ImagePath.profile, contentType);
-        return s3Service.createPresignedUrl(objectKey, contentType);
+    public void updateProfileImage(Long userId, String objectKey) {
+        Users user = userReadService.findByIdFetchJoinImageResource(userId);
+        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        if (user.getImageResource() != null) {
+            s3Service.updateIsActiveTag(user.getImageResource().getObjectKey(), false);
+        }
+        userWriteService.updateProfileImage(user, imageResource);
+        s3Service.updateIsActiveTag(objectKey, true);
     }
 }

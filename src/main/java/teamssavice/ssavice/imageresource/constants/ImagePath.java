@@ -1,4 +1,4 @@
-package teamssavice.ssavice.image.constants;
+package teamssavice.ssavice.imageresource.constants;
 
 public enum ImagePath {
     profile, company, serviceItem

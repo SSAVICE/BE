@@ -1,4 +1,4 @@
-package teamssavice.ssavice.image.constants;
+package teamssavice.ssavice.imageresource.constants;
 
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.UnsupportedImageContentTypeException;

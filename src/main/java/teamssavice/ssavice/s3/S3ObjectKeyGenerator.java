@@ -1,8 +1,8 @@
 package teamssavice.ssavice.s3;
 
 import org.springframework.stereotype.Component;
-import teamssavice.ssavice.image.constants.ImageContentType;
-import teamssavice.ssavice.image.constants.ImagePath;
+import teamssavice.ssavice.imageresource.constants.ImageContentType;
+import teamssavice.ssavice.imageresource.constants.ImagePath;
 
 import java.util.UUID;
 

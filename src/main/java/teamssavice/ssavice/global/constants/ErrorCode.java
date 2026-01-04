@@ -24,7 +24,8 @@ public enum ErrorCode {
     SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
 
     // imageResource
-    UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다.");
+    UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
