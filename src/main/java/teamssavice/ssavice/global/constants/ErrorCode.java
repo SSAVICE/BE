@@ -21,7 +21,10 @@ public enum ErrorCode {
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
 
     // serviceItem
-    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다.");
+    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
+
+    // imageResource
+    UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다.");
 
     private final HttpStatus status;
     private final String code;
