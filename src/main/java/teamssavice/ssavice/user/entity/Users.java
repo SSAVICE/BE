@@ -54,5 +54,6 @@ public class Users extends BaseEntity {
             this.imageResource.deActivate();
         }
         this.imageResource = imageResource;
+        imageResource.activate();
     }
 }

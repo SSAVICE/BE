@@ -32,9 +32,13 @@ public class ImageResource extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     @Builder.Default
-    private boolean active = true;
+    private boolean active = false;
 
     public void deActivate() {
         this.active = false;
+    }
+
+    public void activate() {
+        this.active = true;
     }
 }
