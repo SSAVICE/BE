@@ -24,7 +24,7 @@ public class UserModel {
     }
 
     @Builder
-    public record Profile(
+    public record Info(
         String imageUrl,
         String name,
         Timestamp createdAt,
@@ -35,10 +35,10 @@ public class UserModel {
         String detailAddress
     ) {
 
-        public static Profile from(
+        public static Info from(
             Users user
         ) {
-            return Profile.builder()
+            return Info.builder()
                 .imageUrl(user.getImageUrl())
                 .name(user.getName())
                 .createdAt(Timestamp.valueOf(user.getCreatedAt()))

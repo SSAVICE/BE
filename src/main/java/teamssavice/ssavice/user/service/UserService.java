@@ -29,10 +29,10 @@ public class UserService {
         return UserModel.Login.from(token);
     }
 
-    public UserModel.Profile getProfile(Long userId) {
+    public UserModel.Info getProfile(Long userId) {
         // 사용자 정보 조회
         Users user = userReadService.findByIdFetchJoinAddress(userId);
 
-        return UserModel.Profile.from(user);
+        return UserModel.Info.from(user);
     }
 }

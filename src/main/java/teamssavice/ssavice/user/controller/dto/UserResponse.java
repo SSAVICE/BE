@@ -23,7 +23,7 @@ public class UserResponse {
     }
 
     @Builder
-    public record Profile(
+    public record Info(
         String imageUrl,
         String name,
         Timestamp createdAt,
@@ -34,8 +34,8 @@ public class UserResponse {
         String detailAddress
     ) {
 
-        public static Profile from(UserModel.Profile model) {
-            return Profile.builder()
+        public static Info from(UserModel.Info model) {
+            return Info.builder()
                 .imageUrl(model.imageUrl())
                 .name(model.name())
                 .createdAt(model.createdAt())
@@ -47,4 +47,5 @@ public class UserResponse {
                 .build();
         }
     }
+
 }

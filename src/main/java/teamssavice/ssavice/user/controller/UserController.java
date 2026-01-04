@@ -31,12 +31,12 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<UserResponse.Profile> profile(
+    public ResponseEntity<UserResponse.Info> profile(
         @CurrentId Long userId
     ) {
-        UserModel.Profile model = userService.getProfile(userId);
+        UserModel.Info model = userService.getProfile(userId);
 
-        return ResponseEntity.ok(UserResponse.Profile.from(model));
+        return ResponseEntity.ok(UserResponse.Info.from(model));
     }
 
 }
