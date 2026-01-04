@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 
@@ -20,5 +21,9 @@ public class BookReadService {
     public Page<Book> findAllByUserId(Long userId, Pageable pageable) {
 
         return bookRepository.findAllByUserId(userId, pageable);
+    }
+
+    public Long countByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
+        return bookRepository.countByUserIdAndBookStatus(userId, bookStatus);
     }
 }
