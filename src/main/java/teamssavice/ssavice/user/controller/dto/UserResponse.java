@@ -48,4 +48,26 @@ public class UserResponse {
         }
     }
 
+    @Builder
+    public record Summary(
+        String name,
+        String email,
+        String phoneNumber,
+        String postCode,
+        String address,
+        String detailAddress
+    ) {
+
+        public static Summary from(UserModel.Info model) {
+            return Summary.builder()
+                .name(model.name())
+                .email(model.email())
+                .phoneNumber(model.phoneNumber())
+                .postCode(model.postCode())
+                .address(model.address())
+                .detailAddress(model.detailAddress())
+                .build();
+        }
+    }
+
 }
