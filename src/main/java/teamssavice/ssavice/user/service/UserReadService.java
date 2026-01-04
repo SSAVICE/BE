@@ -31,4 +31,9 @@ public class UserReadService {
         return userRepository.findByIdFetchJoinAddress(id)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
