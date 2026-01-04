@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
+import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.user.entity.Users;
@@ -19,6 +21,7 @@ public class UserService {
     private final TokenService tokenService;
     private final UserWriteService userWriteService;
     private final UserReadService userReadService;
+    private final BookReadService bookReadService;
 
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
@@ -54,5 +57,13 @@ public class UserService {
 
         user.modify(command.name(), command.email(), command.phoneNumber());
         return UserModel.Info.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserModel.BookSummary getBookSummary(Long userId) {
+        Long applying = bookReadService.countByUserIdAndBookStatus(userId, BookStatus.APPLYING);
+        Long completed = bookReadService.countByUserIdAndBookStatus(userId, BookStatus.COMPLETED);
+
+        return UserModel.BookSummary.from(applying, completed);
     }
 }

@@ -47,8 +47,17 @@ public class UserController {
     ) {
         UserCommand.Modify command = UserCommand.Modify.from(userId, request);
         UserModel.Info model = userService.modifyProfile(userId, command);
-        
+
         return ResponseEntity.ok(UserResponse.Summary.from(model));
+    }
+
+    @GetMapping("/book/summary")
+    public ResponseEntity<UserResponse.BookSummary> getBookSummary(
+        @CurrentId Long userId
+    ) {
+        UserModel.BookSummary model = userService.getBookSummary(userId);
+
+        return ResponseEntity.ok(UserResponse.BookSummary.from(model));
     }
 
 }
