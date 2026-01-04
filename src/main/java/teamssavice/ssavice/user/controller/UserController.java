@@ -42,7 +42,7 @@ public class UserController {
             @CurrentId Long userId,
             @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.Presigned model = imageService.updateProfileImage(userId, ImageContentType.from(request.contentType()));
+        ImageModel.PutPresigned model = imageService.updateProfileImage(userId, ImageContentType.from(request.contentType()));
         return ResponseEntity.ok(ImageResponse.Presigned.from(model));
     }
 

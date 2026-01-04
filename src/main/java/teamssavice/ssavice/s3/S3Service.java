@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import teamssavice.ssavice.global.property.S3Properties;
@@ -16,11 +17,11 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class S3Service {
-    private final S3Presigner presigner;
+    private final S3Presigner s3Presigner;
     private final S3Client s3Client;
     private final S3Properties properties;
 
-    public ImageModel.Presigned createPresignedUrl(String objectKey, ImageContentType contentType) {
+    public ImageModel.PutPresigned createPresignedUrl(String objectKey, ImageContentType contentType) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(objectKey)
@@ -29,12 +30,12 @@ public class S3Service {
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofSeconds(properties.expirationSecond()))
+                .signatureDuration(Duration.ofSeconds(properties.putExpirationSecond()))
                 .putObjectRequest(putObjectRequest)
                 .build();
 
-        PresignedPutObjectRequest presigned = presigner.presignPutObject(presignRequest);
-        return ImageModel.Presigned.from(presigned.url().toString(), objectKey);
+        PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
+        return ImageModel.PutPresigned.from(presigned.url().toString(), objectKey);
     }
 
     public void updateIsActiveTag(String objectKey, boolean isActive) {
@@ -50,5 +51,19 @@ public class S3Service {
             s3Client.putObjectTagging(request);
         } catch (S3Exception ignored) {
         }
+    }
+
+    public String generateGetPresignedUrl(String objectKey) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .build();
+
+        GetObjectPresignRequest presign = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(properties.getExpirationMin()))
+                .getObjectRequest(getObjectRequest)
+                .build();
+
+        return s3Presigner.presignGetObject(presign).url().toString();
     }
 }

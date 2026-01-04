@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record S3Properties(
         String bucket,
         String region,
-        Long expirationSecond
+        Long putExpirationSecond,
+        Long getExpirationMin
 ) {
 }

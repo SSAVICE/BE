@@ -10,7 +10,7 @@ public class ImageResponse {
             String uploadUrl,
             String objectKey
     ) {
-        public static ImageResponse.Presigned from(ImageModel.Presigned model) {
+        public static ImageResponse.Presigned from(ImageModel.PutPresigned model) {
             return Presigned.builder()
                     .uploadUrl(model.uploadUrl())
                     .objectKey(model.objectKey())

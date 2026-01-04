@@ -5,12 +5,12 @@ import lombok.Builder;
 public class ImageModel {
 
     @Builder
-    public record Presigned(
+    public record PutPresigned(
             String uploadUrl,
             String objectKey
     ) {
-        public static ImageModel.Presigned from(String uploadUrl, String objectKey) {
-            return Presigned.builder()
+        public static PutPresigned from(String uploadUrl, String objectKey) {
+            return PutPresigned.builder()
                     .uploadUrl(uploadUrl)
                     .objectKey(objectKey)
                     .build();
