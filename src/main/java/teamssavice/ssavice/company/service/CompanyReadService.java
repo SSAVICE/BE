@@ -46,4 +46,10 @@ public class CompanyReadService {
         return companyRepository.findByIdFetchJoinImageResource(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND));
     }
+
+    @Transactional(readOnly = true)
+    public Company findByIdFetchJoinAddressAndImageResource(Long id) {
+        return companyRepository.findByIdFetchJoinAddressAndImageResource(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND));
+    }
 }

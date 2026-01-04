@@ -56,4 +56,8 @@ public class Users extends BaseEntity {
         this.imageResource = imageResource;
         imageResource.activate();
     }
+
+    public boolean hasImageResource() {
+        return this.getImageResource() != null;
+    }
 }

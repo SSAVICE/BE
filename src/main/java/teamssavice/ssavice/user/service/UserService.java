@@ -36,7 +36,7 @@ public class UserService {
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
         ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
-        if (user.getImageResource() != null) {
+        if (user.hasImageResource()) {
             s3Service.updateIsActiveTag(user.getImageResource().getObjectKey(), false);
         }
         userWriteService.updateProfileImage(user, imageResource);

@@ -9,6 +9,7 @@ import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.review.entity.Review;
@@ -73,26 +74,38 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyModel.MyCompany getMyCompany(Long id) {
-        Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
+        Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
-        return CompanyModel.MyCompany.from(company, services);
+        if (company.hasImageResource()) {
+            String presignedUrl = s3Service.generateGetPresignedUrl(company.getImageResource().getObjectKey());
+            return CompanyModel.MyCompany.from(company, presignedUrl, services);
+        }
+        return CompanyModel.MyCompany.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY, services);
     }
 
     @Transactional(readOnly = true)
     public CompanyModel.Info getCompanyById(Long id) {
-        Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
+        Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
-        return CompanyModel.Info.from(company, services, reviews);
+        if (company.hasImageResource()) {
+            String presignedUrl = s3Service.generateGetPresignedUrl(company.getImageResource().getObjectKey());
+            return CompanyModel.Info.from(company, presignedUrl, services, reviews);
+        }
+        return CompanyModel.Info.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY, services, reviews);
     }
 
     @Transactional(readOnly = true)
     public CompanyModel.Summary getCompanySummary(Long id) {
-        Company company = companyReadService.findByCompanyIdFetchJoinAddress(id);
+        Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
         Float companyRate = 10F;
         Long rateCount = 100L;
-        return CompanyModel.Summary.from(company, companyRate, rateCount, reviews);
+        if (company.hasImageResource()) {
+            String presignedUrl = s3Service.generateGetPresignedUrl(company.getImageResource().getObjectKey());
+            return CompanyModel.Summary.from(company, presignedUrl, companyRate, rateCount, reviews);
+        }
+        return CompanyModel.Summary.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY, companyRate, rateCount, reviews);
     }
 
     public void updateCompanyImage(Long companyId, String objectKey) {

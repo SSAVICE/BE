@@ -30,9 +30,6 @@ public class Company extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = true)
-    private String imageUrl;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_resource_id")
     private ImageResource imageResource;
@@ -99,5 +96,9 @@ public class Company extends BaseEntity {
         }
         this.imageResource = imageResource;
         imageResource.activate();
+    }
+
+    public boolean hasImageResource() {
+        return this.getImageResource() != null;
     }
 }

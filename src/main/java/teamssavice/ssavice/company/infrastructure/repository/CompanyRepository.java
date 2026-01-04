@@ -19,4 +19,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("SELECT c FROM Company c LEFT JOIN FETCH c.imageResource where c.id = :id")
     Optional<Company> findByIdFetchJoinImageResource(@Param("id") Long id);
+
+    @Query("SELECT c FROM Company c JOIN FETCH c.address LEFT JOIN FETCH c.imageResource where c.id = :id")
+    Optional<Company> findByIdFetchJoinAddressAndImageResource(@Param("id") Long id);
 }

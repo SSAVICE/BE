@@ -95,10 +95,10 @@ public class CompanyController {
     @PostMapping("/image/confirm")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<Void> confirmCompanyImageUpload(
-            @CurrentId Long userId,
+            @CurrentId Long companyId,
             @RequestBody @Valid ImageRequest.Confirm request
     ) {
-        companyService.updateCompanyImage(userId, request.objectKey());
+        companyService.updateCompanyImage(companyId, request.objectKey());
         return ResponseEntity.ok().build();
     }
 }
