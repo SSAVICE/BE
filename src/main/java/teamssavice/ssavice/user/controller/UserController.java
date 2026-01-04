@@ -12,6 +12,7 @@ import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.user.controller.dto.UserRequest;
 import teamssavice.ssavice.user.controller.dto.UserResponse;
 import teamssavice.ssavice.user.service.UserService;
+import teamssavice.ssavice.user.service.dto.UserCommand;
 import teamssavice.ssavice.user.service.dto.UserModel;
 
 @RestController
@@ -37,6 +38,17 @@ public class UserController {
         UserModel.Info model = userService.getProfile(userId);
 
         return ResponseEntity.ok(UserResponse.Info.from(model));
+    }
+
+    @PostMapping("/profile")
+    public ResponseEntity<UserResponse.Summary> Modify(
+        @CurrentId Long userId,
+        @RequestBody @Valid UserRequest.Modify request
+    ) {
+        UserCommand.Modify command = UserCommand.Modify.from(userId, request);
+        UserModel.Info model = userService.modifyProfile(userId, command);
+        
+        return ResponseEntity.ok(UserResponse.Summary.from(model));
     }
 
 }
