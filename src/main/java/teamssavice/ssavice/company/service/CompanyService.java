@@ -9,8 +9,11 @@ import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
+import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.review.entity.Review;
 import teamssavice.ssavice.review.service.ReviewReadService;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.user.entity.Users;
@@ -30,6 +33,8 @@ public class CompanyService {
     private final CompanyWriteService companyWriteService;
     private final ServiceItemReadService serviceItemReadService;
     private final ReviewReadService reviewReadService;
+    private final ImageReadService imageReadService;
+    private final S3Service s3Service;
 
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
@@ -88,5 +93,15 @@ public class CompanyService {
         Float companyRate = 10F;
         Long rateCount = 100L;
         return CompanyModel.Summary.from(company, companyRate, rateCount, reviews);
+    }
+
+    public void updateCompanyImage(Long companyId, String objectKey) {
+        Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
+        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        if (company.getImageResource() != null) {
+            s3Service.updateIsActiveTag(company.getImageResource().getObjectKey(), false);
+        }
+        companyWriteService.updateCompanyImage(company, imageResource);
+        s3Service.updateIsActiveTag(objectKey, true);
     }
 }

@@ -13,6 +13,7 @@ import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
+import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.user.controller.dto.UserRequest;
@@ -38,11 +39,11 @@ public class UserController {
 
     @PostMapping("/profile/image")
     @RequireRole(Role.USER)
-    public ResponseEntity<ImageResponse.Presigned> createPresignedUrl(
+    public ResponseEntity<ImageResponse.Presigned> createProfilePresignedUrl(
             @CurrentId Long userId,
             @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.PutPresigned model = imageService.updateProfileImage(userId, ImageContentType.from(request.contentType()));
+        ImageModel.PutPresigned model = imageService.updateProfileImage(userId, ImagePath.profile, ImageContentType.from(request.contentType()));
         return ResponseEntity.ok(ImageResponse.Presigned.from(model));
     }
 

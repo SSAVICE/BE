@@ -17,9 +17,9 @@ public class ImageService {
     private final ImageWriteService imageWriteService;
 
     @Transactional
-    public ImageModel.PutPresigned updateProfileImage(Long userId, ImageContentType contentType) {
-        String objectKey = s3ObjectKeyGenerator.generator(ImagePath.profile, userId, contentType);
-        imageWriteService.save(objectKey, ImagePath.profile, contentType);
+    public ImageModel.PutPresigned updateProfileImage(Long userId, ImagePath path, ImageContentType contentType) {
+        String objectKey = s3ObjectKeyGenerator.generator(path, userId, contentType);
+        imageWriteService.save(objectKey, path, contentType);
 
         return s3Service.createPresignedUrl(objectKey, contentType);
     }
