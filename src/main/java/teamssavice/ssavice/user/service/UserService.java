@@ -11,6 +11,7 @@ import teamssavice.ssavice.user.service.dto.UserModel;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final TokenService tokenService;
     private final UserWriteService userWriteService;
     private final UserReadService userReadService;
@@ -21,10 +22,17 @@ public class UserService {
 
         // user 저장 및 중복 체크
         Users user = userReadService.findByEmail(email)
-                .orElseGet(() -> userWriteService.save(email));
+            .orElseGet(() -> userWriteService.save(email));
 
         // 토큰 발행
         Token token = tokenService.issueToken(user.getId(), Role.USER);
         return UserModel.Login.from(token);
+    }
+
+    public UserModel.Profile getProfile(Long userId) {
+        // 사용자 정보 조회
+        Users user = userReadService.findByIdFetchJoinAddress(userId);
+
+        return UserModel.Profile.from(user);
     }
 }
