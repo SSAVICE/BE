@@ -70,20 +70,5 @@ public class UserResponse {
         }
     }
 
-    @Builder
-    public record BookSummary(
-        Long total,
-        Long applying,
-        Long completed
-    ) {
-
-        public static BookSummary from(UserModel.BookSummary model) {
-            return BookSummary.builder()
-                .total(model.total())
-                .applying(model.applying())
-                .completed(model.completed())
-                .build();
-        }
-    }
 
 }

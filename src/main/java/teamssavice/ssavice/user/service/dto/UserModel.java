@@ -51,24 +51,4 @@ public class UserModel {
         }
     }
 
-    @Builder
-    public record BookSummary(
-        Long applying,
-        Long completed
-    ) {
-
-        public static BookSummary from(
-            Long applying,
-            Long completed
-        ) {
-            return BookSummary.builder()
-                .applying(applying)
-                .completed(completed)
-                .build();
-        }
-
-        public Long total() {
-            return applying + completed;
-        }
-    }
 }

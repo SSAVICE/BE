@@ -2,7 +2,6 @@ package teamssavice.ssavice.book.controller;
 
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -30,8 +29,8 @@ public class BookController {
 
     @GetMapping("/book")
     public ResponseEntity<PageResponse<BookResponse.Info>> getMyBook(
-            @CurrentId Long userId,
-            @PageableDefault(size = 10) Pageable pageable
+        @CurrentId Long userId,
+        @PageableDefault(size = 10) Pageable pageable
     ) {
 
         BookCommand.Retrieve command = BookCommand.Retrieve.of(userId, pageable);
@@ -40,5 +39,14 @@ public class BookController {
         Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
 
         return ResponseEntity.ok(PageResponse.from(reponsePage));
+    }
+
+    @GetMapping("/book/summary")
+    public ResponseEntity<BookResponse.BookSummary> getBookSummary(
+        @CurrentId Long userId
+    ) {
+        BookModel.BookSummary model = bookService.getBookSummary(userId);
+
+        return ResponseEntity.ok(BookResponse.BookSummary.from(model));
     }
 }

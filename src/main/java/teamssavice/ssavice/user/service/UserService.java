@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
@@ -57,13 +56,5 @@ public class UserService {
 
         user.modify(command.name(), command.email(), command.phoneNumber());
         return UserModel.Info.from(user);
-    }
-
-    @Transactional(readOnly = true)
-    public UserModel.BookSummary getBookSummary(Long userId) {
-        Long applying = bookReadService.countByUserIdAndBookStatus(userId, BookStatus.APPLYING);
-        Long completed = bookReadService.countByUserIdAndBookStatus(userId, BookStatus.COMPLETED);
-
-        return UserModel.BookSummary.from(applying, completed);
     }
 }
