@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.controller.dto.CompanyResponse;
+import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyService;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
@@ -74,4 +75,18 @@ public class CompanyController {
         CompanyModel.Summary model = companyService.getCompanySummary(companyId);
         return ResponseEntity.ok(CompanyResponse.Summary.from(model));
     }
+
+    @RequireRole(Role.USER)
+    @PostMapping
+    public ResponseEntity<CompanyResponse.Verify> verifyBusiness(
+            @RequestBody @Valid CompanyRequest.Verify request
+    ){
+
+        CompanyCommand.Verify command = CompanyCommand.Verify.from(request);
+
+        CompanyModel.Verify model = companyService.verifyBusinessNumber(command);
+        return ResponseEntity.ok(CompanyResponse.Verify.from(model));
+    }
+
+
 }
