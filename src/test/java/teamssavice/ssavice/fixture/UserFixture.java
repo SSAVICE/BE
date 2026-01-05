@@ -13,18 +13,18 @@ public class UserFixture {
                 .name("user")
                 .email("user@email.com")
                 .phoneNumber("010-1234-5678")
-                .imageUrl("imageUrl")
+                .imageResource(null)
                 .build();
     }
 
-    public static Users of(UserRole userRole, String name, String email, String phoneNumber, String imageUrl) {
+    public static Users of(UserRole userRole, String name, String email, String phoneNumber) {
         return Users.builder()
                 .userRole(userRole)
                 .provider(Provider.KAKAO)
                 .name(name)
                 .email(email)
                 .phoneNumber(phoneNumber)
-                .imageUrl(imageUrl)
+                .imageResource(null)
                 .build();
     }
 }

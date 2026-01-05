@@ -41,9 +41,17 @@ public class ServiceItemService {
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
-            nextCursor = content.getLast().id();
+            nextCursor = content.getLast().serviceId();
         }
 
         return new CursorResult<>(content, nextCursor, items.hasNext());
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceItemModel.ItemInfo getServiceDetail(Long serviceId) {
+
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+
+        return ServiceItemModel.ItemInfo.from(serviceItem);
     }
 }
