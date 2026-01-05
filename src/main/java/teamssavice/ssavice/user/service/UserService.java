@@ -1,23 +1,25 @@
 package teamssavice.ssavice.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
-import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.dto.UserModel;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final TokenService tokenService;
     private final UserWriteService userWriteService;
     private final UserReadService userReadService;
-    private final S3Service s3Service;
     private final ImageReadService imageReadService;
 
     public UserModel.Login register(String kakaoToken) {
@@ -33,13 +35,14 @@ public class UserService {
         return UserModel.Login.from(token);
     }
 
+    @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
         ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
         if (user.hasImageResource()) {
-            s3Service.updateIsActiveTag(user.getImageResource().getObjectKey(), false);
+            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(user.getImageResource().getObjectKey(), false));
         }
-        userWriteService.updateProfileImage(user, imageResource);
-        s3Service.updateIsActiveTag(objectKey, true);
+        user.updateImage(imageResource);
+        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
     }
 }

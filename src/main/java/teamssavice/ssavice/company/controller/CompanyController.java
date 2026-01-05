@@ -84,12 +84,12 @@ public class CompanyController {
 
     @PostMapping("/image")
     @RequireRole(Role.COMPANY)
-    public ResponseEntity<ImageResponse.Presigned> createCompanyPresignedUrl(
+    public ResponseEntity<ImageResponse.PresignedUrl> createCompanyPresignedUrl(
             @CurrentId Long userId,
             @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.PutPresigned model = imageService.updateProfileImage(userId, ImagePath.company, ImageContentType.from(request.contentType()));
-        return ResponseEntity.ok(ImageResponse.Presigned.from(model));
+        ImageModel.PutPresignedUrl model = imageService.updateImage(userId, ImagePath.company, ImageContentType.from(request.contentType()));
+        return ResponseEntity.ok(ImageResponse.PresignedUrl.from(model));
     }
 
     @PostMapping("/image/confirm")

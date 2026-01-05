@@ -1,8 +1,8 @@
 package teamssavice.ssavice.serviceItem.controller.dto;
 
 import lombok.Builder;
-import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -86,8 +86,8 @@ public class ServiceItemResponse {
 
             LocalDateTime deadline
     ) {
-        public static Search from(ServiceItemModel.ItemInfo model) {
-            return Search.builder()
+        public static Search from(ServiceItemModel.Search model) {
+            return ServiceItemResponse.Search.builder()
                     .serviceId(model.serviceId())
                     .serviceImageUrl(null) // 이미지는 28 이슈에서 해결해서 그거 기본 URL 쓰면서 지우면될듯
                     .category(model.category())
@@ -98,13 +98,13 @@ public class ServiceItemResponse {
                     .companyName(model.companyName())
                     .latitude(model.latitude())
                     .longitude(model.longitude())
-                    .region1(model.region1Code())
-                    .region2(model.region2Code())
+                    .region1(model.region1())
+                    .region2(model.region2())
                     .currentMember(model.currentMember())
                     .minimumMember(model.minimumMember())
                     .maximumMember(model.maximumMember())
                     .basePrice(model.basePrice())
-                    .discountRatio(model.discountRate())
+                    .discountRatio(model.discountRatio())
                     .discountedPrice(model.discountedPrice())
                     .deadline(model.deadline())
                     .build();
@@ -113,7 +113,7 @@ public class ServiceItemResponse {
 
     @Builder
     public record Detail(
-            String imageUrl, //  이미지 관련해서 엔티티 추가하든 DB 설계가 추가되든 하면서 수정 예정
+            List<String> imageUrl,
             Long serviceId,
             String category,
             Long companyId,
@@ -137,7 +137,7 @@ public class ServiceItemResponse {
             String status,
             LocalDateTime createdAt
     ) {
-        public static Detail from(ServiceItemModel.ItemInfo model) {
+        public static Detail from(ServiceItemModel.Detail model) {
             return Detail.builder()
                     .imageUrl(model.imageUrl())
                     .serviceId(model.serviceId())

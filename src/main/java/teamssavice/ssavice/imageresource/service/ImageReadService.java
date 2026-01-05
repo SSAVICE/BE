@@ -8,14 +8,26 @@ import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResourceRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ImageReadService {
-    private final ImageResourceRepository repository;
+    private final ImageResourceRepository imageResourceRepository;
 
     @Transactional(readOnly = true)
     public ImageResource findByObjectKey(String objectKey) {
-        return repository.findByObjectKey(objectKey)
+        return imageResourceRepository.findByObjectKey(objectKey)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageResource> findAllByObjectKeyIn(List<String> objectKeys) {
+        return imageResourceRepository.findAllByObjectKeyIn(objectKeys);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageResource> findAllById(List<Long> ids) {
+        return imageResourceRepository.findAllById(ids);
     }
 }
