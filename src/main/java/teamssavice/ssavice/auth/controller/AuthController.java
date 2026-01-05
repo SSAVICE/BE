@@ -1,16 +1,14 @@
 package teamssavice.ssavice.auth.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import teamssavice.ssavice.auth.controller.dto.AuthRequest;
 import teamssavice.ssavice.auth.controller.dto.AuthResponse;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.auth.service.dto.AuthModel;
+import teamssavice.ssavice.global.annotation.CurrentRefreshToken;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,11 +16,19 @@ import teamssavice.ssavice.auth.service.dto.AuthModel;
 public class AuthController {
     private final TokenService tokenService;
 
-    @PostMapping("token/refresh")
+    @GetMapping("token/refresh")
     public ResponseEntity<AuthResponse.Refresh> refresh(
-            @RequestBody @Valid AuthRequest.Refresh request
+            @CurrentRefreshToken String refreshToken
     ) {
-        AuthModel.Refresh model = tokenService.refresh(request.refreshToken());
+        AuthModel.Refresh model = tokenService.refresh(refreshToken);
         return ResponseEntity.ok(AuthResponse.Refresh.from(model));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CurrentRefreshToken String refreshToken
+    ) {
+        tokenService.logout(refreshToken);
+        return ResponseEntity.ok().build();
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;
 
@@ -18,6 +19,7 @@ public class Users extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false)
     private UserRole userRole;
@@ -33,9 +35,11 @@ public class Users extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private String phoneNumber;
-    @NotNull
-    @Column(nullable = false)
-    private String imageUrl;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_resource_id")
+    private ImageResource imageResource;
+
     @NotNull
     @Column(nullable = false)
     @Builder.Default
@@ -44,4 +48,16 @@ public class Users extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id")
     private Address address;
+
+    public void updateImage(ImageResource imageResource) {
+        if (this.imageResource != null) {
+            this.imageResource.deActivate();
+        }
+        this.imageResource = imageResource;
+        imageResource.activate();
+    }
+
+    public boolean hasImageResource() {
+        return this.getImageResource() != null;
+    }
 }

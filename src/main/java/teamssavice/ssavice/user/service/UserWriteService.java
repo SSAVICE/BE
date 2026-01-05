@@ -2,6 +2,8 @@ package teamssavice.ssavice.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;
 import teamssavice.ssavice.user.entity.Users;
@@ -19,8 +21,13 @@ public class UserWriteService {
                 .name("홍길동")
                 .email(email)
                 .phoneNumber("010-1234-5678")
-                .imageUrl("url")
+                .imageResource(null)
                 .build();
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateProfileImage(Users user, ImageResource imageResource) {
+        user.updateImage(imageResource);
     }
 }

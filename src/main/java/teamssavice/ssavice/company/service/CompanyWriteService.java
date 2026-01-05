@@ -2,10 +2,12 @@ package teamssavice.ssavice.company.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.entity.Users;
 
 @Service
@@ -36,5 +38,10 @@ public class CompanyWriteService {
                 .build();
 
         return companyRepository.save(company);
+    }
+
+    @Transactional
+    public void updateCompanyImage(Company company, ImageResource imageResource) {
+        company.updateImage(imageResource);
     }
 }

@@ -53,7 +53,7 @@ public class ServiceItemModel {
 
     @Builder
     public record ItemInfo(
-            Long id,
+            Long serviceId,
             Long companyId,
             Long addressId,
             String companyName,
@@ -66,6 +66,7 @@ public class ServiceItemModel {
             LocalDateTime startDate,
             LocalDateTime endDate,
             LocalDateTime deadline,
+            LocalDateTime createdAt,
             String category,
             String tag,
             Long currentMember,
@@ -77,17 +78,23 @@ public class ServiceItemModel {
             String detailAddress,
             BigDecimal latitude,
             BigDecimal longitude,
+            String region1,
+            String region2,
             String region1Code,
-            String region2Code
+            String region2Code,
+
+            String imageUrl, // 이미지 테이블 추가되면서 변경 예정
+            Boolean liked
     ) {
         public static ItemInfo from (ServiceItem entity) {
             Address addr = entity.getAddress();
 
             return ItemInfo.builder()
-                    .id(entity.getId())
+                    .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
                     .addressId(addr.getId())
                     .companyName(entity.getCompany().getCompanyName())
+                    .imageUrl(entity.getThumbnailUrl())
                     .title(entity.getTitle())
                     .description(entity.getDescription())
                     .basePrice(entity.getPrice().getBasePrice())
@@ -97,6 +104,7 @@ public class ServiceItemModel {
                     .startDate(entity.getStartDate())
                     .endDate(entity.getEndDate())
                     .deadline(entity.getDeadline())
+                    .createdAt(entity.getCreatedAt())
                     .category(entity.getCategory())
                     .tag(entity.getTag())
                     .currentMember(entity.getCurrentMember())
@@ -107,8 +115,11 @@ public class ServiceItemModel {
                     .detailAddress(addr.getDetailAddress())
                     .latitude(addr.getLatitude())
                     .longitude(addr.getLongitude())
+                    .region1(addr.getRegion1())
+                    .region2(addr.getRegion2())
                     .region1Code(addr.getRegion1Code())
                     .region2Code(addr.getRegion2Code())
+                    .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
                     .build();
         }
     }

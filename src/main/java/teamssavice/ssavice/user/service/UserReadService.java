@@ -25,4 +25,10 @@ public class UserReadService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
+
+    @Transactional(readOnly = true)
+    public Users findByIdFetchJoinImageResource(Long id) {
+        return userRepository.findByIdFetchJoinImageResource(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 }
