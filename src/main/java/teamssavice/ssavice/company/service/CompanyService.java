@@ -9,6 +9,7 @@ import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
@@ -88,6 +89,7 @@ public class CompanyService {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(company);
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(company.getId());
+
         if (company.hasImageResource()) {
             String presignedUrl = s3Service.generateGetPresignedUrl(company.getImageResource().getObjectKey());
             return CompanyModel.Info.from(company, presignedUrl, services, reviews);
