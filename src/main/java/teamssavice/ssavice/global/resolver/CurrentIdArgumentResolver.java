@@ -13,7 +13,8 @@ import teamssavice.ssavice.global.exception.AuthenticationException;
 public class CurrentIdArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentId.class);
+        return parameter.hasParameterAnnotation(CurrentId.class)
+                && parameter.getParameterType().equals(Long.class);
     }
 
     @Override
