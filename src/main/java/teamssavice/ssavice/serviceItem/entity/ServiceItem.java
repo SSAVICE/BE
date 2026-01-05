@@ -99,7 +99,7 @@ public class ServiceItem extends BaseEntity {
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
 
-    public void addAllImageIds(List<Long> ids) {
-        imageIds.addAll(ids);
+    public void addImageId(Long id) {
+        imageIds.add(id);
     }
 }
