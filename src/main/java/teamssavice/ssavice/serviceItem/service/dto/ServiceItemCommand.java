@@ -2,10 +2,12 @@ package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
+import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ServiceItemCommand {
 
@@ -26,10 +28,12 @@ public class ServiceItemCommand {
             BigDecimal latitude,
             String postCode,
             String address,
-            String detailAddress
+            String detailAddress,
+            List<String> imageObjectKeys
     ) {
 
         public static ServiceItemCommand.Create from(Long companyId, ServiceItemRequest.Create request) {
+            List<String> objectKeys = request.imageConfirms().stream().map(ImageRequest.Confirm::objectKey).toList();
             return new ServiceItemCommand.Create(
                     companyId,
                     request.title(),
@@ -47,7 +51,8 @@ public class ServiceItemCommand {
                     request.latitude(),
                     request.postCode(),
                     request.address(),
-                    request.detailAddress()
+                    request.detailAddress(),
+                    objectKeys
             );
         }
     }

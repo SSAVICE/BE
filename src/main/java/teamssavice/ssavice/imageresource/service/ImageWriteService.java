@@ -8,6 +8,8 @@ import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResourceRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ImageWriteService {
@@ -21,5 +23,12 @@ public class ImageWriteService {
                 .contentType(contentType.mimeType())
                 .build();
         return imageResourceRepository.save(entity);
+    }
+
+    @Transactional
+    public void activeImages(List<ImageResource> list) {
+        for (ImageResource image : list) {
+            image.activate();
+        }
     }
 }

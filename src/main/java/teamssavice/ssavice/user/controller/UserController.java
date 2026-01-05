@@ -39,12 +39,12 @@ public class UserController {
 
     @PostMapping("/profile/image")
     @RequireRole(Role.USER)
-    public ResponseEntity<ImageResponse.Presigned> createProfilePresignedUrl(
+    public ResponseEntity<ImageResponse.PresignedUrl> createProfilePresignedUrl(
             @CurrentId Long userId,
             @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.PutPresigned model = imageService.updateProfileImage(userId, ImagePath.profile, ImageContentType.from(request.contentType()));
-        return ResponseEntity.ok(ImageResponse.Presigned.from(model));
+        ImageModel.PutPresignedUrl model = imageService.updateImage(userId, ImagePath.profile, ImageContentType.from(request.contentType()));
+        return ResponseEntity.ok(ImageResponse.PresignedUrl.from(model));
     }
 
     @PostMapping("/profile/image/confirm")

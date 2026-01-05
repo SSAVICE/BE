@@ -11,11 +11,19 @@ import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.imageresource.ImageRequest;
+import teamssavice.ssavice.imageresource.ImageResponse;
+import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.service.ImageService;
+import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
+import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +31,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 public class ServiceItemController {
 
     private final ServiceItemService serviceItemService;
+    private final ImageService imageService;
 
     @PostMapping
     @RequireRole(Role.COMPANY)
@@ -64,4 +73,13 @@ public class ServiceItemController {
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
+    @PostMapping("/image")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<ImageResponse.PresignedUrls> createServiceItemPresignedUrls(
+            @CurrentId Long companyId,
+            @RequestBody @Valid ImageRequest.ServiceImages request
+    ) {
+        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(ImageCommand.PutPresignedUrls.from(companyId, ImagePath.serviceItem, request));
+        return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
+    }
 }

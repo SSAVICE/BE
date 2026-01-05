@@ -10,13 +10,16 @@ import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ServiceItemWriteService {
     private final ServiceItemRepository serviceItemRepository;
 
-    public ServiceItem save(ServiceItemCommand.Create command, Company company) {
+    @Transactional
+    public ServiceItem save(ServiceItemCommand.Create command, List<Long> imageIds, Company company) {
         Address address = Address.builder()
                 .latitude(command.latitude())
                 .longitude(command.longitude())
@@ -39,6 +42,8 @@ public class ServiceItemWriteService {
                 .category(command.category())
                 .tag(command.tag())
                 .build();
+
+        serviceItem.addAllImageIds(imageIds);
 
         return serviceItemRepository.save(serviceItem);
     }
