@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -48,6 +49,16 @@ public class GlobalExceptionHandler {
 
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperties(errors);
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ProblemDetail> missingServletRequestParameterException(
+            MissingServletRequestParameterException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Missing Request Parameter");
+        problemDetail.setDetail("Required request parameter is missing: " + e.getParameterName());
         return ResponseEntity.badRequest().body(problemDetail);
     }
 

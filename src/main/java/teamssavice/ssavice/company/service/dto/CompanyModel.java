@@ -46,13 +46,13 @@ public class CompanyModel {
             String detail,
             List<ServiceItemModel.Summary> service
     ){
-        public static CompanyModel.MyCompany from(Company company, List<ServiceItem> services) {
+        public static CompanyModel.MyCompany from(Company company, String presignedUrl, List<ServiceItem> services) {
             List<ServiceItemModel.Summary> models = services.stream().map(ServiceItemModel.Summary::from).toList();
             return CompanyModel.MyCompany.builder()
                     .companyId(company.getId())
                     .companyName(company.getCompanyName())
                     .phoneNumber(company.getPhoneNumber())
-                    .imageUrl(company.getImageUrl())
+                    .imageUrl(presignedUrl)
                     .businessNumber(company.getBusinessNumber())
                     .longitude(company.getAddress().getLongitude())
                     .latitude(company.getAddress().getLatitude())
@@ -71,8 +71,8 @@ public class CompanyModel {
             CompanyModel.MyCompany myCompany,
             List<ReviewModel.Item> review
     ) {
-        public static CompanyModel.Info from(Company company, List<ServiceItem> services, List<Review> reviews) {
-            CompanyModel.MyCompany my = CompanyModel.MyCompany.from(company, services);
+        public static CompanyModel.Info from(Company company, String presignedUrl, List<ServiceItem> services, List<Review> reviews) {
+            CompanyModel.MyCompany my = CompanyModel.MyCompany.from(company, presignedUrl, services);
             List<ReviewModel.Item> models = reviews.stream().map(ReviewModel.Item::from).toList();
             return Info.builder()
                     .myCompany(my)
@@ -93,7 +93,7 @@ public class CompanyModel {
             Long rateCount,
             List<ReviewModel.Item> review
     ) {
-        public static CompanyModel.Summary from(Company company, Float companyRate, Long rateCount, List<Review> review) {
+        public static CompanyModel.Summary from(Company company, String presignedUrl, Float companyRate, Long rateCount, List<Review> review) {
             List<ReviewModel.Item> models = review.stream().map(ReviewModel.Item::from).toList();
             return Summary.builder()
                     .companyId(company.getId())
@@ -101,7 +101,7 @@ public class CompanyModel {
                     .address(company.getAddress().getAddress())
                     .description(company.getDescription())
                     .phoneNumber(company.getPhoneNumber())
-                    .companyImageUrl(company.getImageUrl())
+                    .companyImageUrl(presignedUrl)
                     .companyRate(companyRate)
                     .rateCount(rateCount)
                     .review(models)
