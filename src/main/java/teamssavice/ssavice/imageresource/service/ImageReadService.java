@@ -25,4 +25,9 @@ public class ImageReadService {
     public List<ImageResource> findAllByObjectKeyIn(List<String> objectKeys) {
         return imageResourceRepository.findAllByObjectKeyIn(objectKeys);
     }
+
+    @Transactional(readOnly = true)
+    public List<ImageResource> findAllById(List<Long> ids) {
+        return imageResourceRepository.findAllById(ids);
+    }
 }

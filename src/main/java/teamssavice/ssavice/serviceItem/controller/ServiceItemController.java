@@ -56,7 +56,7 @@ public class ServiceItemController {
         Pageable pageable = PageRequest.of(0, size);
         ServiceItemCommand.Search command = ServiceItemCommand.Search.of(request, pageable);
 
-        CursorResult<ServiceItemModel.ItemInfo> models = serviceItemService.search(command);
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(command);
 
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
 
@@ -68,7 +68,7 @@ public class ServiceItemController {
             @PathVariable Long serviceId
     ) {
 
-        ServiceItemModel.ItemInfo model = serviceItemService.getServiceDetail(serviceId);
+        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId);
 
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }

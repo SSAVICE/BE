@@ -25,7 +25,7 @@ public class ImageService {
         String objectKey = s3ObjectKeyGenerator.generator(path, id, contentType);
         imageWriteService.save(objectKey, path, contentType);
 
-        return s3Service.createPresignedUrl(objectKey, contentType);
+        return s3Service.createPutPresignedUrl(objectKey, contentType);
     }
 
     @Transactional

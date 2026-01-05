@@ -21,7 +21,7 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Properties properties;
 
-    public ImageModel.PutPresignedUrl createPresignedUrl(String objectKey, ImageContentType contentType) {
+    public ImageModel.PutPresignedUrl createPutPresignedUrl(String objectKey, ImageContentType contentType) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(objectKey)

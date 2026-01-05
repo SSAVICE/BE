@@ -10,11 +10,13 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,6 +27,7 @@ public class ServiceItemService {
     private final ServiceItemWriteService serviceItemWriteService;
     private final ServiceItemReadService serviceItemReadService;
     private final ImageReadService imageReadService;
+    private final S3Service s3Service;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -42,12 +45,12 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public CursorResult<ServiceItemModel.ItemInfo> search(ServiceItemCommand.Search command) {
+    public CursorResult<ServiceItemModel.Search> search(ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
-        List<ServiceItemModel.ItemInfo> content = items.getContent().stream()
-                .map(ServiceItemModel.ItemInfo::from)
+        List<ServiceItemModel.Search> content = items.getContent().stream()
+                .map(ServiceItemModel.Search::from)
                 .toList();
 
         Long nextCursor = null;
@@ -59,10 +62,13 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItemModel.ItemInfo getServiceDetail(Long serviceId) {
-
+    public ServiceItemModel.Detail getServiceDetail(Long serviceId) {
         ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
-
-        return ServiceItemModel.ItemInfo.from(serviceItem);
+        List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
+        List<String> imageUrls = new ArrayList<>();
+        for (ImageResource imageResource : imageList) {
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
+        }
+        return ServiceItemModel.Detail.from(serviceItem, imageUrls);
     }
 }
