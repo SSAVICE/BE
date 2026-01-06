@@ -47,13 +47,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      ## Maven Central 접근 확인 (네트워크 문제 디버깅용)
-      - name: Check Maven Central access
-        run: |
-          curl -I https://repo.maven.apache.org/maven2/software/amazon/awssdk/bom/2.25.60/bom-2.25.60.pom
-        
-
-        # 5. 핵심 단계: 빌드 및 테스트 실행
+      # 5. 핵심 단계: 빌드 및 테스트 실행
       # 이 명령이 실패하면 CI 전체가 실패 처리됩니다.
       - name: Run Build and Tests
         run: ./gradlew build --scan
