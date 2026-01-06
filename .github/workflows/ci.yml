@@ -32,6 +32,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      # Maven Central 접근 확인 (네트워크 문제 조기 발견용)
+      - name: Check Maven Central access
+        run: |
+          curl -I https://repo.maven.apache.org/maven2/software/amazon/awssdk/bom/2.25.60/bom-2.25.60.pom
+
+
       # 3. Gradle 의존성 캐싱 (빌드 속도 최적화)
       - name: Cache Gradle packages
         uses: actions/cache@v3
