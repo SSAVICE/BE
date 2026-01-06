@@ -37,75 +37,80 @@ jobs:
           --health-retries=3
 
     steps:
-    # 1. 코드 체크아웃
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # 1. 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # 2. 자바 환경 설정 (JDK 17 기준)
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      # 2. 자바 환경 설정 (JDK 17 기준)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-    # 3. Gradle 의존성 캐싱 (빌드 속도 최적화)
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+      # Maven Central 접근 확인 (네트워크 문제 조기 발견용)
+      - name: Check Maven Central access
+        run: |
+          curl -I https://repo.maven.apache.org/maven2/software/amazon/awssdk/bom/2.25.60/bom-2.25.60.pom
 
-    # 4. gradlew 실행 권한 부여
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      # 3. Gradle 의존성 캐싱 (빌드 속도 최적화)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-    # 5. 핵심 단계: 빌드 및 테스트 실행
-    # 이 명령이 실패하면 CI 전체가 실패 처리됩니다.
-    - name: Run Build and Tests
-      run: ./gradlew build --scan
-      env:
-        # 스프링 부트 설정을 환경변수로 덮어쓰기
-        # 1. DB 주소: 서비스 컨테이너의 localhost:3306 + DB이름(testdb)
-        SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-        # 2. mysql 서비스에서 설정한 root
-        SPRING_DATASOURCE_USERNAME: root
-        # 3. 비밀번호: mysql 서비스에서 설정한 root
-        SPRING_DATASOURCE_PASSWORD: root
-        # 4. DDL 설정: 테스트 시작 시 테이블 생성, 종료 시 삭제
-        SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      # 4. gradlew 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    # 6. 테스트 결과를 PR에 코멘트로 등록 (표 형태 요약)
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        files: "**/build/test-results/test/TEST-*.xml"
+      # 5. 핵심 단계: 빌드 및 테스트 실행
+      # 이 명령이 실패하면 CI 전체가 실패 처리됩니다.
+      - name: Run Build and Tests
+        run: ./gradlew build --scan
+        env:
+          # 스프링 부트 설정을 환경변수로 덮어쓰기
+          # 1. DB 주소: 서비스 컨테이너의 localhost:3306 + DB이름(testdb)
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+          # 2. mysql 서비스에서 설정한 root
+          SPRING_DATASOURCE_USERNAME: root
+          # 3. 비밀번호: mysql 서비스에서 설정한 root
+          SPRING_DATASOURCE_PASSWORD: root
+          # 4. DDL 설정: 테스트 시작 시 테이블 생성, 종료 시 삭제
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-    # 7. 깃허브 봇
-    - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v4
-      if: always() # 빌드 실패(테스트 실패) 시에도 리포트는 남겨야 함
-      with:
-        report_paths: '**/build/test-results/test/TEST-*.xml'
+      # 6. 테스트 결과를 PR에 코멘트로 등록 (표 형태 요약)
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: "**/build/test-results/test/TEST-*.xml"
 
-      # 8. 디스코드 알림 전송 (업그레이드 버전)
-    - name: Discord Notification
-      uses: sarisia/actions-status-discord@v1
-      if: always()
-      with:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-        status: ${{ job.status }}
-        title: " ${{ github.workflow }} 결과 알림"
+      # 7. 깃허브 봇
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always() # 빌드 실패(테스트 실패) 시에도 리포트는 남겨야 함
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
 
-        description: |
-          **결과**: ${{ job.status }}
-          **PR 제목**: ${{ github.event.pull_request.title }}
-          **요청자**: ${{ github.actor }}
-          **브랜치**: ${{ github.head_ref }} -> ${{ github.base_ref }}
-        # 성공이면 초록, 실패면 빨강, 취소면 회색
-        color: ${{ job.status == 'success' && '0x00FF00' || job.status == 'failure' && '0xFF0000' || '0x808080' }}
-        url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        # 8. 디스코드 알림 전송 (업그레이드 버전)
+      - name: Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        if: always()
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: " ${{ github.workflow }} 결과 알림"
+
+          description: |
+            **결과**: ${{ job.status }}
+            **PR 제목**: ${{ github.event.pull_request.title }}
+            **요청자**: ${{ github.actor }}
+            **브랜치**: ${{ github.head_ref }} -> ${{ github.base_ref }}
+          # 성공이면 초록, 실패면 빨강, 취소면 회색
+          color: ${{ job.status == 'success' && '0x00FF00' || job.status == 'failure' && '0xFF0000' || '0x808080' }}
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

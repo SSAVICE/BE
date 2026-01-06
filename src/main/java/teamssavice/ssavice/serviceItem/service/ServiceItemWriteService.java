@@ -16,6 +16,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 public class ServiceItemWriteService {
     private final ServiceItemRepository serviceItemRepository;
 
+    @Transactional
     public ServiceItem save(ServiceItemCommand.Create command, Company company) {
         Address address = Address.builder()
                 .latitude(command.latitude())

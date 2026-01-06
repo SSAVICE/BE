@@ -2,11 +2,12 @@ package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.address.Address;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ServiceItemModel {
 
@@ -52,7 +53,61 @@ public class ServiceItemModel {
     }
 
     @Builder
-    public record ItemInfo(
+    public record Search(
+            Long serviceId,
+            String serviceImageUrl,
+            String category,
+            String title,
+            String tag,
+            ServiceStatus status,
+
+            Long companyId,
+            String companyName,
+
+            BigDecimal latitude,
+            BigDecimal longitude,
+            String region1,
+            String region2,
+
+            Long currentMember,
+            Long minimumMember,
+            Long maximumMember,
+
+            Long basePrice,
+            Integer discountRatio,
+            Long discountedPrice,
+
+            LocalDateTime deadline
+    ) {
+        public static Search from (ServiceItem entity) {
+            Address addr = entity.getAddress();
+
+            return Search.builder()
+                    .serviceId(entity.getId())
+                    .companyId(entity.getCompany().getId())
+                    .companyName(entity.getCompany().getCompanyName())
+                    .serviceImageUrl(entity.getThumbnailUrl())
+                    .title(entity.getTitle())
+                    .basePrice(entity.getPrice().getBasePrice())
+                    .discountRatio(entity.getPrice().getDiscountRate())
+                    .discountedPrice(entity.getPrice().getDiscountedPrice())
+                    .status(entity.getStatus())
+                    .deadline(entity.getDeadline())
+                    .category(entity.getCategory())
+                    .tag(entity.getTag())
+                    .currentMember(entity.getCurrentMember())
+                    .minimumMember(entity.getMinimumMember())
+                    .maximumMember(entity.getMaximumMember())
+                    .latitude(addr.getLatitude())
+                    .longitude(addr.getLongitude())
+                    .region1(addr.getRegion1())
+                    .region2(addr.getRegion2())
+                    .build();
+        }
+    }
+
+    @Builder
+    public record Detail(
             Long serviceId,
             Long companyId,
             Long addressId,
@@ -83,18 +138,18 @@ public class ServiceItemModel {
             String region1Code,
             String region2Code,
 
-            String imageUrl, // 이미지 테이블 추가되면서 변경 예정
+            List<String> imageUrl,
             Boolean liked
     ) {
-        public static ItemInfo from (ServiceItem entity) {
+        public static Detail from (ServiceItem entity, List<String> imageUrl) {
             Address addr = entity.getAddress();
 
-            return ItemInfo.builder()
+            return Detail.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
                     .addressId(addr.getId())
                     .companyName(entity.getCompany().getCompanyName())
-                    .imageUrl(entity.getThumbnailUrl())
+                    .imageUrl(imageUrl)
                     .title(entity.getTitle())
                     .description(entity.getDescription())
                     .basePrice(entity.getPrice().getBasePrice())

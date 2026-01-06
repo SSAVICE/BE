@@ -25,8 +25,6 @@ class UserWriteServiceTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UserWriteService userWriteService;
-    @Autowired
     private ImageResourceRepository imageResourceRepository;
     @Autowired
     EntityManager em;
@@ -49,7 +47,7 @@ class UserWriteServiceTest {
         boolean originalActive = imageResource.isActive();
 
         // when
-        userWriteService.updateProfileImage(user, imageResource);
+        user.updateImage(imageResource);
         em.flush();
         em.clear();
         var actual = imageResourceRepository.findById(imageResource.getId()).get();
