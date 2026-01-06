@@ -36,17 +36,43 @@ public class UserModel {
     ) {
 
         public static Info from(
-            Users user
+            Users user, String presignedUrl
         ) {
             return Info.builder()
-                .imageUrl(user.getImageUrl())
+                .imageUrl(presignedUrl)
                 .name(user.getName())
                 .createdAt(Timestamp.valueOf(user.getCreatedAt()))
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
-                .postCode(user.getAddress().getPostCode())
-                .address(user.getAddress().getAddress())
-                .detailAddress(user.getAddress().getDetailAddress())
+                .postCode(user.getAddress() != null ? user.getAddress().getPostCode() : null)
+                .address(user.getAddress() != null ? user.getAddress().getAddress() : null)
+                .detailAddress(
+                    user.getAddress() != null ? user.getAddress().getDetailAddress() : null)
+                .build();
+        }
+    }
+
+    @Builder
+    public record Modify(
+        String name,
+        String email,
+        String phoneNumber,
+        String postCode,
+        String address,
+        String detailAddress
+    ) {
+
+        public static Modify from(Users user) {
+            return Modify.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .postCode(user.getAddress() != null ? user.getAddress().getPostCode()
+                    : null)
+                .address(
+                    user.getAddress() != null ? user.getAddress().getAddress() : null)
+                .detailAddress(user.getAddress() != null ? user.getAddress()
+                    .getDetailAddress() : null)
                 .build();
         }
     }
