@@ -2,6 +2,7 @@ package teamssavice.ssavice.book.controller;
 
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,4 +46,13 @@ public class BookController {
         return ResponseEntity.ok(PageResponse.from(reponsePage));
     }
 
+
+    @GetMapping("/book/summary")
+    public ResponseEntity<BookResponse.BookSummary> getBookSummary(
+        @CurrentId Long userId
+    ) {
+        BookModel.BookSummary model = bookService.getBookSummary(userId);
+
+        return ResponseEntity.ok(BookResponse.BookSummary.from(model));
+    }
 }

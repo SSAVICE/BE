@@ -14,13 +14,13 @@ import teamssavice.ssavice.book.entity.Book;
 public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query(value = "SELECT b FROM Book b " +
-        "JOIN FETCH b.user " +
-        "JOIN FETCH b.serviceItem s " +
-        "JOIN FETCH s.company " +
-        "JOIN FETCH s.address " +
-        "WHERE b.user.id = :userId",
+            "JOIN FETCH b.user " +
+            "JOIN FETCH b.serviceItem s " +
+            "JOIN FETCH s.company " +
+            "JOIN FETCH s.address " +
+            "WHERE b.user.id = :userId",
 
-        countQuery = "SELECT count(b) FROM Book b WHERE b.user.id = :userId")
+            countQuery = "SELECT count(b) FROM Book b WHERE b.user.id = :userId")
     Page<Book> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(
@@ -36,4 +36,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             "AND (:status IS NULL OR b.bookStatus = :status)"
     )
     Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable);
+
+    Long countByUserIdAndBookStatus(Long userId, BookStatus bookStatus);
 }

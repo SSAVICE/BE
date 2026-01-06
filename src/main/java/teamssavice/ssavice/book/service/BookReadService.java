@@ -23,6 +23,10 @@ public class BookReadService {
         return bookRepository.findAllByUserId(userId, pageable);
     }
 
+    public Long countByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
+        return bookRepository.countByUserIdAndBookStatus(userId, bookStatus);
+    }
+
     public Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable) {
         return bookRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
