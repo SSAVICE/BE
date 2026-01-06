@@ -7,6 +7,7 @@ import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.address.Address;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.entity.Users;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,8 +30,9 @@ public class Company extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = true)
-    private String imageUrl;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_resource_id")
+    private ImageResource imageResource;
     @NotNull
     @Column(nullable = false)
     private String businessNumber;
@@ -86,5 +88,17 @@ public class Company extends BaseEntity {
         }
         this.detail = command.detail();
         address.update(AddressCommand.Update.from(command));
+    }
+
+    public void updateImage(ImageResource imageResource) {
+        if (this.imageResource != null) {
+            this.imageResource.deActivate();
+        }
+        this.imageResource = imageResource;
+        imageResource.activate();
+    }
+
+    public boolean hasImageResource() {
+        return this.getImageResource() != null;
     }
 }

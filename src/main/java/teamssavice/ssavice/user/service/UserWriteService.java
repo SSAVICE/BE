@@ -19,7 +19,7 @@ public class UserWriteService {
                 .name("홍길동")
                 .email(email)
                 .phoneNumber("010-1234-5678")
-                .imageUrl("url")
+                .imageResource(null)
                 .build();
         return userRepository.save(user);
     }

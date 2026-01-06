@@ -44,8 +44,7 @@ class UserRepositoryTest {
         assertAll(
                 () -> assertThat(actual.getName()).isEqualTo(user.getName()),
                 () -> assertThat(actual.getEmail()).isEqualTo(user.getEmail()),
-                () -> assertThat(actual.getPhoneNumber()).isEqualTo(user.getPhoneNumber()),
-                () -> assertThat(actual.getImageUrl()).isEqualTo(user.getImageUrl())
+                () -> assertThat(actual.getPhoneNumber()).isEqualTo(user.getPhoneNumber())
         );
     }
 }

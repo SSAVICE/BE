@@ -14,6 +14,12 @@ import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.imageresource.ImageRequest;
+import teamssavice.ssavice.imageresource.ImageResponse;
+import teamssavice.ssavice.imageresource.constants.ImageContentType;
+import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.service.ImageService;
+import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +27,7 @@ import teamssavice.ssavice.global.annotation.RequireRole;
 @Validated
 public class CompanyController {
     private final CompanyService companyService;
+    private final ImageService imageService;
 
     @PostMapping("/login")
     public ResponseEntity<CompanyResponse.Login> login(
@@ -73,5 +80,25 @@ public class CompanyController {
     ) {
         CompanyModel.Summary model = companyService.getCompanySummary(companyId);
         return ResponseEntity.ok(CompanyResponse.Summary.from(model));
+    }
+
+    @PostMapping("/image")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<ImageResponse.PresignedUrl> createCompanyPresignedUrl(
+            @CurrentId Long userId,
+            @RequestBody @Valid ImageRequest.ContentType request
+    ) {
+        ImageModel.PutPresignedUrl model = imageService.updateImage(userId, ImagePath.company, ImageContentType.from(request.contentType()));
+        return ResponseEntity.ok(ImageResponse.PresignedUrl.from(model));
+    }
+
+    @PostMapping("/image/confirm")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<Void> confirmCompanyImageUpload(
+            @CurrentId Long companyId,
+            @RequestBody @Valid ImageRequest.Confirm request
+    ) {
+        companyService.updateCompanyImage(companyId, request.objectKey());
+        return ResponseEntity.ok().build();
     }
 }

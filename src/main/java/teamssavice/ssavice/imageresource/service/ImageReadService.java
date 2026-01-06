@@ -1,0 +1,33 @@
+package teamssavice.ssavice.imageresource.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
+import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResourceRepository;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ImageReadService {
+    private final ImageResourceRepository imageResourceRepository;
+
+    @Transactional(readOnly = true)
+    public ImageResource findByObjectKey(String objectKey) {
+        return imageResourceRepository.findByObjectKey(objectKey)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageResource> findAllByObjectKeyIn(List<String> objectKeys) {
+        return imageResourceRepository.findAllByObjectKeyIn(objectKeys);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImageResource> findAllById(List<Long> ids) {
+        return imageResourceRepository.findAllById(ids);
+    }
+}

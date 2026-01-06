@@ -2,6 +2,7 @@ package teamssavice.ssavice.company.controller.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
+import teamssavice.ssavice.review.controller.dto.ReviewResponse;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 
 import java.math.BigDecimal;
@@ -77,10 +78,11 @@ public class CompanyResponse {
             String description,
             String detail,
             List<ServiceItemResponse.Summary> service,
-            List<String> review
+            List<ReviewResponse.Item> review
     ) {
         public static CompanyResponse.Info from(CompanyModel.Info model) {
             List<ServiceItemResponse.Summary> services = model.myCompany().service().stream().map(ServiceItemResponse.Summary::from).toList();
+            List<ReviewResponse.Item> reviews = model.review().stream().map(ReviewResponse.Item::from).toList();
             return Info.builder()
                     .companyId(model.myCompany().companyId())
                     .companyName(model.myCompany().companyName())
@@ -95,7 +97,7 @@ public class CompanyResponse {
                     .description(model.myCompany().description())
                     .detail(model.myCompany().detail())
                     .service(services)
-                    .review(model.review())
+                    .review(reviews)
                     .build();
         }
     }
@@ -110,9 +112,10 @@ public class CompanyResponse {
             String companyImageUrl,
             Float companyRate,
             Long rateCount,
-            List<String> review
+            List<ReviewResponse.Item> review
     ) {
         public static CompanyResponse.Summary from(CompanyModel.Summary model) {
+            List<ReviewResponse.Item> reviews = model.review().stream().map(ReviewResponse.Item::from).toList();
             return Summary.builder()
                     .companyId(model.companyId())
                     .companyName(model.companyName())
@@ -122,7 +125,7 @@ public class CompanyResponse {
                     .companyImageUrl(model.companyImageUrl())
                     .companyRate(model.companyRate())
                     .rateCount(model.rateCount())
-                    .review(model.review())
+                    .review(reviews)
                     .build();
         }
     }

@@ -27,6 +27,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/user/login",
             "/api/company/login",
             "/api/auth/token/refresh",
+            "/api/auth/logout",
             "/api/health"
     );
     private final TokenProvider tokenProvider;
@@ -66,7 +67,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
         }
 
-        return authHeader.substring(7);
+        return authHeader.substring(TOKEN_PREFIX.length());
     }
 
     private void writeErrorResponse(

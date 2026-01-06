@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import teamssavice.ssavice.global.interceptor.RequireRoleInterceptor;
 import teamssavice.ssavice.global.resolver.CurrentIdArgumentResolver;
+import teamssavice.ssavice.global.resolver.RefreshTokenArgumentResolver;
 
 import java.util.List;
 
@@ -23,6 +24,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         return new CurrentIdArgumentResolver();
     }
 
+    @Bean
+    public RefreshTokenArgumentResolver refreshTokenArgumentResolver() {
+        return new RefreshTokenArgumentResolver();
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(requireRoleInterceptor())
@@ -32,5 +38,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(currentIdArgumentResolver());
+        resolvers.add(refreshTokenArgumentResolver());
     }
 }
