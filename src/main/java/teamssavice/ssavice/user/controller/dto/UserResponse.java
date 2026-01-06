@@ -58,7 +58,7 @@ public class UserResponse {
         String detailAddress
     ) {
 
-        public static Summary from(UserModel.Modify model) {
+        public static Summary from(UserModel.Info model) {
             return Summary.builder()
                 .name(model.name())
                 .email(model.email())
