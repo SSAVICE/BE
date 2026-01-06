@@ -29,25 +29,11 @@ public class BookController {
 
     private final BookService bookService;
 
-//    @GetMapping("/book")
-//    public ResponseEntity<PageResponse<BookResponse.Info>> getMyBook(
-//        @CurrentId Long userId,
-//        @PageableDefault(size = 10) Pageable pageable
-//    ) {
-//
-//        BookCommand.Retrieve command = BookCommand.Retrieve.of(userId, pageable);
-//
-//        Page<BookModel.Info> models = bookService.getMyBooks(command);
-//        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
-//
-//        return ResponseEntity.ok(PageResponse.from(reponsePage));
-//    }
-
     @GetMapping("/book")
     public ResponseEntity<PageResponse<BookResponse.Info>> getMyBooksByStatus(
         @CurrentId Long userId,
         @PageableDefault(size = 10) Pageable pageable,
-        @RequestParam(required = true) BookStatus status
+        @RequestParam(required = false) BookStatus status
     ) {
 
         BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable,

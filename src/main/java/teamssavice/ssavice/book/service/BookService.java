@@ -15,13 +15,6 @@ public class BookService {
 
     private final BookReadService bookReadService;
 
-
-    public Page<BookModel.Info> getMyBooks(BookCommand.Retrieve command) {
-        Page<Book> books = bookReadService.findAllByUserId(command.userId(), command.pageable());
-
-        return books.map(BookModel.Info::from);
-    }
-
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyBooksByStatue(BookCommand.RetrieveByStatus command) {
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(
