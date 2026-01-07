@@ -1,6 +1,7 @@
 package teamssavice.ssavice.company.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
@@ -16,6 +17,7 @@ import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.review.entity.Review;
 import teamssavice.ssavice.review.service.ReviewReadService;
 import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.user.entity.Users;
@@ -28,6 +30,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final TokenService tokenService;
     private final UserReadService userReadService;
     private final UserWriteService userWriteService;
@@ -110,13 +113,14 @@ public class CompanyService {
         return CompanyModel.Summary.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY, companyRate, rateCount, reviews);
     }
 
+    @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
         ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
         if (company.hasImageResource()) {
-            s3Service.updateIsActiveTag(company.getImageResource().getObjectKey(), false);
+            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(company.getImageResource().getObjectKey(), false));
         }
-        companyWriteService.updateCompanyImage(company, imageResource);
-        s3Service.updateIsActiveTag(objectKey, true);
+        company.updateImage(imageResource);
+        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
     }
 }

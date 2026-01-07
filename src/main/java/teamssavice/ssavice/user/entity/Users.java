@@ -15,6 +15,7 @@ import teamssavice.ssavice.user.constants.UserRole;
 @Getter
 @AllArgsConstructor
 public class Users extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -59,5 +60,11 @@ public class Users extends BaseEntity {
 
     public boolean hasImageResource() {
         return this.getImageResource() != null;
+    }
+
+    public void modify(String name, String email, String phoneNumber) {
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 }

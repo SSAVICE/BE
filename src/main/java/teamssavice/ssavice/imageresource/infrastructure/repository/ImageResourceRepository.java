@@ -1,11 +1,17 @@
 package teamssavice.ssavice.imageresource.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ImageResourceRepository extends JpaRepository<ImageResource, Long> {
 
-    public Optional<ImageResource> findByObjectKey(String objectKey);
+    Optional<ImageResource> findByObjectKey(String objectKey);
+
+    @Query("SELECT i FROM ImageResource i WHERE i.objectKey IN :objectKeys")
+    List<ImageResource> findAllByObjectKeyIn(@Param("objectKeys") List<String> objectKeys);
 }

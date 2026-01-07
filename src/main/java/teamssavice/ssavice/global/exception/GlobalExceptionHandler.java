@@ -1,6 +1,8 @@
 package teamssavice.ssavice.global.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -12,9 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -22,13 +22,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ProblemDetail> methodArgumentNotValidException(
-            MethodArgumentNotValidException e
+        MethodArgumentNotValidException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         Map<String, Object> errors = new HashMap<>();
         e.getAllErrors()
-                .forEach(
-                        field -> errors.put(((FieldError) field).getField(), field.getDefaultMessage()));
+            .forEach(
+                field -> errors.put(((FieldError) field).getField(), field.getDefaultMessage()));
 
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperties(errors);
@@ -38,14 +38,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ProblemDetail> constraintViolationException(
-            ConstraintViolationException e
+        ConstraintViolationException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         Map<String, Object> errors = new HashMap<>();
         e.getConstraintViolations()
-                .forEach(
-                        violation -> errors.put(violation.getPropertyPath().toString(),
-                                violation.getMessage()));
+            .forEach(
+                violation -> errors.put(violation.getPropertyPath().toString(),
+                    violation.getMessage()));
 
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperties(errors);
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> httpMessageNotReadableException(
-            HttpMessageNotReadableException e
+        HttpMessageNotReadableException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Invalid Request Body");
@@ -122,4 +122,27 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("error_code", e.getErrorCode().getCode());
         return problemDetail;
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> methodArgumentTypeMismatchException(
+        MethodArgumentTypeMismatchException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Invalid Request Parameter");
+
+        // 어떤 파라미터가 문제인지
+        String paramName = e.getName();
+        problemDetail.setDetail(paramName + " 파라미터 값이 올바르지 않습니다.");
+
+        // status 같은 enum이면 허용 값도 함께 내려주기
+        e.getRequiredType();
+        if (e.getRequiredType().isEnum()) {
+            Object[] enumConstants = e.getRequiredType().getEnumConstants();
+            problemDetail.setProperty("allowed_values", enumConstants);
+        }
+
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+
 }
