@@ -9,6 +9,8 @@ import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -87,4 +89,21 @@ public class ServiceItem extends BaseEntity {
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
+
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(
+            name = "service_item_image",
+            joinColumns = @JoinColumn(name = "service_item_id")
+    )
+    @Column(name = "image_id")
+    private List<Long> imageIds = new ArrayList<>();
+
+    public void addImageId(Long id) {
+        imageIds.add(id);
+    }
+
+    public boolean hasImage() {
+        return imageIds.isEmpty();
+    }
 }
