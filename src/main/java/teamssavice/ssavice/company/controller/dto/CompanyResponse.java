@@ -129,4 +129,17 @@ public class CompanyResponse {
                     .build();
         }
     }
+
+    @Builder
+    public record validate(
+            boolean isValid,
+            String statusMessage
+    ) {
+        public static CompanyResponse.validate from(CompanyModel.Validate model) {
+            return validate.builder()
+                    .isValid(model.isValid())
+                    .statusMessage(model.statusMessage())
+                    .build();
+        }
+    }
 }

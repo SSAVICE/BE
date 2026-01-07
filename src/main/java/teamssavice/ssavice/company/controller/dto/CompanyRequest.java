@@ -61,4 +61,12 @@ public class CompanyRequest {
             BigDecimal latitude
     ) {
     }
+
+    @Builder
+    public record Verify(
+            String name,
+            String startDate,
+            String businessNumber
+    ) {
+    }
 }

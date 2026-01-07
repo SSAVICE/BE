@@ -108,4 +108,11 @@ public class CompanyModel {
                     .build();
         }
     }
+
+    @Builder
+    public record Validate(
+            boolean isValid,
+            String statusMessage
+    ) {
+    }
 }

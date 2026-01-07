@@ -102,16 +102,15 @@ public class CompanyController {
         return ResponseEntity.ok().build();
     }
 
+
+    @PostMapping("/validate")
     @RequireRole(Role.USER)
-    @PostMapping
-    public ResponseEntity<CompanyResponse.Verify> verifyBusiness(
+    public ResponseEntity<CompanyResponse.validate> validateBusiness(
             @RequestBody @Valid CompanyRequest.Verify request
     ){
 
-        CompanyCommand.Verify command = CompanyCommand.Verify.from(request);
-
-        CompanyModel.Verify model = companyService.verifyBusinessNumber(command);
-        return ResponseEntity.ok(CompanyResponse.Verify.from(model));
+        CompanyModel.Validate model = companyService.validateBusinessNumber(request);
+        return ResponseEntity.ok(CompanyResponse.validate.from(model));
     }
 
 
