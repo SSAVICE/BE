@@ -128,10 +128,9 @@ public class CompanyService {
         applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
     }
 
-    public CompanyModel.Validate validateBusinessNumber(CompanyRequest.Verify request) {
+    public CompanyModel.Validate validateBusinessNumber(CompanyCommand.Validate command) {
 
-        // command 패턴으로 리팩토링
-         CompanyModel.Validate model = businessVerificationClient.validate(request.businessNumber(), request.startDate(), request.name());
+         CompanyModel.Validate model = businessVerificationClient.validate(command);
 
          return model;
     }

@@ -8,6 +8,7 @@ import teamssavice.ssavice.company.infrastructure.nts.client.NtsApiClient;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
 import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
+import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ExternalApiException;
@@ -23,9 +24,9 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
     private String serviceKey;
 
     @Override
-    public CompanyModel.Validate validate(String businessNumber, String startDate, String ownerName) {
+    public CompanyModel.Validate validate(CompanyCommand.Validate command) {
 
-        NtsValidationRequest request = NtsValidationRequest.of(businessNumber, startDate, ownerName);
+        NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(), command.startDate(), command.name());
 
         try {
             NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);

@@ -63,7 +63,7 @@ public class CompanyRequest {
     }
 
     @Builder
-    public record Verify(
+    public record Validate(
             String name,
             String startDate,
             String businessNumber
