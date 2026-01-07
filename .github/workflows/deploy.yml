@@ -51,8 +51,6 @@ jobs:
           echo "DEV_DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> .env
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
-
-        # 생성확인 (값은 마스킹 돼서 찍힘)
           cat .env
 
       # 핵심: 로컬의 docker-compose.yml 과 env 를 EC2로 복사
