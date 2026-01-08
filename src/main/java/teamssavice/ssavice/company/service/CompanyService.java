@@ -1,5 +1,6 @@
 package teamssavice.ssavice.company.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -7,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
+import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 
@@ -40,6 +43,7 @@ public class CompanyService {
     private final ReviewReadService reviewReadService;
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
+    private final BusinessVerificationClient businessVerificationClient;
 
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
@@ -122,5 +126,12 @@ public class CompanyService {
         }
         company.updateImage(imageResource);
         applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
+    }
+
+    public CompanyModel.Validate validateBusinessNumber(CompanyCommand.Validate command) {
+
+         CompanyModel.Validate model = businessVerificationClient.validate(command);
+
+         return model;
     }
 }

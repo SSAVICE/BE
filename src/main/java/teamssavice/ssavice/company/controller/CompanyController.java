@@ -101,4 +101,17 @@ public class CompanyController {
         companyService.updateCompanyImage(companyId, request.objectKey());
         return ResponseEntity.ok().build();
     }
+
+
+    @PostMapping("/validate")
+    @RequireRole(Role.USER)
+    public ResponseEntity<CompanyResponse.Validate> validateBusiness(
+            @RequestBody @Valid CompanyRequest.Validate request
+    ){
+
+        CompanyModel.Validate model = companyService.validateBusinessNumber(CompanyCommand.Validate.from(request));
+        return ResponseEntity.ok(CompanyResponse.Validate.from(model));
+    }
+
+
 }
