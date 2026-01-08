@@ -35,7 +35,6 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
 
             return CompanyModel.Validate.builder()
                     .isValid("01".equals(data.getValid()))
-                    .statusMessage(data.getValidMessage()) // 실패 케이스에는 확인할 수 없습니다 가 잡힘
                     .build();
 
         } catch (feign.RetryableException e) {

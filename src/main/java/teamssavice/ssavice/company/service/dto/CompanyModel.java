@@ -111,8 +111,7 @@ public class CompanyModel {
 
     @Builder
     public record Validate(
-            boolean isValid,
-            String statusMessage
+            boolean isValid
     ) {
     }
 }

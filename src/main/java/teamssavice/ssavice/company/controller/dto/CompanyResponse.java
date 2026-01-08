@@ -132,13 +132,11 @@ public class CompanyResponse {
 
     @Builder
     public record Validate(
-            boolean isValid,
-            String statusMessage
+            boolean isValid
     ) {
         public static CompanyResponse.Validate from(CompanyModel.Validate model) {
             return Validate.builder()
                     .isValid(model.isValid())
-                    .statusMessage(model.statusMessage())
                     .build();
         }
     }
