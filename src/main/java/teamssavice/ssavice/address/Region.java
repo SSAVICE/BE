@@ -1,4 +1,4 @@
-package teamssavice.ssavice.global.entity;
+package teamssavice.ssavice.address;
 
 
 import jakarta.persistence.*;
@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(indexes = {
-        @Index(name = "idx_region_filter", columnList = "gugun_code, depth")
-})
 @Getter
 @Builder
 @AllArgsConstructor
@@ -19,9 +16,14 @@ public class Region {
     @Column(length = 10, columnDefinition = "CHAR(10)")
     private String regionCode;
 
+    // gugunCode에 매핑되는 문자열
     @NotNull
     @Column(nullable = false)
-    private String fullAddress;
+    private String gugun;
+
+    // regionCode 에 매핑되는 문자열
+    @Column(nullable = false)
+    private String region;
 
 
 }
