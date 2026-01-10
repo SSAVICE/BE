@@ -2,8 +2,7 @@ package teamssavice.ssavice.company.controller.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-
-import java.math.BigDecimal;
+import teamssavice.ssavice.address.AddressRequest;
 
 public class CompanyRequest {
 
@@ -33,15 +32,7 @@ public class CompanyRequest {
 
             String detail,
             @NotNull
-            String postCode,
-            @NotNull
-            String address,
-            @NotNull
-            String detailAddress,
-            @NotNull
-            BigDecimal longitude,
-            @NotNull
-            BigDecimal latitude
+            AddressRequest.Region region
     ) {
     }
 
@@ -54,11 +45,15 @@ public class CompanyRequest {
             String depositor,
             String accountNumber,
             String detail,
-            String postCode,
-            String address,
-            String detailAddress,
-            BigDecimal longitude,
-            BigDecimal latitude
+            AddressRequest.Region region
+    ) {
+    }
+
+    @Builder
+    public record Validate(
+            String name,
+            String startDate,
+            String businessNumber
     ) {
     }
 }

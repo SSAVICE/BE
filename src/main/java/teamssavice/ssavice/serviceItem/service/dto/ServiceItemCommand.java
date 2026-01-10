@@ -24,6 +24,7 @@ public class ServiceItemCommand {
             LocalDateTime deadline,
             String category,
             String tag,
+            String regionCode,
             BigDecimal longitude,
             BigDecimal latitude,
             String postCode,
@@ -47,11 +48,12 @@ public class ServiceItemCommand {
                     request.deadline(),
                     request.category(),
                     request.tag(),
-                    request.longitude(),
-                    request.latitude(),
-                    request.postCode(),
-                    request.address(),
-                    request.detailAddress(),
+                    request.region().regionCode(),
+                    request.region().longitude(),
+                    request.region().latitude(),
+                    request.region().postCode(),
+                    request.region().address(),
+                    request.region().detailAddress(),
                     objectKeys
             );
         }
@@ -61,8 +63,8 @@ public class ServiceItemCommand {
     public record Search (
         String category,
         String query,
-        String region1,
-        String region2,
+        String gugun,
+        String region,
         Integer range,
         Long minPrice,
         Long maxPrice,
@@ -74,8 +76,8 @@ public class ServiceItemCommand {
             return new Search(
                     request.getCategory(),
                     request.getQuery(),
-                    request.getRegion1(),
-                    request.getRegion2(),
+                    request.getGugun(),
+                    request.getRegion(),
                     request.getRange(),
                     request.getMinPrice(),
                     request.getMaxPrice(),

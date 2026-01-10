@@ -26,7 +26,14 @@ public enum ErrorCode {
 
     // imageResource
     UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),
-    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다.");
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다."),
+
+    // Region
+    REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_NOT_FOUND", "Region을 찾을 수 없습니다."),
+
+    // External
+    EXTERNAL_API_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_TIMEOUT", "외부 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."),
+    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "EXTERNAL_API_ERROR", "외부 서비스 호출 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;

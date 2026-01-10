@@ -102,8 +102,4 @@ public class ServiceItem extends BaseEntity {
     public void addImageId(Long id) {
         imageIds.add(id);
     }
-
-    public boolean hasImage() {
-        return imageIds.isEmpty();
-    }
 }
