@@ -1,11 +1,10 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
-import teamssavice.ssavice.address.Address;
+import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -64,10 +63,7 @@ public class ServiceItemModel {
             Long companyId,
             String companyName,
 
-            BigDecimal latitude,
-            BigDecimal longitude,
-            String gugun,
-            String region,
+            AddressModel.RegionSummary region,
 
             Long currentMember,
             Long minimumMember,
@@ -80,8 +76,6 @@ public class ServiceItemModel {
             LocalDateTime deadline
     ) {
         public static Search from (ServiceItem entity) {
-            Address addr = entity.getAddress();
-
             return Search.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -98,10 +92,12 @@ public class ServiceItemModel {
                     .currentMember(entity.getCurrentMember())
                     .minimumMember(entity.getMinimumMember())
                     .maximumMember(entity.getMaximumMember())
-                    .latitude(addr.getLatitude())
-                    .longitude(addr.getLongitude())
-                    .gugun(addr.getGugun())
-                    .region(addr.getRegion())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(entity.getAddress().getGugun())
+                            .region(entity.getAddress().getRegion())
+                            .latitude(entity.getAddress().getLatitude())
+                            .longitude(entity.getAddress().getLongitude())
+                            .build())
                     .build();
         }
     }
@@ -110,7 +106,6 @@ public class ServiceItemModel {
     public record Detail(
             Long serviceId,
             Long companyId,
-            Long addressId,
             String companyName,
             String title,
             String description,
@@ -129,25 +124,15 @@ public class ServiceItemModel {
             Long minimumMember,
             Long maximumMember,
 
-            String address,
-            String detailAddress,
-            BigDecimal latitude,
-            BigDecimal longitude,
-            String gugun,
-            String region,
-            String gugunCode,
-            String regionCode,
+            AddressModel.RegionSummary region,
 
             List<String> imageUrl,
             Boolean liked
     ) {
         public static Detail from (ServiceItem entity, List<String> imageUrl) {
-            Address addr = entity.getAddress();
-
             return Detail.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
-                    .addressId(addr.getId())
                     .companyName(entity.getCompany().getCompanyName())
                     .imageUrl(imageUrl)
                     .title(entity.getTitle())
@@ -166,14 +151,12 @@ public class ServiceItemModel {
                     .minimumMember(entity.getMinimumMember())
                     .maximumMember(entity.getMaximumMember())
                     // Address 관련
-                    .address(addr.getAddress())
-                    .detailAddress(addr.getDetailAddress())
-                    .latitude(addr.getLatitude())
-                    .longitude(addr.getLongitude())
-                    .gugun(addr.getGugun())
-                    .region(addr.getRegion())
-                    .gugunCode(addr.getGugunCode())
-                    .regionCode(addr.getRegionCode())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(entity.getAddress().getGugun())
+                            .region(entity.getAddress().getRegion())
+                            .latitude(entity.getAddress().getLatitude())
+                            .longitude(entity.getAddress().getLongitude())
+                            .build())
                     .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
                     .build();
         }

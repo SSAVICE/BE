@@ -18,6 +18,7 @@ public class CompanyCommand {
             String depositor,
             String accountNumber,
             String detail,
+            String regionCode,
             String postCode,
             String address,
             String detailAddress,
@@ -35,11 +36,12 @@ public class CompanyCommand {
                     .depositor(request.depositor())
                     .description(request.description())
                     .detail(request.detail())
-                    .postCode(request.postCode())
-                    .address(request.address())
-                    .detailAddress(request.detailAddress())
-                    .longitude(request.longitude())
-                    .latitude(request.latitude())
+                    .regionCode(request.region().regionCode())
+                    .postCode(request.region().postCode())
+                    .address(request.region().address())
+                    .detailAddress(request.region().detailAddress())
+                    .longitude(request.region().longitude())
+                    .latitude(request.region().latitude())
                     .build();
         }
     }
@@ -54,6 +56,7 @@ public class CompanyCommand {
             String depositor,
             String accountNumber,
             String detail,
+            String regionCode,
             String postCode,
             String address,
             String detailAddress,
@@ -70,11 +73,12 @@ public class CompanyCommand {
                     .depositor(request.depositor())
                     .description(request.description())
                     .detail(request.detail())
-                    .postCode(request.postCode())
-                    .address(request.address())
-                    .detailAddress(request.detailAddress())
-                    .longitude(request.longitude())
-                    .latitude(request.latitude())
+                    .regionCode(request.region().regionCode())
+                    .postCode(request.region().postCode())
+                    .address(request.region().address())
+                    .detailAddress(request.region().detailAddress())
+                    .longitude(request.region().longitude())
+                    .latitude(request.region().latitude())
                     .build();
         }
     }

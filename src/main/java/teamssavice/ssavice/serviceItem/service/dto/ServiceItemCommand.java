@@ -24,6 +24,7 @@ public class ServiceItemCommand {
             LocalDateTime deadline,
             String category,
             String tag,
+            String regionCode,
             BigDecimal longitude,
             BigDecimal latitude,
             String postCode,
@@ -47,11 +48,12 @@ public class ServiceItemCommand {
                     request.deadline(),
                     request.category(),
                     request.tag(),
-                    request.longitude(),
-                    request.latitude(),
-                    request.postCode(),
-                    request.address(),
-                    request.detailAddress(),
+                    request.region().regionCode(),
+                    request.region().longitude(),
+                    request.region().latitude(),
+                    request.region().postCode(),
+                    request.region().address(),
+                    request.region().detailAddress(),
                     objectKeys
             );
         }

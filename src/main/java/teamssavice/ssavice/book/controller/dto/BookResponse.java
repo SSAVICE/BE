@@ -1,9 +1,10 @@
 package teamssavice.ssavice.book.controller.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.Builder;
+import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.book.service.dto.BookModel;
+
+import java.time.LocalDateTime;
 
 public class BookResponse {
 
@@ -30,10 +31,7 @@ public class BookResponse {
         Long companyId,
         String title,
         // 위치 정보
-        BigDecimal latitude,
-        BigDecimal longitude,
-        String gugun,
-        String region,
+        AddressResponse.RegionSummary region,
         // 인원
         Long currentMember,
         Long minimumMember,
@@ -57,10 +55,7 @@ public class BookResponse {
                 model.companyId(),
                 model.title(),
 
-                model.latitude(),
-                model.longitude(),
-                model.gugun(),
-                model.region(),
+                AddressResponse.RegionSummary.from(model.region()),
 
                 model.currentMember(),
                 model.minMember(),

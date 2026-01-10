@@ -36,6 +36,9 @@ public class Address extends BaseEntity {
     private String detailAddress;
 
     public void update(AddressCommand.Update command) {
+        if (command.regionCode() != null) {
+            this.regionCode = command.regionCode();
+        }
         if (command.latitude() != null) {
             this.latitude = command.latitude();
         }

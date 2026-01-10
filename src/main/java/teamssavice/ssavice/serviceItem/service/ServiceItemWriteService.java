@@ -19,6 +19,7 @@ public class ServiceItemWriteService {
     @Transactional
     public ServiceItem save(ServiceItemCommand.Create command, Company company) {
         Address address = Address.builder()
+                .regionCode(command.regionCode())
                 .latitude(command.latitude())
                 .longitude(command.longitude())
                 .postCode(command.postCode())

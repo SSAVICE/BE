@@ -15,6 +15,7 @@ public class CompanyWriteService {
 
     public Company save(CompanyCommand.Create command, Users user) {
         Address address = Address.builder()
+                .regionCode(command.regionCode())
                 .latitude(command.latitude())
                 .longitude(command.longitude())
                 .postCode(command.postCode())

@@ -1,11 +1,12 @@
 package teamssavice.ssavice.book.service.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.Builder;
+import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+
+import java.time.LocalDateTime;
 
 public class BookModel {
 
@@ -34,10 +35,7 @@ public class BookModel {
         String companyName,
         Long companyId,
 
-        String gugun,
-        String region,
-        BigDecimal latitude,
-        BigDecimal longitude,
+        AddressModel.RegionSummary region,
 
         Long currentMember,
         Long minMember,
@@ -61,10 +59,12 @@ public class BookModel {
 
                 item.getCompany().getCompanyName(),
                 item.getCompany().getId(),
-                item.getAddress().getGugun(),
-                item.getAddress().getRegion(),
-                item.getAddress().getLatitude(),
-                item.getAddress().getLongitude(),
+                AddressModel.RegionSummary.builder()
+                        .latitude(item.getAddress().getLatitude())
+                        .longitude(item.getAddress().getLongitude())
+                        .gugun(item.getAddress().getGugun())
+                        .region(item.getAddress().getRegion())
+                        .build(),
 
                 item.getCurrentMember(),
                 item.getMinimumMember(),

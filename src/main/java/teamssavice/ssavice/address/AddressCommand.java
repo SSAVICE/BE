@@ -9,6 +9,7 @@ public class AddressCommand {
 
     @Builder
     public record Update(
+            String regionCode,
             BigDecimal latitude,
             BigDecimal longitude,
             String postCode,
@@ -17,6 +18,7 @@ public class AddressCommand {
     ) {
         public static AddressCommand.Update from(CompanyCommand.Update command) {
             return AddressCommand.Update.builder()
+                    .regionCode(command.regionCode())
                     .latitude(command.latitude())
                     .longitude(command.longitude())
                     .postCode(command.postCode())
