@@ -10,7 +10,6 @@ import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
-
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
@@ -116,11 +115,11 @@ public class CompanyService {
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
-        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
         if (company.hasImageResource()) {
-            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(company.getImageResource().getObjectKey(), false));
+            applicationEventPublisher.publishEvent(S3EventDto.Delete.from(company.getImageResource()));
         }
         company.updateImage(imageResource);
-        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
+        applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 }

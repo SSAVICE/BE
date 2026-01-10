@@ -12,7 +12,12 @@ public class S3EventHandler {
     private final S3Service s3Service;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void updateImageTagEventListener(S3EventDto.UpdateTag event) {
-        s3Service.updateIsActiveTag(event.objectKey(), event.isActive());
+    public void moveImageEventListener(S3EventDto.Move event) {
+        s3Service.moveObject(event.sourceKey(), event.targetKey(), event.contentType());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void deleteImageEventListener(S3EventDto.Delete event) {
+        s3Service.deleteObject(event.objectKey());
     }
 }

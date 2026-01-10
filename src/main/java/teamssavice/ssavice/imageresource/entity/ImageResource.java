@@ -20,6 +20,10 @@ public class ImageResource extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String objectKey;
 
+    @NotNull
+    @Column(nullable = false, unique = true)
+    private String tempKey;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false)

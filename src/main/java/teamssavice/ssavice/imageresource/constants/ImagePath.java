@@ -1,5 +1,5 @@
 package teamssavice.ssavice.imageresource.constants;
 
 public enum ImagePath {
-    profile, company, serviceItem
+    profile, company, serviceItem, temp
 }
