@@ -73,12 +73,11 @@ public class UserService {
     @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
-        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
         if (user.hasImageResource()) {
-            applicationEventPublisher.publishEvent(
-                S3EventDto.UpdateTag.from(user.getImageResource().getObjectKey(), false));
+            applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }
         user.updateImage(imageResource);
-        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
+        applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 }
