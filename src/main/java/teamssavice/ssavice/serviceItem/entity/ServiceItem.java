@@ -63,7 +63,7 @@ public class ServiceItem extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private ServiceStatus status = ServiceStatus.BEFORE_RECRUITING;
+    private ServiceStatus status = ServiceStatus.RECRUITING;
 
     private String category;
 
@@ -106,4 +106,15 @@ public class ServiceItem extends BaseEntity {
     public boolean hasImage() {
         return imageIds.isEmpty();
     }
+
+    public void increaseCurrentMember() {
+        if (this.currentMember >= this.maximumMember) {
+
+        }
+
+        this.currentMember++;
+
+
+    }
+
 }
