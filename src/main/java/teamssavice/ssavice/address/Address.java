@@ -35,24 +35,15 @@ public class Address extends BaseEntity {
     @Column
     private String detailAddress;
 
-    public void update(AddressCommand.Update command) {
-        if (command.regionCode() != null) {
-            this.regionCode = command.regionCode();
-        }
-        if (command.latitude() != null) {
-            this.latitude = command.latitude();
-        }
-        if (command.longitude() != null) {
-            this.longitude = command.longitude();
-        }
-        if (command.postCode() != null) {
-            this.postCode = command.postCode();
-        }
-        if (command.address() != null) {
-            this.address = command.address();
-        }
-        if (command.detailAddress() != null) {
-            this.detailAddress = command.detailAddress();
-        }
+    public void update(AddressCommand.RegionInfo command) {
+        this.gugun = command.gugun();
+        this.gugunCode = command.gugunCode();
+        this.region = command.region();
+        this.regionCode = command.regionCode();
+        this.latitude = command.latitude();
+        this.longitude = command.longitude();
+        this.postCode = command.postCode();
+        this.address = command.address();
+        this.detailAddress = command.detailAddress();
     }
 }

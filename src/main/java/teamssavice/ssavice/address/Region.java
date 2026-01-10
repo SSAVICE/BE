@@ -25,5 +25,7 @@ public class Region {
     @Column(nullable = false)
     private String region;
 
-
+    public String getGugunCode() {
+        return regionCode.substring(4);
+    }
 }

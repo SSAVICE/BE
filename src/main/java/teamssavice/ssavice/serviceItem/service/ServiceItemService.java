@@ -5,6 +5,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.address.Region;
+import teamssavice.ssavice.address.RegionReadService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.dto.CursorResult;
@@ -28,12 +31,14 @@ public class ServiceItemService {
     private final ServiceItemReadService serviceItemReadService;
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
+    private final RegionReadService regionReadService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
         List<ImageResource> imageResourceList = imageReadService.findAllByObjectKeyIn(command.imageObjectKeys());
-        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company);
+        Region region = regionReadService.findByRegionCode(command.regionCode());
+        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company, AddressCommand.RegionInfo.from(command, region));
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();

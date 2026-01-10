@@ -3,6 +3,7 @@ package teamssavice.ssavice.company.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import teamssavice.ssavice.address.Address;
+import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
@@ -13,9 +14,12 @@ import teamssavice.ssavice.user.entity.Users;
 public class CompanyWriteService {
     private final CompanyRepository companyRepository;
 
-    public Company save(CompanyCommand.Create command, Users user) {
+    public Company save(CompanyCommand.Create command, Users user, AddressCommand.RegionInfo addressCommand) {
         Address address = Address.builder()
-                .regionCode(command.regionCode())
+                .gugun(addressCommand.gugun())
+                .gugunCode(addressCommand.gugunCode())
+                .region(addressCommand.region())
+                .regionCode(addressCommand.regionCode())
                 .latitude(command.latitude())
                 .longitude(command.longitude())
                 .postCode(command.postCode())
