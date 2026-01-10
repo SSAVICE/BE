@@ -43,8 +43,8 @@ public class ServiceItemRequest {
         private String category;
         private String query;
 
-        private String region1;
-        private String region2;
+        private String gugun;
+        private String region;
 
         private Integer range;
 

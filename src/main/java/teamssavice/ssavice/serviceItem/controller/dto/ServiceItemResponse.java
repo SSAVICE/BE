@@ -73,8 +73,8 @@ public class ServiceItemResponse {
 
             BigDecimal latitude,
             BigDecimal longitude,
-            String region1,
-            String region2,
+            String gugun,
+            String region,
 
             Long currentMember,
             Long minimumMember,
@@ -98,8 +98,8 @@ public class ServiceItemResponse {
                     .companyName(model.companyName())
                     .latitude(model.latitude())
                     .longitude(model.longitude())
-                    .region1(model.region1())
-                    .region2(model.region2())
+                    .gugun(model.gugun())
+                    .region(model.region())
                     .currentMember(model.currentMember())
                     .minimumMember(model.minimumMember())
                     .maximumMember(model.maximumMember())
@@ -121,8 +121,8 @@ public class ServiceItemResponse {
             String description,
             BigDecimal latitude,
             BigDecimal longitude,
-            String region1,
-            String region2,
+            String gugun,
+            String region,
             Long currentMember,
             Long minimumMember,
             Long maximumMember,
@@ -147,8 +147,8 @@ public class ServiceItemResponse {
                     .description(model.description())
                     .latitude(model.latitude())
                     .longitude(model.longitude())
-                    .region1(model.region1())
-                    .region2(model.region2())
+                    .gugun(model.gugun())
+                    .region(model.region())
                     .currentMember(model.currentMember())
                     .minimumMember(model.minimumMember())
                     .maximumMember(model.maximumMember())

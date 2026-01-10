@@ -34,8 +34,8 @@ public class BookModel {
         String companyName,
         Long companyId,
 
-        String region1,
-        String region2,
+        String gugun,
+        String region,
         BigDecimal latitude,
         BigDecimal longitude,
 
@@ -61,8 +61,8 @@ public class BookModel {
 
                 item.getCompany().getCompanyName(),
                 item.getCompany().getId(),
-                item.getAddress().getRegion1(),
-                item.getAddress().getRegion2(),
+                item.getAddress().getGugun(),
+                item.getAddress().getRegion(),
                 item.getAddress().getLatitude(),
                 item.getAddress().getLongitude(),
 

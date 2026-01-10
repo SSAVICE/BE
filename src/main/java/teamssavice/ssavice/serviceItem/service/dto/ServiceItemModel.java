@@ -66,8 +66,8 @@ public class ServiceItemModel {
 
             BigDecimal latitude,
             BigDecimal longitude,
-            String region1,
-            String region2,
+            String gugun,
+            String region,
 
             Long currentMember,
             Long minimumMember,
@@ -100,8 +100,8 @@ public class ServiceItemModel {
                     .maximumMember(entity.getMaximumMember())
                     .latitude(addr.getLatitude())
                     .longitude(addr.getLongitude())
-                    .region1(addr.getRegion1())
-                    .region2(addr.getRegion2())
+                    .gugun(addr.getGugun())
+                    .region(addr.getRegion())
                     .build();
         }
     }
@@ -133,10 +133,10 @@ public class ServiceItemModel {
             String detailAddress,
             BigDecimal latitude,
             BigDecimal longitude,
-            String region1,
-            String region2,
-            String region1Code,
-            String region2Code,
+            String gugun,
+            String region,
+            String gugunCode,
+            String regionCode,
 
             List<String> imageUrl,
             Boolean liked
@@ -170,10 +170,10 @@ public class ServiceItemModel {
                     .detailAddress(addr.getDetailAddress())
                     .latitude(addr.getLatitude())
                     .longitude(addr.getLongitude())
-                    .region1(addr.getRegion1())
-                    .region2(addr.getRegion2())
-                    .region1Code(addr.getRegion1Code())
-                    .region2Code(addr.getRegion2Code())
+                    .gugun(addr.getGugun())
+                    .region(addr.getRegion())
+                    .gugunCode(addr.getGugunCode())
+                    .regionCode(addr.getRegionCode())
                     .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
                     .build();
         }

@@ -32,8 +32,8 @@ public class BookResponse {
         // 위치 정보
         BigDecimal latitude,
         BigDecimal longitude,
-        String region1,
-        String region2,
+        String gugun,
+        String region,
         // 인원
         Long currentMember,
         Long minimumMember,
@@ -59,8 +59,8 @@ public class BookResponse {
 
                 model.latitude(),
                 model.longitude(),
-                model.region1(),
-                model.region2(),
+                model.gugun(),
+                model.region(),
 
                 model.currentMember(),
                 model.minMember(),

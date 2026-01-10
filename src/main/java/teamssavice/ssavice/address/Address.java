@@ -17,13 +17,13 @@ public class Address extends BaseEntity {
     private Long id;
 
     @Column
-    private String region1;
+    private String gugun;
     @Column
-    private String region1Code;
+    private String gugunCode;
     @Column
-    private String region2;
+    private String region;
     @Column
-    private String region2Code;
+    private String regionCode;
     @Column(precision = 10, scale = 7)
     private BigDecimal latitude;
     @Column(precision = 10, scale = 7)
