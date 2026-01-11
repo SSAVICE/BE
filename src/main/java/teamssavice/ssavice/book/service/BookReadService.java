@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.user.entity.Users;
 
 
 @Service
@@ -29,5 +31,10 @@ public class BookReadService {
 
     public Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable) {
         return bookRepository.findAllByUserIdAndStatus(userId, status, pageable);
+    }
+
+    // 취소한 사람은 다시 신청이 가능
+    public boolean existsByUserAndServiceItem(Users user, ServiceItem serviceItem) {
+        return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED);
     }
 }

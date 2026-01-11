@@ -82,4 +82,18 @@ public class ServiceItemController {
         List<ImageModel.PutPresignedUrl> models = imageService.updateImages(ImageCommand.PutPresignedUrls.from(companyId, ImagePath.serviceItem, request));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
     }
+
+    @PostMapping("/{serviceId}/apply")
+    @RequireRole(Role.USER)
+    public ResponseEntity<ServiceItemResponse.Apply> applyServiceItem(
+            @CurrentId Long userId,
+            @PathVariable Long serviceId
+    ) {
+
+        ServiceItemCommand.Apply command = ServiceItemCommand.Apply.of(userId, serviceId);
+
+        ServiceItemModel.Apply model = serviceItemService.apply(command);
+
+        return ResponseEntity.ok(ServiceItemResponse.Apply.from(model));
+    }
 }

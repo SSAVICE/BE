@@ -165,4 +165,15 @@ public class ServiceItemResponse {
                     .build();
         }
     }
+
+    @Builder
+    public record Apply(
+            Long bookId
+    ) {
+        public static Apply from(ServiceItemModel.Apply model) {
+            return Apply.builder()
+                    .bookId(model.bookId())
+                    .build();
+        }
+    }
 }

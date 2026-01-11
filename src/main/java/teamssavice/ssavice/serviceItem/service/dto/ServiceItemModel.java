@@ -2,6 +2,7 @@ package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.address.Address;
+import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
@@ -175,6 +176,21 @@ public class ServiceItemModel {
                     .region1Code(addr.getRegion1Code())
                     .region2Code(addr.getRegion2Code())
                     .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
+                    .build();
+        }
+    }
+
+    @Builder
+    public record Apply(
+            Long bookId,
+            Long serviceId,
+            Long userId
+    ) {
+        public static Apply from(Book entity) {
+            return Apply.builder()
+                    .bookId(entity.getId())
+                    .serviceId(entity.getServiceItem().getId())
+                    .userId(entity.getUser().getId())
                     .build();
         }
     }
