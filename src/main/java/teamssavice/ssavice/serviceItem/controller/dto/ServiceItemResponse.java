@@ -1,6 +1,8 @@
 package teamssavice.ssavice.serviceItem.controller.dto;
 
 import lombok.Builder;
+import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
@@ -166,14 +168,4 @@ public class ServiceItemResponse {
         }
     }
 
-    @Builder
-    public record Apply(
-            Long bookId
-    ) {
-        public static Apply from(ServiceItemModel.Apply model) {
-            return Apply.builder()
-                    .bookId(model.bookId())
-                    .build();
-        }
-    }
 }

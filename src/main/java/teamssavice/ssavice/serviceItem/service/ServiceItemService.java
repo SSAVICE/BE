@@ -9,6 +9,7 @@ import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.book.service.BookWriteService;
+import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -85,7 +86,7 @@ public class ServiceItemService {
     }
 
     @Transactional
-    public ServiceItemModel.Apply apply(ServiceItemCommand.Apply command) {
+    public BookModel.Apply apply(ServiceItemCommand.Apply command) {
 
         ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
         Users user = userReadService.findById(command.userId());
@@ -107,7 +108,7 @@ public class ServiceItemService {
 
         Book book = bookWriteService.save(user, serviceItem, initialStatus);
 
-        return ServiceItemModel.Apply.from(book);
+        return BookModel.Apply.from(book);
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
