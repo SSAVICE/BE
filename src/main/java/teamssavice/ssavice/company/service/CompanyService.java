@@ -128,10 +128,17 @@ public class CompanyService {
         applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
     }
 
-    public CompanyModel.Validate validateBusinessNumber(CompanyCommand.Validate command) {
+    public CompanyModel.Validate validateBusinessNumber(Long userId,
+        CompanyCommand.Validate command) {
 
-         CompanyModel.Validate model = businessVerificationClient.validate(command);
+        CompanyInfraCommand.Validate infraCommand = command.toInfraCommand();
+        CompanyInfraModel.Validate infraModel = businessVerificationClient.validate(infraCommand);
+        if (!infraModel.isValid()) {
+            throw new InvalidBusinessNumberException(ErrorCode.INVALID_BUSINESS_NUMBER);
+        }
+        CompanySignupVerifyToken verifyToken = companySignupVerifyTokenService.issueToken(
+            userId, command.businessNumber());
 
-         return model;
+        return CompanyModel.Validate.from(verifyToken);
     }
 }
