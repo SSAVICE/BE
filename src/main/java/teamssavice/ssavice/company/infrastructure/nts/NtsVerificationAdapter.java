@@ -4,12 +4,12 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
+import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraModel;
 import teamssavice.ssavice.company.infrastructure.nts.client.NtsApiClient;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
 import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
-import teamssavice.ssavice.company.service.dto.CompanyCommand;
-import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ExternalApiException;
 
@@ -24,24 +24,22 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
     private String serviceKey;
 
     @Override
-    public CompanyModel.Validate validate(CompanyCommand.Validate command) {
+    public CompanyInfraModel.Validate validate(CompanyInfraCommand.Validate command) {
 
-        NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(), command.startDate(), command.name());
+        NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(),
+            command.startDate(), command.name());
 
         try {
             NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);
-
             var data = response.getData().get(0);
 
-            return CompanyModel.Validate.builder()
-                    .isValid("01".equals(data.getValid()))
-                    .build();
-
+            return CompanyInfraModel.Validate.builder()
+                .isValid("01".equals(data.getValid()))
+                .build();
         } catch (feign.RetryableException e) {
             throw new ExternalApiException(ErrorCode.EXTERNAL_API_TIMEOUT);
         } catch (FeignException e) {
             throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
-
         }
     }
 }
