@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ProblemDetail> missingServletRequestParameterException(
-            MissingServletRequestParameterException e
+        MissingServletRequestParameterException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Missing Request Parameter");
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ProblemDetail> httpRequestMethodNotSupportedException(
-            HttpRequestMethodNotSupportedException e
+        HttpRequestMethodNotSupportedException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
         problemDetail.setTitle("Method Not Allowed");
@@ -111,6 +111,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ProblemDetail> conflictException(ConflictException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
+    @ExceptionHandler(InvalidBusinessNumberException.class)
+    public ResponseEntity<ProblemDetail> invalidBusinessNumberException(
+        InvalidBusinessNumberException e) {
         ProblemDetail problemDetail = setCustomProblemDetail(e);
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
@@ -152,8 +159,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
-
-
 
 
 }
