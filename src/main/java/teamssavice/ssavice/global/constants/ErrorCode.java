@@ -20,13 +20,22 @@ public enum ErrorCode {
     // Company
     COMPANY_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_ALREADY_EXISTS", "이미 업체가 등록되어 있습니다."),
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
+    INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "INVALID_BUSINESS_NUMBER",
+        "유효하지 않은 사업자 등록번호입니다."),
 
     // serviceItem
     SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
 
     // imageResource
-    UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),
-    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다.");
+    UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE",
+        "지원하지 않는 contentType입니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다."),
+
+    // External
+    EXTERNAL_API_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_TIMEOUT",
+        "외부 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."),
+    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "EXTERNAL_API_ERROR",
+        "외부 서비스 호출 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;
