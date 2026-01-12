@@ -22,7 +22,11 @@ public enum ErrorCode {
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
 
     // serviceItem
-    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
+    SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_ITEM_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
+    MEMBER_FULL(HttpStatus.CONFLICT, "MEMBER_FULL", "모집 정원이 모두 찼습니다."),
+    SERVICE_DELETED(HttpStatus.CONFLICT, "SERVICE_DELETED", "이미 삭제된 서비스입니다."),
+    SERVICE_NOT_RECRUITING(HttpStatus.CONFLICT, "SERVICE_NOT_RECRUITING", "현재 모집 중인 서비스가 아닙니다."),
+    SERVICE_DEADLINE_EXPIRED(HttpStatus.CONFLICT, "SERVICE_DEADLINE_EXPIRED", "신청 마감 기한이 지났습니다."),
 
     // imageResource
     UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),
@@ -33,7 +37,10 @@ public enum ErrorCode {
 
     // External
     EXTERNAL_API_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_TIMEOUT", "외부 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."),
-    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "EXTERNAL_API_ERROR", "외부 서비스 호출 중 오류가 발생했습니다.");
+    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "EXTERNAL_API_ERROR", "외부 서비스 호출 중 오류가 발생했습니다."),
+
+    // Book
+    ALREADY_APPLIED(HttpStatus.CONFLICT, "ALREADY_APPLIED", "이미 신청한 서비스입니다.");
 
     private final HttpStatus status;
     private final String code;

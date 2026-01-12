@@ -101,4 +101,21 @@ public class BookModel {
             return applying + completed;
         }
     }
+
+    @Builder
+    public record Apply(
+            Long bookId,
+            Long serviceId,
+            Long userId,
+            BookStatus bookStatus
+    ) {
+        public static Apply from(Book entity) {
+            return Apply.builder()
+                    .bookId(entity.getId())
+                    .serviceId(entity.getServiceItem().getId())
+                    .userId(entity.getUser().getId())
+                    .bookStatus(entity.getBookStatus())
+                    .build();
+        }
+    }
 }

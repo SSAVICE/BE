@@ -126,12 +126,12 @@ public class CompanyService {
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
-        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
         if (company.hasImageResource()) {
-            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(company.getImageResource().getObjectKey(), false));
+            applicationEventPublisher.publishEvent(S3EventDto.Delete.from(company.getImageResource()));
         }
         company.updateImage(imageResource);
-        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
+        applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
     public CompanyModel.Validate validateBusinessNumber(CompanyCommand.Validate command) {

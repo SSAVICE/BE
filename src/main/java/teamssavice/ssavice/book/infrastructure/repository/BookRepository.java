@@ -3,6 +3,7 @@ package teamssavice.ssavice.book.infrastructure.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,17 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable);
 
     Long countByUserIdAndBookStatus(Long userId, BookStatus bookStatus);
+
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Book b SET b.bookStatus = :targetStatus " +
+            "WHERE b.serviceItem.id = :serviceId " +
+            "AND b.bookStatus = :currentStatus")
+    int updateStatusByServiceId(
+            @Param("serviceId") Long serviceId,
+            @Param("currentStatus") BookStatus currentStatus,
+            @Param("targetStatus") BookStatus targetStatus
+    );
+
+    boolean existsByUserIdAndServiceItemIdAndBookStatusNot(Long userId, Long serviceItemId, BookStatus bookStatus);
 }

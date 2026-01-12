@@ -12,6 +12,8 @@ public interface ImageResourceRepository extends JpaRepository<ImageResource, Lo
 
     Optional<ImageResource> findByObjectKey(String objectKey);
 
-    @Query("SELECT i FROM ImageResource i WHERE i.objectKey IN :objectKeys")
-    List<ImageResource> findAllByObjectKeyIn(@Param("objectKeys") List<String> objectKeys);
+    @Query("SELECT i FROM ImageResource i WHERE i.tempKey IN :tempKeys")
+    List<ImageResource> findAllByTempKeyIn(@Param("tempKeys") List<String> tempKeys);
+
+    Optional<ImageResource> findByTempKey(String tempKey);
 }

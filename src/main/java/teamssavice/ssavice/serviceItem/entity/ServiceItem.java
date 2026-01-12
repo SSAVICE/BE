@@ -4,13 +4,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.address.Address;
+import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -63,7 +67,7 @@ public class ServiceItem extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private ServiceStatus status = ServiceStatus.BEFORE_RECRUITING;
+    private ServiceStatus status = ServiceStatus.RECRUITING;
 
     private String category;
 
@@ -101,5 +105,53 @@ public class ServiceItem extends BaseEntity {
 
     public void addImageId(Long id) {
         imageIds.add(id);
+    }
+
+    public boolean hasImage() {
+        return imageIds.isEmpty();
+    }
+
+
+    public void participate() {
+        if (this.isFull()) {
+            throw new ConflictException(ErrorCode.MEMBER_FULL);
+        }
+        this.currentMember++;
+
+        if (this.isFull()) {
+            this.finish();
+        }
+    }
+
+    public boolean isReachedMinimum() {
+        return this.currentMember >= this.minimumMember;
+    }
+
+    public boolean isFull() {
+        return this.currentMember >= this.maximumMember;
+    }
+
+    public void finish() {
+        this.status = ServiceStatus.FINISHED;
+    }
+
+    // 서비스아이템 등록을 위한 검증
+    public void validateAppliable(LocalDateTime now) {
+        // 삭제 여부
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_DELETED);
+        }
+        // 모집중 여부
+        if (this.status != ServiceStatus.RECRUITING) {
+            throw new ConflictException(ErrorCode.SERVICE_NOT_RECRUITING);
+        }
+        // 마감 기한 확인
+        if (now.isAfter(this.deadline)) {
+            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
+
+        if (this.currentMember >= this.maximumMember) {
+            throw new ConflictException(ErrorCode.MEMBER_FULL);
+        }
     }
 }
