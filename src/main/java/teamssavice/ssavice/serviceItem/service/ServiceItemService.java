@@ -91,10 +91,10 @@ public class ServiceItemService {
     }
 
     @Transactional
-    public BookModel.Apply apply(ServiceItemCommand.Apply command) {
+    public BookModel.Apply apply(Long userId, Long serviceId) {
 
-        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
-        Users user = userReadService.findById(command.userId());
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+        Users user = userReadService.findById(userId);
 
         validateApply(user, serviceItem);
 

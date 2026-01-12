@@ -108,8 +108,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponse.Validate> validateBusiness(
             @RequestBody @Valid CompanyRequest.Validate request
     ){
-
-        CompanyModel.Validate model = companyService.validateBusinessNumber(CompanyCommand.Validate.from(request));
+        CompanyModel.Validate model = companyService.validateBusinessNumber(request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
     }
 

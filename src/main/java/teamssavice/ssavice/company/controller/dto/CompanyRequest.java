@@ -3,6 +3,7 @@ package teamssavice.ssavice.company.controller.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressRequest;
+import teamssavice.ssavice.company.service.dto.CompanyCommand;
 
 public class CompanyRequest {
 
@@ -55,5 +56,12 @@ public class CompanyRequest {
             String startDate,
             String businessNumber
     ) {
+        public CompanyCommand.Validate toCommand() {
+            return CompanyCommand.Validate.builder()
+                    .businessNumber(businessNumber)
+                    .startDate(startDate)
+                    .name(name)
+                    .build();
+        }
     }
 }
