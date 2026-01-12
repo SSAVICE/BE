@@ -36,14 +36,15 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByObjectKeyIn(command.imageObjectKeys());
+      
+        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company, AddressCommand.RegionInfo.from(command, region));
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();
             savedServiceItem.addImageId(imageResource.getId());
-            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(imageResource.getObjectKey(), false));
+            applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
 
         return savedServiceItem.getId();

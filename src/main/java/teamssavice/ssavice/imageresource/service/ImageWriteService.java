@@ -14,9 +14,10 @@ public class ImageWriteService {
     private final ImageResourceRepository imageResourceRepository;
 
     @Transactional
-    public ImageResource save(String objectKey, ImagePath path, ImageContentType contentType) {
+    public ImageResource save(String objectKey, String tempKey, ImagePath path, ImageContentType contentType) {
         ImageResource entity = ImageResource.builder()
                 .objectKey(objectKey)
+                .tempKey(tempKey)
                 .path(path)
                 .contentType(contentType.mimeType())
                 .build();

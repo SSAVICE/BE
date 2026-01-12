@@ -8,6 +8,7 @@ public class ImageResourceFixture {
     public static ImageResource imageResource() {
         return ImageResource.builder()
                 .objectKey("objectKey")
+                .tempKey("tempKey")
                 .path(ImagePath.profile)
                 .contentType("image/jpeg")
                 .build();
