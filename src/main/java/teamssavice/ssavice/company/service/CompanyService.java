@@ -1,6 +1,5 @@
 package teamssavice.ssavice.company.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -8,9 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
-import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
+import teamssavice.ssavice.company.infrastructure.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;

@@ -1,4 +1,4 @@
-package teamssavice.ssavice.company.service.client;
+package teamssavice.ssavice.company.infrastructure.client;
 
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;

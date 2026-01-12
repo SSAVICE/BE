@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import teamssavice.ssavice.company.infrastructure.nts.client.NtsApiClient;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
-import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
+import teamssavice.ssavice.company.infrastructure.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
