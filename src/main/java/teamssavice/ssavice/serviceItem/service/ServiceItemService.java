@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.BookReadService;
@@ -17,6 +18,8 @@ import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.region.Region;
+import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -41,12 +44,14 @@ public class ServiceItemService {
     private final UserReadService userReadService;
     private final BookWriteService bookWriteService;
     private final BookReadService bookReadService;
+    private final RegionReadService regionReadService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
         List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(command.imageObjectKeys());
-        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company);
+        Region region = regionReadService.findByRegionCode(command.regionCode());
+        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company, AddressCommand.RegionInfo.from(command, region));
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();
@@ -86,10 +91,10 @@ public class ServiceItemService {
     }
 
     @Transactional
-    public BookModel.Apply apply(ServiceItemCommand.Apply command) {
+    public BookModel.Apply apply(Long userId, Long serviceId) {
 
-        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
-        Users user = userReadService.findById(command.userId());
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+        Users user = userReadService.findById(userId);
 
         validateApply(user, serviceItem);
 

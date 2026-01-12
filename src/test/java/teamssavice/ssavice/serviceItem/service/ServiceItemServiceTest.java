@@ -16,7 +16,6 @@ import teamssavice.ssavice.fixture.BookFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
@@ -46,7 +45,6 @@ public class ServiceItemServiceTest {
         // given
         Long serviceId = 1L;
         Long userId = 2L;
-        ServiceItemCommand.Apply command = new ServiceItemCommand.Apply(userId, serviceId);
 
         ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), null, null);
         ReflectionTestUtils.setField(serviceItem, "id", serviceId);
@@ -63,7 +61,7 @@ public class ServiceItemServiceTest {
         given(bookWriteService.save(any(), any(), any())).willReturn(mockBook);
 
         // when
-        BookModel.Apply result = serviceItemService.apply(command);
+        BookModel.Apply result = serviceItemService.apply(userId, serviceId);
 
         // then
         verify(bookWriteService, times(1)).updateAllStatusToMatched(serviceId);

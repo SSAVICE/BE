@@ -2,8 +2,8 @@ package teamssavice.ssavice.company.controller.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-
-import java.math.BigDecimal;
+import teamssavice.ssavice.address.AddressRequest;
+import teamssavice.ssavice.company.service.dto.CompanyCommand;
 
 public class CompanyRequest {
 
@@ -33,15 +33,7 @@ public class CompanyRequest {
 
             String detail,
             @NotNull
-            String postCode,
-            @NotNull
-            String address,
-            @NotNull
-            String detailAddress,
-            @NotNull
-            BigDecimal longitude,
-            @NotNull
-            BigDecimal latitude
+            AddressRequest.Region region
     ) {
     }
 
@@ -54,11 +46,7 @@ public class CompanyRequest {
             String depositor,
             String accountNumber,
             String detail,
-            String postCode,
-            String address,
-            String detailAddress,
-            BigDecimal longitude,
-            BigDecimal latitude
+            AddressRequest.Region region
     ) {
     }
 
@@ -68,5 +56,12 @@ public class CompanyRequest {
             String startDate,
             String businessNumber
     ) {
+        public CompanyCommand.Validate toCommand() {
+            return CompanyCommand.Validate.builder()
+                    .businessNumber(businessNumber)
+                    .startDate(startDate)
+                    .name(name)
+                    .build();
+        }
     }
 }

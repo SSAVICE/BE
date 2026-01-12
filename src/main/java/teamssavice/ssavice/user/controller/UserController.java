@@ -3,11 +3,7 @@ package teamssavice.ssavice.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
@@ -20,7 +16,6 @@ import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.user.controller.dto.UserRequest;
 import teamssavice.ssavice.user.controller.dto.UserResponse;
 import teamssavice.ssavice.user.service.UserService;
-import teamssavice.ssavice.user.service.dto.UserCommand;
 import teamssavice.ssavice.user.service.dto.UserModel;
 
 @RestController
@@ -54,8 +49,7 @@ public class UserController {
         @CurrentId Long userId,
         @RequestBody @Valid UserRequest.Modify request
     ) {
-        UserCommand.Modify command = UserCommand.Modify.from(userId, request);
-        UserModel.Modify model = userService.modifyProfile(userId, command);
+        UserModel.Modify model = userService.modifyProfile(request.toCommand(userId));
 
         return ResponseEntity.ok(UserResponse.Summary.from(model));
     }

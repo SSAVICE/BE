@@ -56,9 +56,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel.Modify modifyProfile(Long userId, UserCommand.Modify command) {
+    public UserModel.Modify modifyProfile(UserCommand.Modify command) {
         // 사용자 정보 조회
-        Users user = userReadService.findById(userId);
+        Users user = userReadService.findById(command.userId());
 
         // 이메일이 변경되는 경우만 중복 체크
         if (!user.getEmail().equals(command.email()) && userReadService.existsByEmail(

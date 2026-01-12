@@ -5,6 +5,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Builder;
+import teamssavice.ssavice.imageresource.constants.ImageContentType;
+import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 
 public class ImageRequest {
 
@@ -14,7 +17,16 @@ public class ImageRequest {
         @Valid
         List<ContentType> add
     ) {
+        public ImageCommand.PutPresignedUrls toCommand(Long companyId, ImagePath path) {
+            List<ImageContentType> list = add.stream().map(a -> ImageContentType.from(a.contentType())).toList();
 
+            return ImageCommand.PutPresignedUrls.builder()
+                    .companyId(companyId)
+                    .path(path)
+                    .add(list)
+                    .build();
+
+        }
     }
 
     @Builder

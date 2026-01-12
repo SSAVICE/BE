@@ -57,7 +57,6 @@ public class CompanyIntegrationTest {
                 .companyId(company.getId())
                 .companyName("newCompanyName")
                 .detail("this is new detail")
-                .address("this is new address")
                 .build();
 
         // when
@@ -67,8 +66,7 @@ public class CompanyIntegrationTest {
         assertAll(
                 () -> assertThat(actual.getCompanyName()).isEqualTo(command.companyName()),
                 () -> assertThat(actual.getDetail()).isEqualTo(command.detail()),
-                () -> assertThat(actual.getDescription()).isNull(),
-                () -> assertThat(actual.getAddress().getAddress()).isEqualTo(command.address())
+                () -> assertThat(actual.getDescription()).isNull()
         );
     }
 }

@@ -17,13 +17,13 @@ public class Address extends BaseEntity {
     private Long id;
 
     @Column
-    private String region1;
+    private String gugun;
     @Column
-    private String region1Code;
+    private String gugunCode;
     @Column
-    private String region2;
+    private String region;
     @Column
-    private String region2Code;
+    private String regionCode;
     @Column(precision = 10, scale = 7)
     private BigDecimal latitude;
     @Column(precision = 10, scale = 7)
@@ -35,21 +35,15 @@ public class Address extends BaseEntity {
     @Column
     private String detailAddress;
 
-    public void update(AddressCommand.Update command) {
-        if (command.latitude() != null) {
-            this.latitude = command.latitude();
-        }
-        if (command.longitude() != null) {
-            this.longitude = command.longitude();
-        }
-        if (command.postCode() != null) {
-            this.postCode = command.postCode();
-        }
-        if (command.address() != null) {
-            this.address = command.address();
-        }
-        if (command.detailAddress() != null) {
-            this.detailAddress = command.detailAddress();
-        }
+    public void update(AddressCommand.RegionInfo command) {
+        this.gugun = command.gugun();
+        this.gugunCode = command.gugunCode();
+        this.region = command.region();
+        this.regionCode = command.regionCode();
+        this.latitude = command.latitude();
+        this.longitude = command.longitude();
+        this.postCode = command.postCode();
+        this.address = command.address();
+        this.detailAddress = command.detailAddress();
     }
 }
