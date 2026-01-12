@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.book.controller.dto.BookResponse;
+import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
@@ -81,5 +83,19 @@ public class ServiceItemController {
     ) {
         List<ImageModel.PutPresignedUrl> models = imageService.updateImages(ImageCommand.PutPresignedUrls.from(companyId, ImagePath.serviceItem, request));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
+    }
+
+    @PostMapping("/{serviceId}/apply")
+    @RequireRole(Role.USER)
+    public ResponseEntity<BookResponse.Apply> applyServiceItem(
+            @CurrentId Long userId,
+            @PathVariable Long serviceId
+    ) {
+
+        ServiceItemCommand.Apply command = ServiceItemCommand.Apply.of(userId, serviceId);
+
+        BookModel.Apply model = serviceItemService.apply(command);
+
+        return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 }

@@ -3,6 +3,7 @@ package teamssavice.ssavice.book.controller.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
 
 public class BookResponse {
@@ -90,6 +91,19 @@ public class BookResponse {
                 .applying(model.applying())
                 .completed(model.completed())
                 .build();
+        }
+    }
+
+    @Builder
+    public record Apply(
+            Long bookId,
+            BookStatus bookStatus
+    ) {
+        public static Apply from(BookModel.Apply model) {
+            return Apply.builder()
+                    .bookId(model.bookId())
+                    .bookStatus(model.bookStatus())
+                    .build();
         }
     }
 }
