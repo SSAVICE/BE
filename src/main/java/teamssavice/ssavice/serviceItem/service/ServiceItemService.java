@@ -5,9 +5,16 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.service.BookReadService;
+import teamssavice.ssavice.book.service.BookWriteService;
+import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.s3.S3Service;
@@ -15,7 +22,10 @@ import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
+import teamssavice.ssavice.user.entity.Users;
+import teamssavice.ssavice.user.service.UserReadService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,17 +38,20 @@ public class ServiceItemService {
     private final ServiceItemReadService serviceItemReadService;
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
+    private final UserReadService userReadService;
+    private final BookWriteService bookWriteService;
+    private final BookReadService bookReadService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByObjectKeyIn(command.imageObjectKeys());
+        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(command.imageObjectKeys());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company);
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();
             savedServiceItem.addImageId(imageResource.getId());
-            applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(imageResource.getObjectKey(), false));
+            applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
 
         return savedServiceItem.getId();
@@ -71,4 +84,41 @@ public class ServiceItemService {
         }
         return ServiceItemModel.Detail.from(serviceItem, imageUrls);
     }
+
+    @Transactional
+    public BookModel.Apply apply(ServiceItemCommand.Apply command) {
+
+        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
+        Users user = userReadService.findById(command.userId());
+
+        validateApply(user, serviceItem);
+
+        boolean alreadyReachedMin = serviceItem.isReachedMinimum();
+
+        serviceItem.participate();
+
+        // 최소인원 도달시 기존 APPLYING 상태 참여자들 일괄 MATCHED 변경
+        if (!alreadyReachedMin && serviceItem.isReachedMinimum()) {
+            bookWriteService.updateAllStatusToMatched(serviceItem.getId());
+        }
+
+        BookStatus initialStatus = serviceItem.isReachedMinimum()
+                ? BookStatus.MATCHED
+                : BookStatus.APPLYING;
+
+        Book book = bookWriteService.save(user, serviceItem, initialStatus);
+
+        return BookModel.Apply.from(book);
+    }
+
+    private void validateApply(Users user, ServiceItem serviceItem) {
+
+        serviceItem.validateAppliable(LocalDateTime.now());
+
+        if (bookReadService.existsByUserAndServiceItem(user, serviceItem)) {
+            throw new ConflictException(ErrorCode.ALREADY_APPLIED);
+        }
+    }
+
+
 }

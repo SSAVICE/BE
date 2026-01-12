@@ -85,4 +85,17 @@ public class ServiceItemCommand {
             );
         }
     }
+
+    @Builder
+    public record Apply(
+            Long userId,
+            Long serviceId
+    ) {
+        public static Apply of(Long userId, Long serviceId) {
+            return Apply.builder()
+                    .userId(userId)
+                    .serviceId(serviceId)
+                    .build();
+        }
+    }
 }
