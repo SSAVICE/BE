@@ -1,11 +1,11 @@
 package teamssavice.ssavice.serviceItem.controller.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
+import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,30 +29,63 @@ public class ServiceItemRequest {
             @NotNull AddressRequest.Region region,
             @NotNull List<ImageRequest.Confirm> imageConfirms
     ) {
+        public ServiceItemCommand.Create toCommand(Long companyId) {
+            List<String> objectKeys = imageConfirms.stream().map(ImageRequest.Confirm::objectKey).toList();
+            return ServiceItemCommand.Create.builder()
+                    .companyId(companyId)
+                    .title(title)
+                    .description(description)
+                    .basePrice(basePrice)
+                    .discountRate(discountRate)
+                    .minimumMember(minimumMember)
+                    .maximumMember(maximumMember)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .deadline(deadline)
+                    .category(category)
+                    .tag(tag)
+                    .regionCode(region().regionCode())
+                    .longitude(region().longitude())
+                    .latitude(region().latitude())
+                    .postCode(region().postCode())
+                    .address(region().address())
+                    .detailAddress(region().detailAddress())
+                    .imageObjectKeys(objectKeys)
+                    .build();
+        }
     }
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class Search {
+    @Builder
+    public record Search(
+            String category,
+            String query,
+            String gugun,
+            String region,
+            Integer range,
+            @PositiveOrZero
+            Long minPrice,
+            @PositiveOrZero
+            Long maxPrice,
 
-        private String category;
-        private String query;
+            Integer sortBy,
 
-        private String gugun;
-        private String region;
-
-        private Integer range;
-
-        @PositiveOrZero
-        private Long minPrice;
-        @PositiveOrZero
-        private Long maxPrice;
-
-        private Integer sortBy;
-
-        // 커서 방식 (안드로이드 무한 스크롤과)
-        @PositiveOrZero
-        private Long lastId;
+            // 커서 방식 (안드로이드 무한 스크롤과)
+            @PositiveOrZero
+            Long lastId
+    ) {
+        public ServiceItemCommand.Search toCommand(Pageable pageable) {
+            return ServiceItemCommand.Search.builder()
+                    .category(category)
+                    .query(query)
+                    .gugun(gugun)
+                    .region(region)
+                    .range(range)
+                    .minPrice(minPrice)
+                    .maxPrice(maxPrice)
+                    .sortBy(sortBy)
+                    .lastId(lastId)
+                    .pageable(pageable)
+                    .build();
+        }
     }
 }

@@ -3,6 +3,7 @@ package teamssavice.ssavice.user.controller.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import teamssavice.ssavice.user.service.dto.UserCommand;
 
 public class UserRequest {
 
@@ -23,6 +24,13 @@ public class UserRequest {
         @NotBlank
         String phoneNumber
     ) {
-
+        public UserCommand.Modify toCommand(Long userId) {
+            return UserCommand.Modify.builder()
+                    .userId(userId)
+                    .name(name)
+                    .email(email)
+                    .phoneNumber(phoneNumber)
+                    .build();
+        }
     }
 }

@@ -89,12 +89,5 @@ public class CompanyCommand {
             String startDate,
             String name
     ){
-        public static Validate from(CompanyRequest.Validate request) {
-            return Validate.builder()
-                    .businessNumber(request.businessNumber())
-                    .startDate(request.startDate())
-                    .name(request.name())
-                    .build();
-        }
     }
 }

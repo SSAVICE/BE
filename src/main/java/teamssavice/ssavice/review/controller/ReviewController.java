@@ -17,7 +17,6 @@ import teamssavice.ssavice.global.dto.PagingResponse;
 import teamssavice.ssavice.review.controller.dto.ReviewRequest;
 import teamssavice.ssavice.review.controller.dto.ReviewResponse;
 import teamssavice.ssavice.review.service.ReviewService;
-import teamssavice.ssavice.review.service.dto.ReviewCommand;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class ReviewController {
             @CurrentId Long userId,
             @RequestBody @Valid ReviewRequest.Input request
     ) {
-        reviewService.saveReview(ReviewCommand.Input.from(userId, request));
+        reviewService.saveReview(request.toCommand(userId));
         return ResponseEntity.ok().build();
     }
 
