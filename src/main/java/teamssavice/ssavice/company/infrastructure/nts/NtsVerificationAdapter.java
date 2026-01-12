@@ -31,10 +31,10 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
         try {
             NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);
 
-            var data = response.getData().get(0);
+            NtsValidationResponse.BusinessDataResponse data = response.getData().get(0);
 
             return CompanyModel.Validate.builder()
-                    .isValid("01".equals(data.getValid()))
+                    .isValid(data.isValidSuccess())
                     .build();
 
         } catch (feign.RetryableException e) {

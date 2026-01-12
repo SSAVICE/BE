@@ -35,6 +35,10 @@ public class NtsValidationResponse {
 
         @JsonProperty("request_param")
         private RequestParam requestParam;
+
+        public boolean isValidSuccess() {
+            return "01".equals(this.valid);
+        }
     }
 
     @Getter
