@@ -16,14 +16,14 @@ public class ImageReadService {
     private final ImageResourceRepository imageResourceRepository;
 
     @Transactional(readOnly = true)
-    public ImageResource findByObjectKey(String objectKey) {
-        return imageResourceRepository.findByObjectKey(objectKey)
+    public ImageResource findByTempKey(String objectKey) {
+        return imageResourceRepository.findByTempKey(objectKey)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
-    public List<ImageResource> findAllByObjectKeyIn(List<String> objectKeys) {
-        return imageResourceRepository.findAllByObjectKeyIn(objectKeys);
+    public List<ImageResource> findAllByTempKeyIn(List<String> objectKeys) {
+        return imageResourceRepository.findAllByTempKeyIn(objectKeys);
     }
 
     @Transactional(readOnly = true)
