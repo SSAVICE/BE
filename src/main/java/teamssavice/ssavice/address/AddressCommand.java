@@ -2,6 +2,7 @@ package teamssavice.ssavice.address;
 
 import lombok.Builder;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
+import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package teamssavice.ssavice.address;
+package teamssavice.ssavice.region;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

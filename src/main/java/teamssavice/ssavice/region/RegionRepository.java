@@ -1,4 +1,4 @@
-package teamssavice.ssavice.address;
+package teamssavice.ssavice.region;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

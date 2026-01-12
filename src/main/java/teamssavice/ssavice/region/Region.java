@@ -1,4 +1,4 @@
-package teamssavice.ssavice.address;
+package teamssavice.ssavice.region;
 
 
 import jakarta.persistence.*;
@@ -26,6 +26,6 @@ public class Region {
     private String region;
 
     public String getGugunCode() {
-        return regionCode.substring(4);
+        return regionCode.substring(5);
     }
 }
