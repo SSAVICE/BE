@@ -3,10 +3,9 @@ package teamssavice.ssavice.company.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.global.entity.BaseEntity;
-import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.entity.Users;
 
@@ -87,7 +86,6 @@ public class Company extends BaseEntity {
             this.accountNumber = command.accountNumber();
         }
         this.detail = command.detail();
-        address.update(AddressCommand.Update.from(command));
     }
 
     public void updateImage(ImageResource imageResource) {

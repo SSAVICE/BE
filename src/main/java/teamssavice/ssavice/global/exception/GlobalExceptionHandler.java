@@ -154,4 +154,15 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<ProblemDetail> externalApiException(ExternalApiException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        problemDetail.setDetail(e.getMessage());
+
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
+
+
+
 }

@@ -129,4 +129,15 @@ public class CompanyResponse {
                     .build();
         }
     }
+
+    @Builder
+    public record Validate(
+            boolean isValid
+    ) {
+        public static CompanyResponse.Validate from(CompanyModel.Validate model) {
+            return Validate.builder()
+                    .isValid(model.isValid())
+                    .build();
+        }
+    }
 }
