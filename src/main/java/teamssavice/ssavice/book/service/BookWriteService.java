@@ -17,10 +17,6 @@ public class BookWriteService {
 
     private final BookRepository bookRepository;
 
-    public void updateAllStatusToMatched(Long serviceId) {
-        bookRepository.updateStatusByServiceId(serviceId, BookStatus.APPLYING, BookStatus.MATCHED);
-    }
-
     public Book save(Users user, ServiceItem serviceItem, BookStatus status) {
         Book book = Book.builder()
                 .user(user)

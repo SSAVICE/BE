@@ -10,8 +10,6 @@ import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
 import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.client.BusinessVerifyRequest;
 import teamssavice.ssavice.company.service.client.BusinessVerifyResponse;
-import teamssavice.ssavice.company.service.dto.CompanyCommand;
-import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ExternalApiException;
 

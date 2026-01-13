@@ -98,20 +98,9 @@ public class ServiceItemService {
 
         validateApply(user, serviceItem);
 
-        boolean alreadyReachedMin = serviceItem.isReachedMinimum();
-
         serviceItem.participate();
 
-        // 최소인원 도달시 기존 APPLYING 상태 참여자들 일괄 MATCHED 변경
-        if (!alreadyReachedMin && serviceItem.isReachedMinimum()) {
-            bookWriteService.updateAllStatusToMatched(serviceItem.getId());
-        }
-
-        BookStatus initialStatus = serviceItem.isReachedMinimum()
-                ? BookStatus.MATCHED
-                : BookStatus.APPLYING;
-
-        Book book = bookWriteService.save(user, serviceItem, initialStatus);
+        Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
 
         return BookModel.Apply.from(book);
     }
