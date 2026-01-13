@@ -1,9 +1,11 @@
 package teamssavice.ssavice.book.service.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
@@ -105,17 +107,42 @@ public class BookModel {
     @Builder
     public record Apply(
             Long bookId,
-            Long serviceId,
-            Long userId,
-            BookStatus bookStatus
+            DisplayStatus displayStatus
     ) {
         public static Apply from(Book entity) {
             return Apply.builder()
                     .bookId(entity.getId())
-                    .serviceId(entity.getServiceItem().getId())
-                    .userId(entity.getUser().getId())
-                    .bookStatus(entity.getBookStatus())
+                    .displayStatus(toDisplayStatus(entity, entity.getServiceItem()))
                     .build();
         }
     }
+
+    private static DisplayStatus toDisplayStatus(Book book, ServiceItem serviceItem) {
+
+        if (book.getBookStatus() == BookStatus.CANCELED) {
+            return new DisplayStatus(DisplayStatusCode.USER_CANCELED, "취소됨");
+        }
+
+        return switch (serviceItem.getStatus()) {
+            case RECRUITING -> new DisplayStatus(DisplayStatusCode.RECRUITING, "모집 중");
+            case SUCCEEDED -> new DisplayStatus(DisplayStatusCode.SUCCEEDED, "예약 확정");
+            case CLOSED -> new DisplayStatus(DisplayStatusCode.CLOSED, "모집 마감");
+            case FAILED -> new DisplayStatus(DisplayStatusCode.FAILED, "모집 무산");
+            case COMPLETED -> new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료");
+            case CANCELED -> new DisplayStatus(DisplayStatusCode.SERVICE_CANCELED, "업체 취소");
+        };
+    }
+
+    public record DisplayStatus(
+            DisplayStatusCode code, // 프론트 로직용
+            @Schema(description = "상태 라벨", example = "모집 중")
+            String label  // 화면 출력용
+    ) {
+    }
+
+    public enum DisplayStatusCode {
+        RECRUITING, SUCCEEDED, CLOSED, FAILED, COMPLETED, SERVICE_CANCELED, USER_CANCELED
+    }
+
+
 }

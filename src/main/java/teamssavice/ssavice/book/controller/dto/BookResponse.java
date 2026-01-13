@@ -92,12 +92,12 @@ public class BookResponse {
     @Builder
     public record Apply(
             Long bookId,
-            BookStatus bookStatus
+            BookModel.DisplayStatus displayStatus
     ) {
         public static Apply from(BookModel.Apply model) {
             return Apply.builder()
                     .bookId(model.bookId())
-                    .bookStatus(model.bookStatus())
+                    .displayStatus(model.displayStatus())
                     .build();
         }
     }
