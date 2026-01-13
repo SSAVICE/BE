@@ -5,13 +5,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
+import teamssavice.ssavice.company.service.client.BusinessVerifyRequest;
+import teamssavice.ssavice.company.service.client.BusinessVerifyResponse;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.company.infrastructure.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
@@ -136,8 +138,16 @@ public class CompanyService {
 
     public CompanyModel.Validate validateBusinessNumber(CompanyCommand.Validate command) {
 
-         CompanyModel.Validate model = businessVerificationClient.validate(command);
+        BusinessVerifyRequest request = BusinessVerifyRequest.builder()
+                .businessNumber(command.businessNumber())
+                .startDate(command.startDate())
+                .name(command.name())
+                .build();
 
-         return model;
+        BusinessVerifyResponse response = businessVerificationClient.validate(request);
+
+        return CompanyModel.Validate.builder()
+                .isValid(response.isValid())
+                .build();
     }
 }
