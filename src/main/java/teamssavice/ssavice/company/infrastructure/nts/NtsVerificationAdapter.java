@@ -8,6 +8,8 @@ import teamssavice.ssavice.company.infrastructure.nts.client.NtsApiClient;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
 import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
+import teamssavice.ssavice.company.service.client.BusinessVerifyRequest;
+import teamssavice.ssavice.company.service.client.BusinessVerifyResponse;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -24,17 +26,21 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
     private String serviceKey;
 
     @Override
-    public CompanyModel.Validate validate(CompanyCommand.Validate command) {
+    public BusinessVerifyResponse validate(BusinessVerifyRequest request) {
 
-        NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(), command.startDate(), command.name());
+        NtsValidationRequest ntsRequest = NtsValidationRequest.of(
+                request.businessNumber(),
+                request.startDate(),
+                request.name()
+        );
 
         try {
-            NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);
+            NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, ntsRequest);
 
-            var data = response.getData().get(0);
+            NtsValidationResponse.BusinessDataResponse data = response.getData().get(0);
 
-            return CompanyModel.Validate.builder()
-                    .isValid("01".equals(data.getValid()))
+            return BusinessVerifyResponse.builder()
+                    .isValid(data.isValidSuccess())
                     .build();
 
         } catch (feign.RetryableException e) {
