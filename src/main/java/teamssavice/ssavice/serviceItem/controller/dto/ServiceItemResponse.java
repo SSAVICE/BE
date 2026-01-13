@@ -35,7 +35,8 @@ public class ServiceItemResponse {
             LocalDateTime startDate,
             LocalDateTime endDate,
             LocalDateTime deadline,
-            String tag
+            String tag,
+            AddressResponse.RegionSummary region
     ) {
         public static ServiceItemResponse.Summary from(ServiceItemModel.Summary model) {
             return Summary.builder()
@@ -55,6 +56,7 @@ public class ServiceItemResponse {
                     .endDate(model.endDate())
                     .deadline(model.deadline())
                     .tag(model.tag())
+                    .region(AddressResponse.RegionSummary.from(model.region()))
                     .build();
         }
     }

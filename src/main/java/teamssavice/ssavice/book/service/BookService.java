@@ -17,7 +17,7 @@ public class BookService {
     private final BookReadService bookReadService;
 
     @Transactional(readOnly = true)
-    public Page<BookModel.Info> getMyBooksByStatue(BookCommand.RetrieveByStatus command) {
+    public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(
             command.userId(),
             command.status(),

@@ -2,6 +2,7 @@ package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -46,5 +47,20 @@ public class ServiceItemCommand {
         Long lastId,      // 커서 ID
         Pageable pageable
     ) {
+    }
+
+    @Builder
+    public record RetrieveByCompanyAndStatus(
+        Long companyId,
+        Pageable pageable,
+        ServiceStatus status
+    ) {
+        public static RetrieveByCompanyAndStatus of(Long companyId, Pageable pageable, ServiceStatus status) {
+            return RetrieveByCompanyAndStatus.builder()
+                    .companyId(companyId)
+                    .pageable(pageable)
+                    .status(status)
+                    .build();
+        }
     }
 }
