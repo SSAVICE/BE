@@ -16,6 +16,7 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.region.Region;
@@ -115,4 +116,20 @@ public class ServiceItemService {
     }
 
 
+    @Transactional
+    public void delete(Long serviceId, Long companyId) {
+
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+
+        if (!serviceItem.isOwner(companyId)) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+        }
+
+        if (serviceItem.getCurrentMember() > 0) {
+            throw new ConflictException(ErrorCode.SERVICE_HAS_USERS);
+        }
+
+        serviceItem.delete();
+
+    }
 }

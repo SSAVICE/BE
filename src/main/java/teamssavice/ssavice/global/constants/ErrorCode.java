@@ -30,6 +30,7 @@ public enum ErrorCode {
     SERVICE_RECRUITMENT_FAILED(HttpStatus.CONFLICT, "SERVICE_RECRUITMENT_FAILED", "모집이 무산된 서비스입니다."),
     SERVICE_RECRUITMENT_CANCELED(HttpStatus.CONFLICT, "SERVICE_RECRUITMENT_CANCELED", "업체에 의해 취소된 서비스입니다."),
     SERVICE_ALREADY_COMPLETED(HttpStatus.CONFLICT, "SERVICE_ALREADY_COMPLETED", "이미 이용이 완료된 서비스입니다."),
+    SERVICE_HAS_USERS(HttpStatus.CONFLICT, "SERVICE_HAS_USERS", "이미 신청한 사용자가 있어 삭제하거나 수정할 수 없습니다."),
 
     // imageResource
     UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),

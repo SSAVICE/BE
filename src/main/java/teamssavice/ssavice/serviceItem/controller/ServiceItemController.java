@@ -89,4 +89,19 @@ public class ServiceItemController {
 
         return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
+
+    @DeleteMapping("/{serviceId}")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<Void> deleteServiceItem(
+            @CurrentId Long companyId,
+            @PathVariable Long serviceId
+    ) {
+
+        serviceItemService.delete(serviceId, companyId);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
+
 }

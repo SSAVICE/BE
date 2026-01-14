@@ -3,6 +3,7 @@ package teamssavice.ssavice.serviceItem.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -19,6 +20,7 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
+@SQLRestriction("is_deleted = false") //  만약 Company 측에서 삭제한 데이터에 대해서 봐야 하는 비즈니스 로직이 필요하다면 이 방법으로는 안하고 개선
 public class ServiceItem extends BaseEntity {
 
     private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
@@ -159,5 +161,14 @@ public class ServiceItem extends BaseEntity {
         if (this.currentMember >= this.maximumMember) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+    }
+
+    public boolean isOwner(Long companyId) {
+        return this.company.getId().equals(companyId);
+    }
+
+    public void delete() {
+        this.status = ServiceStatus.CANCELED;
+        this.isDeleted = true;
     }
 }

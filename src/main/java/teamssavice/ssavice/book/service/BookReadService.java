@@ -38,4 +38,5 @@ public class BookReadService {
     public Long countByUserIdAndBookStatusAndServiceStatus(Long userId, BookStatus bookStatus, ServiceStatus serviceStatus) {
         return bookRepository.countByUserIdAndBookStatusAndServiceStatus(userId, bookStatus, serviceStatus);
     }
+
 }
