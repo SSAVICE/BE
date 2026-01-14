@@ -4,12 +4,14 @@ import lombok.Builder;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 
 import java.math.BigDecimal;
+import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
 
 public class CompanyCommand {
 
     @Builder
     public record Create(
             Long userId,
+            String verifyToken,
             String companyName,
             String ownerName,
             String phoneNumber,
@@ -28,6 +30,7 @@ public class CompanyCommand {
         public static CompanyCommand.Create from(Long userId, CompanyRequest.Create request) {
             return Create.builder()
                     .userId(userId)
+                    .verifyToken(request.verifyToken())
                     .companyName(request.companyName())
                     .ownerName(request.ownerName())
                     .phoneNumber(request.phoneNumber())
@@ -82,12 +85,20 @@ public class CompanyCommand {
                     .build();
         }
     }
-
     @Builder
     public record Validate(
-            String businessNumber,
-            String startDate,
-            String name
-    ){
+        String businessNumber,
+        String startDate,
+        String name
+    ) {
+
+        public CompanyInfraCommand.Validate toInfraCommand() {
+            return CompanyInfraCommand.Validate.builder()
+                .businessNumber(this.businessNumber)
+                .startDate(this.startDate)
+                .name(this.name)
+                .build();
+        }
+
     }
 }
