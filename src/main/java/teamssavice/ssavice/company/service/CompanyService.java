@@ -11,14 +11,11 @@ import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
-import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraModel;
 import teamssavice.ssavice.company.service.client.BusinessVerificationClient;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.company.token.CompanySignupVerifyToken;
 import teamssavice.ssavice.company.token.CompanySignupVerifyTokenService;
-import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.InvalidBusinessNumberException;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
@@ -150,12 +147,8 @@ public class CompanyService {
 
     public CompanyModel.Validate validateBusinessNumber(Long userId,
         CompanyCommand.Validate command) {
-
         CompanyInfraCommand.Validate infraCommand = command.toInfraCommand();
-        CompanyInfraModel.Validate infraModel = businessVerificationClient.validate(infraCommand);
-        if (!infraModel.isValid()) {
-            throw new InvalidBusinessNumberException(ErrorCode.INVALID_BUSINESS_NUMBER);
-        }
+        businessVerificationClient.validate(infraCommand);
         CompanySignupVerifyToken verifyToken = companySignupVerifyTokenService.issueToken(
             userId, command.businessNumber());
 
