@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
+import teamssavice.ssavice.book.controller.dto.BookResponse;
+import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
@@ -15,12 +17,10 @@ import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
-import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
-import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 import java.util.List;
@@ -39,9 +39,7 @@ public class ServiceItemController {
             @CurrentId Long companyId,
             @RequestBody @Valid ServiceItemRequest.Create request
     ) {
-
-        ServiceItemCommand.Create command = ServiceItemCommand.Create.from(companyId, request);
-        Long serviceId = serviceItemService.register(command);
+        Long serviceId = serviceItemService.register(request.toCommand(companyId));
 
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
 
@@ -54,9 +52,7 @@ public class ServiceItemController {
     ) {
 
         Pageable pageable = PageRequest.of(0, size);
-        ServiceItemCommand.Search command = ServiceItemCommand.Search.of(request, pageable);
-
-        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(command);
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(pageable));
 
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
 
@@ -79,7 +75,18 @@ public class ServiceItemController {
             @CurrentId Long companyId,
             @RequestBody @Valid ImageRequest.ServiceImages request
     ) {
-        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(ImageCommand.PutPresignedUrls.from(companyId, ImagePath.serviceItem, request));
+        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(request.toCommand(companyId, ImagePath.serviceItem));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
+    }
+
+    @PostMapping("/{serviceId}/apply")
+    @RequireRole(Role.USER)
+    public ResponseEntity<BookResponse.Apply> applyServiceItem(
+            @CurrentId Long userId,
+            @PathVariable Long serviceId
+    ) {
+        BookModel.Apply model = serviceItemService.apply(userId, serviceId);
+
+        return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 }

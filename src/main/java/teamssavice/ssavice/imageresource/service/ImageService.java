@@ -22,10 +22,11 @@ public class ImageService {
 
     @Transactional
     public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path, ImageContentType contentType) {
+        String tempKey = s3ObjectKeyGenerator.generator(ImagePath.temp, id, contentType);
         String objectKey = s3ObjectKeyGenerator.generator(path, id, contentType);
-        imageWriteService.save(objectKey, path, contentType);
+        imageWriteService.save(objectKey, tempKey, path, contentType);
 
-        return s3Service.createPutPresignedUrl(objectKey, contentType);
+        return s3Service.createPutPresignedUrl(tempKey, contentType);
     }
 
     @Transactional

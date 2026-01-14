@@ -37,12 +37,15 @@ public class NtsValidationResponse {
 
         @JsonProperty("request_param")
         private RequestParam requestParam;
+
+        public boolean isValidSuccess() {
+            return "01".equals(this.valid);
+        }
     }
 
     @Getter
     @NoArgsConstructor
     public static class RequestParam {
-
         @JsonProperty("b_no")
         private String businessNumber;
 

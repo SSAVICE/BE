@@ -1,10 +1,10 @@
 package teamssavice.ssavice.serviceItem.controller.dto;
 
 import lombok.Builder;
+import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,10 +71,7 @@ public class ServiceItemResponse {
             Long companyId,
             String companyName,
 
-            BigDecimal latitude,
-            BigDecimal longitude,
-            String region1,
-            String region2,
+            AddressResponse.RegionSummary region,
 
             Long currentMember,
             Long minimumMember,
@@ -87,7 +84,7 @@ public class ServiceItemResponse {
             LocalDateTime deadline
     ) {
         public static Search from(ServiceItemModel.Search model) {
-            return ServiceItemResponse.Search.builder()
+            return Search.builder()
                     .serviceId(model.serviceId())
                     .serviceImageUrl(null) // 이미지는 28 이슈에서 해결해서 그거 기본 URL 쓰면서 지우면될듯
                     .category(model.category())
@@ -96,10 +93,7 @@ public class ServiceItemResponse {
                     .status(model.status().name())
                     .companyId(model.companyId())
                     .companyName(model.companyName())
-                    .latitude(model.latitude())
-                    .longitude(model.longitude())
-                    .region1(model.region1())
-                    .region2(model.region2())
+                    .region(AddressResponse.RegionSummary.from(model.region()))
                     .currentMember(model.currentMember())
                     .minimumMember(model.minimumMember())
                     .maximumMember(model.maximumMember())
@@ -119,10 +113,7 @@ public class ServiceItemResponse {
             Long companyId,
             String title,
             String description,
-            BigDecimal latitude,
-            BigDecimal longitude,
-            String region1,
-            String region2,
+            AddressResponse.RegionSummary region,
             Long currentMember,
             Long minimumMember,
             Long maximumMember,
@@ -145,10 +136,7 @@ public class ServiceItemResponse {
                     .companyId(model.companyId())
                     .title(model.title())
                     .description(model.description())
-                    .latitude(model.latitude())
-                    .longitude(model.longitude())
-                    .region1(model.region1())
-                    .region2(model.region2())
+                    .region(AddressResponse.RegionSummary.from(model.region()))
                     .currentMember(model.currentMember())
                     .minimumMember(model.minimumMember())
                     .maximumMember(model.maximumMember())

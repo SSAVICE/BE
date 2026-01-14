@@ -7,16 +7,6 @@ import teamssavice.ssavice.book.constants.BookStatus;
 
 public class BookCommand {
 
-    public record Retrieve(
-        Long userId,
-        Pageable pageable
-    ) {
-
-        public static Retrieve of(Long userId, Pageable pageable) {
-            return new Retrieve(userId, pageable);
-        }
-    }
-
     @Builder
     public record RetrieveByStatus(
         Long userId,

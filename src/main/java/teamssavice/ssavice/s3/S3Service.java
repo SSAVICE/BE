@@ -3,7 +3,10 @@ package teamssavice.ssavice.s3;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -26,7 +29,6 @@ public class S3Service {
                 .bucket(properties.bucket())
                 .key(objectKey)
                 .contentType(contentType.mimeType())
-                .tagging("is_active=false")
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -36,21 +38,6 @@ public class S3Service {
 
         PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
         return ImageModel.PutPresignedUrl.from(presigned.url().toString(), objectKey);
-    }
-
-    public void updateIsActiveTag(String objectKey, boolean isActive) {
-        try {
-            PutObjectTaggingRequest request = PutObjectTaggingRequest.builder()
-                    .bucket(properties.bucket())
-                    .key(objectKey)
-                    .tagging(Tagging.builder()
-                            .tagSet(Tag.builder().key("is_active").value(Boolean.toString(isActive)).build())
-                            .build())
-                    .build();
-
-            s3Client.putObjectTagging(request);
-        } catch (S3Exception ignored) {
-        }
     }
 
     public String generateGetPresignedUrl(String objectKey) {
@@ -65,5 +52,28 @@ public class S3Service {
                 .build();
 
         return s3Presigner.presignGetObject(presign).url().toString();
+    }
+
+    public void moveObject(String sourceKey, String targetKey, ImageContentType contentType) {
+        CopyObjectRequest request = CopyObjectRequest.builder()
+                .sourceBucket(properties.bucket())
+                .sourceKey(sourceKey)
+                .destinationBucket(properties.bucket())
+                .destinationKey(targetKey)
+                .contentType(contentType.mimeType())
+                .build();
+
+        s3Client.copyObject(request);
+
+        deleteObject(sourceKey);
+    }
+
+    public void deleteObject(String objectKey) {
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .build();
+
+        s3Client.deleteObject(request);
     }
 }

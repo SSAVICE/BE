@@ -8,7 +8,7 @@ import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
 
 
-@FeignClient(name = "ntsApiClient", url = "https://api.odcloud.kr/api/nts-businessman/v1")
+@FeignClient(name = "ntsApiClient", url = "${external.nts.url}")
 public interface NtsApiClient {
 
     @PostMapping("/validate")

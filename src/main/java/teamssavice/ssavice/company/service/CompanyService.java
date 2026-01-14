@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
@@ -19,6 +20,8 @@ import teamssavice.ssavice.company.token.CompanySignupVerifyTokenService;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.region.Region;
+import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.review.entity.Review;
 import teamssavice.ssavice.review.service.ReviewReadService;
 import teamssavice.ssavice.s3.S3Service;
@@ -44,6 +47,7 @@ public class CompanyService {
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
     private final BusinessVerificationClient businessVerificationClient;
+    private final RegionReadService regionReadService;
     private final CompanySignupVerifyTokenService companySignupVerifyTokenService;
 
 
@@ -74,7 +78,9 @@ public class CompanyService {
         Users user = userReadService.findById(command.userId());
         companyReadService.checkUserExists(user);
 
-        Company company = companyWriteService.save(command, user);
+        Region region = regionReadService.findByRegionCode(command.regionCode());
+        Company company = companyWriteService.save(command, user,
+            AddressCommand.RegionInfo.from(command, region));
         Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, true);
     }
@@ -83,6 +89,10 @@ public class CompanyService {
     public void updateCompany(CompanyCommand.Update command) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(command.companyId());
         company.update(command);
+        if (command.regionCode() != null) {
+            Region region = regionReadService.findByRegionCode(command.regionCode());
+            company.getAddress().update(AddressCommand.RegionInfo.from(command, region));
+        }
     }
 
     @Transactional(readOnly = true)
@@ -136,13 +146,13 @@ public class CompanyService {
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
-        ImageResource imageResource = imageReadService.findByObjectKey(objectKey);
+        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
         if (company.hasImageResource()) {
             applicationEventPublisher.publishEvent(
-                S3EventDto.UpdateTag.from(company.getImageResource().getObjectKey(), false));
+                S3EventDto.Delete.from(company.getImageResource()));
         }
         company.updateImage(imageResource);
-        applicationEventPublisher.publishEvent(S3EventDto.UpdateTag.from(objectKey, true));
+        applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
     public CompanyModel.Validate validateBusinessNumber(Long userId,
