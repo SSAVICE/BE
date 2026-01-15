@@ -106,11 +106,12 @@ public class CompanyController {
     @PostMapping("/validate")
     @RequireRole(Role.USER)
     public ResponseEntity<CompanyResponse.Validate> validateBusiness(
-            @RequestBody @Valid CompanyRequest.Validate request
-    ){
-        CompanyModel.Validate model = companyService.validateBusinessNumber(request.toCommand());
+        @CurrentId Long userId,
+        @RequestBody @Valid CompanyRequest.Validate request
+    ) {
+        CompanyModel.Validate model = companyService.validateBusinessNumber(userId,
+            request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
     }
-
 
 }
