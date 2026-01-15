@@ -5,6 +5,7 @@ import lombok.Builder;
 import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.time.LocalDateTime;
@@ -86,6 +87,19 @@ public class ServiceItemRequest {
                     .lastId(lastId)
                     .pageable(pageable)
                     .build();
+        }
+    }
+
+    public enum ServiceStatusFilter {
+        ALL,
+        RECRUITING,
+        SUCCESS,
+        FAILED,
+        CANCELED,
+        FINISHED;
+
+        public ServiceStatus toDomainOrNull() {
+            return this == ALL ? null : ServiceStatus.valueOf(this.name());
         }
     }
 }

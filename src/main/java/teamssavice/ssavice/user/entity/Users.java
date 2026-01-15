@@ -46,7 +46,11 @@ public class Users extends BaseEntity {
     @Builder.Default
     private boolean isDeleted = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     @JoinColumn(name = "address_id")
     private Address address;
 
@@ -66,5 +70,9 @@ public class Users extends BaseEntity {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
+    }
+
+    public void updateAddress(Address address) {
+        this.address = address;
     }
 }

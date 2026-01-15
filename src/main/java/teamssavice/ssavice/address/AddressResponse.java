@@ -27,6 +27,8 @@ public class AddressResponse {
     public record RegionDetail(
             String gugun,
             String region,
+            String gugunCode,
+            String regionCode,
             BigDecimal latitude,
             BigDecimal longitude,
             String postCode,
@@ -37,6 +39,8 @@ public class AddressResponse {
             return RegionDetail.builder()
                     .gugun(model.gugun())
                     .region(model.region())
+                    .gugunCode(model.gugunCode())
+                    .regionCode(model.regionCode())
                     .latitude(model.latitude())
                     .longitude(model.longitude())
                     .postCode(model.postCode())

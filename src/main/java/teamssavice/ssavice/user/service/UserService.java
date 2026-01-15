@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
@@ -12,6 +14,8 @@ import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.region.Region;
+import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.user.entity.Users;
@@ -28,6 +32,7 @@ public class UserService {
     private final UserReadService userReadService;
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
+    private final RegionReadService regionReadService;
 
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
@@ -79,5 +84,19 @@ public class UserService {
         }
         user.updateImage(imageResource);
         applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
+    }
+
+    @Transactional(readOnly = true)
+    public AddressModel.RegionDetail getUserAddress(Long userId) {
+        Users user = userReadService.findByIdFetchJoinAddress(userId);
+        return AddressModel.RegionDetail.from(user.getAddress());
+    }
+
+    @Transactional
+    public AddressModel.RegionDetail updateUserAddress(AddressCommand.Update command) {
+        Users user = userReadService.findById(command.userId());
+        Region region = regionReadService.findByRegionCode(command.regionCode());
+        userWriteService.updateAddress(user, region, command);
+        return AddressModel.RegionDetail.from(user.getAddress());
     }
 }

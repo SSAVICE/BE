@@ -1,14 +1,10 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
-import teamssavice.ssavice.address.Address;
-import teamssavice.ssavice.book.constants.BookStatus;
-import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,7 +27,8 @@ public class ServiceItemModel {
             LocalDateTime startDate,
             LocalDateTime endDate,
             LocalDateTime deadline,
-            String tag
+            String tag,
+            AddressModel.RegionSummary region
     ) {
         public static ServiceItemModel.Summary from (ServiceItem entity) {
             return Summary.builder()
