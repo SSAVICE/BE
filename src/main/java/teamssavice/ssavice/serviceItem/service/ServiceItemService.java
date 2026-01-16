@@ -29,7 +29,6 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,22 +102,24 @@ public class ServiceItemService {
 
         Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
 
-        return BookModel.Apply.of(
-                book.getId()
-        );
+        return BookModel.Apply.of(book.getId());
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
 
-        serviceItem.validateAppliable(LocalDateTime.now());
+        serviceItem.validateAppliable();
 
         if (bookReadService.existsByUserAndServiceItem(user, serviceItem)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }
 
-    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
-        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyAndStatus(command.companyId(), command.status(), command.pageable());
+    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
+        if (command.onSale()) {
+            Page<ServiceItem> serviceItems = serviceItemReadService.findAllRecruitingByCompany_Id(command.companyId(), command.pageable());
+            return serviceItems.map(ServiceItemModel.Summary::from);
+        }
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
         return serviceItems.map(ServiceItemModel.Summary::from);
     }
 }

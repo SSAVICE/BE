@@ -9,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
+
+import java.util.List;
 
 
 @Service
@@ -35,7 +36,7 @@ public class BookReadService {
         return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED);
     }
 
-    public Long countByUserIdAndBookStatusAndServiceStatus(Long userId, BookStatus bookStatus, ServiceStatus serviceStatus) {
-        return bookRepository.countByUserIdAndBookStatusAndServiceStatus(userId, bookStatus, serviceStatus);
+    public List<Book> findByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
+        return bookRepository.findByUserIdAndBookStatus(userId, bookStatus);
     }
 }

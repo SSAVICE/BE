@@ -2,7 +2,6 @@ package teamssavice.ssavice.fixture;
 
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
@@ -27,7 +26,7 @@ public class ServiceItemFixture {
                 .build();
     }
 
-    public static ServiceItem setCompanyAndStatus(Company company, ServiceStatus status) {
+    public static ServiceItem setCompany(Company company) {
         return ServiceItem.builder()
                 .title("title")
                 .description("this is desc")
@@ -50,7 +49,28 @@ public class ServiceItemFixture {
                         .address("address")
                         .detailAddress("detail")
                         .build())
-                .status(status)
+                .build();
+    }
+
+    public static ServiceItem fulled() {
+        return ServiceItem.builder()
+                .currentMember(20L)
+                .minimumMember(10L)
+                .maximumMember(20L)
+                .startDate(LocalDateTime.now().plusDays(10))
+                .endDate(LocalDateTime.now().plusDays(30))
+                .deadline(LocalDateTime.now().plusDays(5))
+                .build();
+    }
+
+    public static ServiceItem recruiting() {
+        return ServiceItem.builder()
+                .currentMember(5L)
+                .minimumMember(10L)
+                .maximumMember(20L)
+                .startDate(LocalDateTime.now().plusDays(10))
+                .endDate(LocalDateTime.now().plusDays(30))
+                .deadline(LocalDateTime.now().plusDays(5))
                 .build();
     }
 }

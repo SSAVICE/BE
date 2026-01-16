@@ -26,7 +26,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,7 +85,6 @@ public class ServiceItemServiceTest {
         ReflectionTestUtils.setField(serviceItem, "minimumMember", 10L);
         ReflectionTestUtils.setField(serviceItem, "maximumMember", 20L);
         ReflectionTestUtils.setField(serviceItem, "currentMember", 19L);
-        ReflectionTestUtils.setField(serviceItem, "status", ServiceStatus.SUCCEEDED); // 이미 최소인원은 넘은 상태 가정
 
         Users user = UserFixture.user();
 

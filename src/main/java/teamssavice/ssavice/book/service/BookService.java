@@ -11,6 +11,8 @@ import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -30,21 +32,16 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public BookModel.BookSummary getBookSummary(Long userId) {
+        List<Book> books = bookReadService.findByUserIdAndBookStatus(userId, BookStatus.RESERVED);
+        Long applying = 0L;
+        Long completedCount = 0L;
+        for (Book book : books) {
+            if(book.getServiceItem().getStatus() == ServiceStatus.RECRUITING) applying++;
+            else if(book.getServiceItem().getStatus() == ServiceStatus.SUCCEEDED ||
+                    book.getServiceItem().getStatus() == ServiceStatus.FULLED) completedCount++;
+        }
 
-        Long applying = bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.RECRUITING
-        );
-
-        // 모집 성공
-        Long succeededCount = bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED
-        );
-        // 모집 마감
-        Long closedCount = bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.FULLED
-        );
-
-        return BookModel.BookSummary.from(applying, succeededCount + closedCount);
+        return BookModel.BookSummary.from(applying, completedCount);
     }
 }
 

@@ -98,10 +98,9 @@ public class ServiceItemController {
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
         @PathVariable("company-id") Long companyId,
         @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam ServiceItemRequest.ServiceStatusFilter status
+        @RequestParam("on-sale") Boolean onSale
     ) {
-        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable,
-                status.toDomainOrNull());
+        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(command)
                 .map(ServiceItemResponse.Summary::from);
