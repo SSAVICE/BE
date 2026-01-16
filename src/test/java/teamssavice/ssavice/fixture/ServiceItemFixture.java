@@ -52,25 +52,78 @@ public class ServiceItemFixture {
                 .build();
     }
 
-    public static ServiceItem fulled() {
+    public static ServiceItem base(Company company) {
         return ServiceItem.builder()
-                .currentMember(20L)
-                .minimumMember(10L)
-                .maximumMember(20L)
-                .startDate(LocalDateTime.now().plusDays(10))
-                .endDate(LocalDateTime.now().plusDays(30))
-                .deadline(LocalDateTime.now().plusDays(5))
-                .build();
-    }
-
-    public static ServiceItem recruiting() {
-        return ServiceItem.builder()
+                .title("title")
+                .description("this is desc")
+                .price(Price.of(1000L, 10))
                 .currentMember(5L)
                 .minimumMember(10L)
                 .maximumMember(20L)
                 .startDate(LocalDateTime.now().plusDays(10))
                 .endDate(LocalDateTime.now().plusDays(30))
                 .deadline(LocalDateTime.now().plusDays(5))
+                .category("category")
+                .company(company)
+                .address(Address.builder()
+                        .gugun("gugun")
+                        .gugunCode("gugunCode")
+                        .region("region")
+                        .regionCode("regionCode")
+                        .latitude(BigDecimal.valueOf(33.333))
+                        .longitude(BigDecimal.valueOf(33.333))
+                        .postCode("postCode")
+                        .address("address")
+                        .detailAddress("detail")
+                        .build())
+                .build();
+    }
+
+    public static ServiceItem recruiting(Company company) {
+        return base(company);
+    }
+
+    public static ServiceItem succeeded(Company company) {
+        return base(company).toBuilder()
+                .currentMember(11L)
+                .minimumMember(10L)
+                .maximumMember(20L)
+                .build();
+    }
+
+    public static ServiceItem fulled(Company company) {
+        return base(company).toBuilder()
+                .currentMember(20L)
+                .minimumMember(10L)
+                .maximumMember(20L)
+                .build();
+    }
+
+    public static ServiceItem inUse(Company company) {
+        return fulled(company).toBuilder()
+                .deadline(LocalDateTime.now().minusDays(20))
+                .startDate(LocalDateTime.now().minusDays(5))
+                .endDate(LocalDateTime.now().plusDays(5))
+                .build();
+    }
+
+    public static ServiceItem completed(Company company) {
+        return fulled(company).toBuilder()
+                .deadline(LocalDateTime.now().minusDays(20))
+                .startDate(LocalDateTime.now().minusDays(5))
+                .endDate(LocalDateTime.now().minusDays(1))
+                .build();
+    }
+
+    public static ServiceItem failed(Company company) {
+        return base(company).toBuilder()
+                .deadline(LocalDateTime.now().minusDays(1))
+                .build();
+    }
+
+    public static ServiceItem canceled(Company company) {
+        return base(company).toBuilder()
+                .isDeleted(true)
                 .build();
     }
 }

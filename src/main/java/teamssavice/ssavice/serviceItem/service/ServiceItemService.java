@@ -7,7 +7,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.book.service.BookWriteService;
@@ -100,7 +99,7 @@ public class ServiceItemService {
 
         serviceItem.participate();
 
-        Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
+        Book book = bookWriteService.apply(user, serviceItem);
 
         return BookModel.Apply.of(book.getId());
     }

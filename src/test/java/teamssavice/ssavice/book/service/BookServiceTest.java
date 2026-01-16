@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.fixture.BookFixture;
@@ -37,8 +37,8 @@ class BookServiceTest {
     void setUp() {
         Users user = UserFixture.user();
         for (int i = 0; i < 5; i++) {
-            books.add(BookFixture.book(user, ServiceItemFixture.fulled(), BookStatus.RESERVED));
-            books.add(BookFixture.book(user, ServiceItemFixture.recruiting(), BookStatus.RESERVED));
+            books.add(BookFixture.book(user, ServiceItemFixture.fulled(null), BookStatus.RESERVED));
+            books.add(BookFixture.book(user, ServiceItemFixture.recruiting(null), BookStatus.RESERVED));
         }
     }
 

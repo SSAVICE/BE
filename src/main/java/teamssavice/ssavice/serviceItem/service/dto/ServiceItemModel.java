@@ -120,8 +120,8 @@ public class ServiceItemModel {
             LocalDateTime createdAt,
             String category,
             String tag,
-            Long currentMember,
 
+            Long currentMember,
             Long minimumMember,
             Long maximumMember,
 

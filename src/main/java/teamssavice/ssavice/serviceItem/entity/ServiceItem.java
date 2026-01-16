@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
 
@@ -106,7 +106,7 @@ public class ServiceItem extends BaseEntity {
 
     public ServiceStatus getStatus() {
         if(this.isDeleted) return ServiceStatus.CANCELED;
-        if(isInUse()) return ServiceStatus.INUSE;
+        if(isInUse()) return ServiceStatus.IN_USE;
         if(isCompleted()) return ServiceStatus.COMPLETED;
         if(isFull()) return ServiceStatus.FULLED;
         if (isTimeOver()) {
