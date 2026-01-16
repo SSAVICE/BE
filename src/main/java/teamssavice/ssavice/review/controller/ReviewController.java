@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
-import teamssavice.ssavice.global.dto.PagingResponse;
+import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.review.controller.dto.ReviewRequest;
 import teamssavice.ssavice.review.controller.dto.ReviewResponse;
 import teamssavice.ssavice.review.service.ReviewService;
@@ -37,12 +37,12 @@ public class ReviewController {
     }
 
     @GetMapping("/{company-id}")
-    public PagingResponse<ReviewResponse.Item> getReview(
+    public ResponseEntity<PageResponse<ReviewResponse.Item>> getReview(
             @PathVariable("company-id") @Positive Long companyId,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ReviewResponse.Item> response = reviewService.getReviewPaging(companyId, pageable)
                 .map(ReviewResponse.Item::from);
-        return PagingResponse.from(response);
+        return ResponseEntity.ok(PageResponse.from(response));
     }
 }

@@ -39,7 +39,7 @@ public class BookController {
         BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable,
             status.toDomainOrNull());
 
-        Page<BookModel.Info> models = bookService.getMyBooksByStatue(command);
+        Page<BookModel.Info> models = bookService.getMyBooksByStatus(command);
         Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
 
         return ResponseEntity.ok(PageResponse.from(reponsePage));

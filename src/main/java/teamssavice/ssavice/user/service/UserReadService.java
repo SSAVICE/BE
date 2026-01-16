@@ -29,7 +29,7 @@ public class UserReadService {
     @Transactional(readOnly = true)
     public Users findByIdFetchJoinAddress(Long id) {
         return userRepository.findByIdFetchJoinAddress(id)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_ADDRESS_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

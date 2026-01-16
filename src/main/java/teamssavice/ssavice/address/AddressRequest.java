@@ -22,5 +22,16 @@ public class AddressRequest {
             @NotNull
             BigDecimal latitude
     ) {
+        public AddressCommand.Update toCommand(Long userId) {
+            return AddressCommand.Update.builder()
+                    .userId(userId)
+                    .regionCode(regionCode)
+                    .postCode(postCode)
+                    .address(address)
+                    .detailAddress(detailAddress)
+                    .longitude(longitude)
+                    .latitude(latitude)
+                    .build();
+        }
     }
 }

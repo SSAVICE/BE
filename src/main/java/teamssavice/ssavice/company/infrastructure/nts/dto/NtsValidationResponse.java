@@ -2,10 +2,9 @@ package teamssavice.ssavice.company.infrastructure.nts.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -23,6 +22,9 @@ public class NtsValidationResponse {
     @Getter
     @NoArgsConstructor
     public static class BusinessDataResponse {
+
+        public static final String VALID_CODE = "01";
+        public static final String INVALID_CODE = "02";
 
         @JsonProperty("b_no")
         private String businessNumber;

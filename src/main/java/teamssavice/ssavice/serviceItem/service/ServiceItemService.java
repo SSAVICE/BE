@@ -2,6 +2,7 @@ package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,5 +115,8 @@ public class ServiceItemService {
         }
     }
 
-
+    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyAndStatus(command.companyId(), command.status(), command.pageable());
+        return serviceItems.map(ServiceItemModel.Summary::from);
+    }
 }

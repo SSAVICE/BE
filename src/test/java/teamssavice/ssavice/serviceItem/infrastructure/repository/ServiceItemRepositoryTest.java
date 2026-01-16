@@ -1,11 +1,15 @@
 package teamssavice.ssavice.serviceItem.infrastructure.repository;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
@@ -14,6 +18,7 @@ import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
@@ -23,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
 @Import(QueryDSLConfig.class)
@@ -34,6 +40,8 @@ class ServiceItemRepositoryTest {
     private ServiceItemRepository serviceItemRepository;
     @Autowired
     private CompanyRepository companyRepository;
+    @Autowired
+    EntityManager em;
 
     private Users user;
     private Company company;
@@ -64,5 +72,31 @@ class ServiceItemRepositoryTest {
             assertThat(actuals.get(i).getTitle()).isEqualTo(serviceItems.get(5 - i - 1).getTitle());
             assertThat(actuals.get(i).getDeadline()).isEqualTo(serviceItems.get(5 - i - 1).getDeadline());
         }
+    }
+
+    @Test
+    @DisplayName("회사Id와 status로 service 검색 테스트")
+    void findAllByCompanyIdAndStatusTest() {
+        // given
+        userRepository.save(this.user);
+        Company company = companyRepository.save(this.company);
+        ServiceStatus status = ServiceStatus.SUCCESS;
+        List<ServiceItem> serviceItems = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            serviceItems.add(ServiceItemFixture.setCompanyAndStatus(company, status));
+        }
+        serviceItemRepository.saveAll(serviceItems);
+        Pageable pageable = PageRequest.of(0, 10);
+        em.flush();
+        em.clear();
+
+        // when
+        Page<ServiceItem> actuals = serviceItemRepository.findAllByCompany_IdAndStatus(company.getId(), status, pageable);
+
+        // then
+        assertAll(
+                () -> assertThat(actuals.getContent()).hasSize(5),
+                () -> assertThat(actuals.getContent().get(0).getStatus()).isEqualTo(status)
+        );
     }
 }

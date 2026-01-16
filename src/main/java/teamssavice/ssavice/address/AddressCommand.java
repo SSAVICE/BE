@@ -63,4 +63,16 @@ public class AddressCommand {
                     .build();
         }
     }
+
+    @Builder
+    public record Update(
+            Long userId,
+            String regionCode,
+            String postCode,
+            String address,
+            String detailAddress,
+            BigDecimal longitude,
+            BigDecimal latitude
+    ) {
+    }
 }

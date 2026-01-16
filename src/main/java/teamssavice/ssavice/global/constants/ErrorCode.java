@@ -16,10 +16,13 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     USER_EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER_EMAIL_ALREADY_EXISTS", "이미 사용 중인 이메일입니다."),
+    USER_ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ADDRESS_NOT_FOUND", "사용자의 주소를 찾을 수 없습니다."),
 
     // Company
     COMPANY_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_ALREADY_EXISTS", "이미 업체가 등록되어 있습니다."),
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
+    INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "INVALID_BUSINESS_NUMBER",
+        "유효하지 않은 사업자 등록번호입니다."),
 
     // serviceItem
     SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_ITEM_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
