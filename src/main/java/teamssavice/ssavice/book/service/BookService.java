@@ -41,7 +41,7 @@ public class BookService {
         );
         // 모집 마감
         Long closedCount = bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.CLOSED
+                userId, BookStatus.RESERVED, ServiceStatus.FULLED
         );
 
         return BookModel.BookSummary.from(applying, succeededCount + closedCount);

@@ -121,7 +121,7 @@ public class ServiceItem extends BaseEntity {
         }
 
         if (isFull()) {
-            this.status = ServiceStatus.CLOSED;
+            this.status = ServiceStatus.FULLED;
         }
     }
 
@@ -134,7 +134,7 @@ public class ServiceItem extends BaseEntity {
     }
 
     public void finish() {
-        this.status = ServiceStatus.CLOSED;
+        this.status = ServiceStatus.FULLED;
     }
 
     // 서비스아이템 등록을 위한 검증
@@ -148,7 +148,7 @@ public class ServiceItem extends BaseEntity {
             case FAILED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_FAILED);
             case CANCELED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
             case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
-            case CLOSED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
+            case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
 
         // 마감 기한 확인
@@ -160,4 +160,19 @@ public class ServiceItem extends BaseEntity {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
     }
+
+    // 이용중인지 여부
+    public boolean isInUse(LocalDateTime now) {
+        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
+                && (now.isAfter(startDate) || now.isEqual(startDate))
+                && now.isBefore(endDate);
+    }
+
+    // 이용 종료 여부
+    public boolean isTimeOver(LocalDateTime now) {
+        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
+                && (now.isAfter(endDate) || now.isEqual(endDate));
+    }
+
+
 }

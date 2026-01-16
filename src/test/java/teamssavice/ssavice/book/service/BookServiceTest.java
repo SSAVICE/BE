@@ -44,7 +44,7 @@ class BookServiceTest {
                 .willReturn(succeededCount);
 
         given(bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.CLOSED))
+                userId, BookStatus.RESERVED, ServiceStatus.FULLED))
                 .willReturn(closedCount);
 
         // when
@@ -64,6 +64,6 @@ class BookServiceTest {
         verify(bookReadService).countByUserIdAndBookStatusAndServiceStatus(
                 userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED);
         verify(bookReadService).countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.CLOSED);
+                userId, BookStatus.RESERVED, ServiceStatus.FULLED);
     }
 }

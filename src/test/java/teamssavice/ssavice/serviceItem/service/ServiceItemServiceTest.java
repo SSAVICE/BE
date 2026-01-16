@@ -74,7 +74,7 @@ public class ServiceItemServiceTest {
     }
 
     @Test
-    @DisplayName("참여 시 최대 인원이 충족되면 서비스 상태는 '모집 마감(CLOSED)'이 되고, 예약은 'RESERVED'로 저장된다")
+    @DisplayName("참여 시 최대 인원이 충족되면 서비스 상태는 '모집 마감(FULLED)'이 되고, 예약은 'RESERVED'로 저장된다")
     void apply_reaches_maximum_trigger_test() {
         // given
         Long serviceId = 1L;
@@ -105,8 +105,8 @@ public class ServiceItemServiceTest {
         // 1. Book 저장 호출 검증
         verify(bookWriteService).save(any(), any(), eq(BookStatus.RESERVED));
 
-        // 2. 서비스 아이템의 상태가 CLOSED로 변했는지 검증
-        assertThat(serviceItem.getStatus()).isEqualTo(ServiceStatus.CLOSED);
+        // 2. 서비스 아이템의 상태가 FULLED 로 변했는지 검증
+        assertThat(serviceItem.getStatus()).isEqualTo(ServiceStatus.FULLED);
 
         // 3. 인원수가 20명으로 늘어났는지 검증
         assertThat(serviceItem.getCurrentMember()).isEqualTo(20L);

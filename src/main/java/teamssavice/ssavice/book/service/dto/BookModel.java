@@ -107,42 +107,21 @@ public class BookModel {
     @Builder
     public record Apply(
             Long bookId,
-            DisplayStatus displayStatus
+            BookStatus bookStatus,
+            ServiceStatus serviceStatus,
+            boolean isInUse,
+            boolean isTimeOver
     ) {
-        public static Apply from(Book entity) {
+        public static Apply of(Long bookId, BookStatus bookStatus, ServiceStatus serviceStatus,
+                               boolean isInUse, boolean isTimeOver) {
             return Apply.builder()
-                    .bookId(entity.getId())
-                    .displayStatus(toDisplayStatus(entity, entity.getServiceItem()))
+                    .bookId(bookId)
+                    .bookStatus(bookStatus)
+                    .serviceStatus(serviceStatus)
+                    .isInUse(isInUse)
+                    .isTimeOver(isTimeOver)
                     .build();
         }
     }
-
-    private static DisplayStatus toDisplayStatus(Book book, ServiceItem serviceItem) {
-
-        if (book.getBookStatus() == BookStatus.CANCELED) {
-            return new DisplayStatus(DisplayStatusCode.USER_CANCELED, "취소됨");
-        }
-
-        return switch (serviceItem.getStatus()) {
-            case RECRUITING -> new DisplayStatus(DisplayStatusCode.RECRUITING, "모집 중");
-            case SUCCEEDED -> new DisplayStatus(DisplayStatusCode.SUCCEEDED, "예약 확정");
-            case CLOSED -> new DisplayStatus(DisplayStatusCode.CLOSED, "모집 마감");
-            case FAILED -> new DisplayStatus(DisplayStatusCode.FAILED, "모집 무산");
-            case COMPLETED -> new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료");
-            case CANCELED -> new DisplayStatus(DisplayStatusCode.SERVICE_CANCELED, "업체 취소");
-        };
-    }
-
-    public record DisplayStatus(
-            DisplayStatusCode code, // 프론트 로직용
-            @Schema(description = "상태 라벨", example = "모집 중")
-            String label  // 화면 출력용
-    ) {
-    }
-
-    public enum DisplayStatusCode {
-        RECRUITING, SUCCEEDED, CLOSED, FAILED, COMPLETED, SERVICE_CANCELED, USER_CANCELED
-    }
-
 
 }

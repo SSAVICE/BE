@@ -103,7 +103,18 @@ public class ServiceItemService {
 
         Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
 
-        return BookModel.Apply.from(book);
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isInUse = serviceItem.isInUse(now);
+        boolean isTimeOver = serviceItem.isTimeOver(now);
+
+        return BookModel.Apply.of(
+                book.getId(),
+                book.getBookStatus(),
+                serviceItem.getStatus(),
+                isInUse,
+                isTimeOver
+        );
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
