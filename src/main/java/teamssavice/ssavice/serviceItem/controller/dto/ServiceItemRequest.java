@@ -88,4 +88,8 @@ public class ServiceItemRequest {
                     .build();
         }
     }
+
+    @Builder
+    public record Update {
+    }
 }

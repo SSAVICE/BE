@@ -103,5 +103,14 @@ public class ServiceItemController {
 
     }
 
+    @PutMapping
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<ServiceItemResponse.Detail> updateServiceItem(
+            @CurrentId Long companyId,
+            @PathVariable Long serviceId,
+            @RequestBody @Valid ServiceItemRequest.Update request
+    ) {
 
+        Long updatedId = serviceItemService.update(request.toCommand(serviceId, companyId));
+    }
 }

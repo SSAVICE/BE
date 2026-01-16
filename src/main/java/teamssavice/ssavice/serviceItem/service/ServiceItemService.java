@@ -19,6 +19,7 @@ import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
@@ -46,6 +47,7 @@ public class ServiceItemService {
     private final BookWriteService bookWriteService;
     private final BookReadService bookReadService;
     private final RegionReadService regionReadService;
+    private final ImageService imageService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -128,6 +130,10 @@ public class ServiceItemService {
         if (serviceItem.getCurrentMember() > 0) {
             throw new ConflictException(ErrorCode.SERVICE_HAS_USERS);
         }
+
+        // 이미지 비활성화 처리해서 - 배치처리 용이하게
+        List<Long> imageIds = serviceItem.getImageIds();
+        imageService.deActivateImages(imageIds);
 
         serviceItem.delete();
 
