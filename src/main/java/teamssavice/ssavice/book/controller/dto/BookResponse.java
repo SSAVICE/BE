@@ -91,54 +91,51 @@ public class BookResponse {
         }
     }
 
-    // Apply에서 쓰는 유의미한 DisplayStatus 는 RECRUITING 하고 SUCCEEDED 만 있을듯
     @Builder
     public record Apply(
-            Long bookId,
-            DisplayStatus displayStatus
+            Long bookId
     ) {
         public static Apply from(BookModel.Apply model) {
             return Apply.builder()
                     .bookId(model.bookId())
-                    .displayStatus(toDisplayStatus(model))
                     .build();
         }
     }
 
-    // 여러 상태를 위해서 만들어둠
-    private static DisplayStatus toDisplayStatus(BookModel.Apply model) {
-        if (model.bookStatus() == BookStatus.CANCELED) {
-            return new DisplayStatus(DisplayStatusCode.USER_CANCELED, "유저 취소");
-        }
-
-        return switch (model.serviceStatus()) {
-            case RECRUITING ->
-                    new DisplayStatus(DisplayStatusCode.RECRUITING, "모집 중 (취소 가능)");
-
-            case FAILED ->
-                    new DisplayStatus(DisplayStatusCode.FAILED, "모집 실패");
-
-            case CANCELED ->
-                    new DisplayStatus(DisplayStatusCode.SERVICE_CANCELED, "업체 취소");
-            // 이 부분 관련해서 스케줄러 도입 예정 - ServiceStatus 에서
-            case COMPLETED ->
-                    new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료 (리뷰 작성 가능)");
-
-            case SUCCEEDED, FULLED -> {
-                if (model.isInUse()) {
-                    yield new DisplayStatus(DisplayStatusCode.IN_USE, "이용 중");
-                }
-
-                if (model.isTimeOver()) {
-                    yield new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료 (리뷰 작성 가능)");
-                }
-
-                yield (model.serviceStatus() == ServiceStatus.SUCCEEDED)
-                        ? new DisplayStatus(DisplayStatusCode.SUCCEEDED, "모집 성공 (취소 불가능)")
-                        : new DisplayStatus(DisplayStatusCode.FULLED, "모집 마감");
-            }
-        };
-    }
+//    // 여러 상태를 위해서 만들어둠
+//    private static DisplayStatus toDisplayStatus() {
+//        if (model.bookStatus() == BookStatus.CANCELED) {
+//            return new DisplayStatus(DisplayStatusCode.USER_CANCELED, "유저 취소");
+//        }
+//
+//        return switch (model.serviceStatus()) {
+//            case RECRUITING ->
+//                    new DisplayStatus(DisplayStatusCode.RECRUITING, "모집 중 (취소 가능)");
+//
+//            case FAILED ->
+//                    new DisplayStatus(DisplayStatusCode.FAILED, "모집 실패");
+//
+//            case CANCELED ->
+//                    new DisplayStatus(DisplayStatusCode.SERVICE_CANCELED, "업체 취소");
+//            // 이 부분 관련해서 스케줄러 도입 예정 - ServiceStatus 에서
+//            case COMPLETED ->
+//                    new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료 (리뷰 작성 가능)");
+//
+//            case SUCCEEDED, FULLED -> {
+//                if (model.isInUse()) {
+//                    yield new DisplayStatus(DisplayStatusCode.IN_USE, "이용 중");
+//                }
+//
+//                if (model.isTimeOver()) {
+//                    yield new DisplayStatus(DisplayStatusCode.COMPLETED, "이용 완료 (리뷰 작성 가능)");
+//                }
+//
+//                yield (model.serviceStatus() == ServiceStatus.SUCCEEDED)
+//                        ? new DisplayStatus(DisplayStatusCode.SUCCEEDED, "모집 성공 (취소 불가능)")
+//                        : new DisplayStatus(DisplayStatusCode.FULLED, "모집 마감");
+//            }
+//        };
+//    }
 
     public record DisplayStatus(
             DisplayStatusCode code, // 프론트 로직용

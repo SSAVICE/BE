@@ -1,11 +1,9 @@
 package teamssavice.ssavice.book.service.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
@@ -106,20 +104,11 @@ public class BookModel {
 
     @Builder
     public record Apply(
-            Long bookId,
-            BookStatus bookStatus,
-            ServiceStatus serviceStatus,
-            boolean isInUse,
-            boolean isTimeOver
+            Long bookId
     ) {
-        public static Apply of(Long bookId, BookStatus bookStatus, ServiceStatus serviceStatus,
-                               boolean isInUse, boolean isTimeOver) {
+        public static Apply of(Long bookId) {
             return Apply.builder()
                     .bookId(bookId)
-                    .bookStatus(bookStatus)
-                    .serviceStatus(serviceStatus)
-                    .isInUse(isInUse)
-                    .isTimeOver(isTimeOver)
                     .build();
         }
     }
