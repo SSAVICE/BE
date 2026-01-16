@@ -80,7 +80,7 @@ class ServiceItemRepositoryTest {
         // given
         userRepository.save(this.user);
         Company company = companyRepository.save(this.company);
-        ServiceStatus status = ServiceStatus.SUCCESS;
+        ServiceStatus status = ServiceStatus.SUCCEEDED;
         List<ServiceItem> serviceItems = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             serviceItems.add(ServiceItemFixture.setCompanyAndStatus(company, status));

@@ -99,22 +99,22 @@ public class ServiceItemService {
 
         validateApply(user, serviceItem);
 
-        boolean alreadyReachedMin = serviceItem.isReachedMinimum();
-
         serviceItem.participate();
 
-        // 최소인원 도달시 기존 APPLYING 상태 참여자들 일괄 MATCHED 변경
-        if (!alreadyReachedMin && serviceItem.isReachedMinimum()) {
-            bookWriteService.updateAllStatusToMatched(serviceItem.getId());
-        }
+        Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
 
-        BookStatus initialStatus = serviceItem.isReachedMinimum()
-                ? BookStatus.MATCHED
-                : BookStatus.APPLYING;
+        LocalDateTime now = LocalDateTime.now();
 
-        Book book = bookWriteService.save(user, serviceItem, initialStatus);
+        boolean isInUse = serviceItem.isInUse(now);
+        boolean isTimeOver = serviceItem.isTimeOver(now);
 
-        return BookModel.Apply.from(book);
+        return BookModel.Apply.of(
+                book.getId(),
+                book.getBookStatus(),
+                serviceItem.getStatus(),
+                isInUse,
+                isTimeOver
+        );
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {

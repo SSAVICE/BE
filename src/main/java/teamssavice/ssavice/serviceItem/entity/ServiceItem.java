@@ -116,8 +116,12 @@ public class ServiceItem extends BaseEntity {
         }
         this.currentMember++;
 
-        if (this.isFull()) {
-            this.finish();
+        if (this.status == ServiceStatus.RECRUITING && isReachedMinimum()) {
+            this.status = ServiceStatus.SUCCEEDED;
+        }
+
+        if (isFull()) {
+            this.status = ServiceStatus.FULLED;
         }
     }
 
@@ -130,7 +134,7 @@ public class ServiceItem extends BaseEntity {
     }
 
     public void finish() {
-        this.status = ServiceStatus.FINISHED;
+        this.status = ServiceStatus.FULLED;
     }
 
     // 서비스아이템 등록을 위한 검증
@@ -139,10 +143,14 @@ public class ServiceItem extends BaseEntity {
         if (this.isDeleted) {
             throw new ConflictException(ErrorCode.SERVICE_DELETED);
         }
-        // 모집중 여부
-        if (this.status != ServiceStatus.RECRUITING) {
-            throw new ConflictException(ErrorCode.SERVICE_NOT_RECRUITING);
+        // 안되는 상황 구체화
+        switch (this.status) {
+            case FAILED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_FAILED);
+            case CANCELED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
+            case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
+            case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+
         // 마감 기한 확인
         if (now.isAfter(this.deadline)) {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
@@ -152,4 +160,19 @@ public class ServiceItem extends BaseEntity {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
     }
+
+    // 이용중인지 여부
+    public boolean isInUse(LocalDateTime now) {
+        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
+                && (now.isAfter(startDate) || now.isEqual(startDate))
+                && now.isBefore(endDate);
+    }
+
+    // 이용 종료 여부
+    public boolean isTimeOver(LocalDateTime now) {
+        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
+                && (now.isAfter(endDate) || now.isEqual(endDate));
+    }
+
+
 }

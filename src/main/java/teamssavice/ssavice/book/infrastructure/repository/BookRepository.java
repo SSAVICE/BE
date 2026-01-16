@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 
 @Repository
@@ -38,9 +39,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     )
     Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable);
 
-    Long countByUserIdAndBookStatus(Long userId, BookStatus bookStatus);
-
-
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Book b SET b.bookStatus = :targetStatus " +
             "WHERE b.serviceItem.id = :serviceId " +
@@ -52,4 +50,15 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     );
 
     boolean existsByUserIdAndServiceItemIdAndBookStatusNot(Long userId, Long serviceItemId, BookStatus bookStatus);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " + // 페치 조인이 아닌 일반 조인
+            "WHERE b.user.id = :userId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :serviceStatus")
+    Long countByUserIdAndBookStatusAndServiceStatus(
+            @Param("userId") Long userId,
+            @Param("bookStatus") BookStatus bookStatus,
+            @Param("serviceStatus") ServiceStatus serviceStatus
+    );
 }

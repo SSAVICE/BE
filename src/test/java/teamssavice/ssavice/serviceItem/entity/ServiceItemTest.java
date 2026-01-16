@@ -18,7 +18,8 @@ public class ServiceItemTest {
     void entity_logic_test() {
         // Given: 최대 인원 10명 현재 9명
         ServiceItem item = ServiceItemFixture.custom("테스트", LocalDateTime.now(), null, null);
-        ReflectionTestUtils.setField(item, "maximumMember", 10L);
+        ReflectionTestUtils.setField(item, "minimumMember", 10L);
+        ReflectionTestUtils.setField(item, "maximumMember", 11L);
         ReflectionTestUtils.setField(item, "currentMember", 9L);
         ReflectionTestUtils.setField(item, "status", ServiceStatus.RECRUITING);
 
@@ -28,7 +29,7 @@ public class ServiceItemTest {
         // Then 10명이 되면서 서비스 상태가 변하는지
         assertAll(
                 () -> assertThat(item.getCurrentMember()).isEqualTo(10L),
-                () -> assertThat(item.getStatus()).isEqualTo(ServiceStatus.FINISHED)
+                () -> assertThat(item.getStatus()).isEqualTo(ServiceStatus.SUCCEEDED)
         );
     }
 }
