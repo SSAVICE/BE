@@ -3,7 +3,6 @@ package teamssavice.ssavice.serviceItem.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.SQLRestriction;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -18,9 +17,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
-@SQLRestriction("is_deleted = false") //  만약 Company 측에서 삭제한 데이터에 대해서 봐야 하는 비즈니스 로직이 필요하다면 이 방법으로는 안하고 개선
 public class ServiceItem extends BaseEntity {
 
     private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
@@ -64,11 +62,6 @@ public class ServiceItem extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime deadline; // 이벤트 마감 기간
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    @Column(nullable = false)
-    private ServiceStatus status = ServiceStatus.RECRUITING;
-
     private String category;
 
     private String tag; // 엘라스틱 서치 도입 예정
@@ -111,20 +104,24 @@ public class ServiceItem extends BaseEntity {
         return imageIds.isEmpty();
     }
 
+    public ServiceStatus getStatus() {
+        if(this.isDeleted) return ServiceStatus.CANCELED;
+        if(isInUse()) return ServiceStatus.IN_USE;
+        if(isCompleted()) return ServiceStatus.COMPLETED;
+        if(isFull()) return ServiceStatus.FULLED;
+        if (isTimeOver()) {
+            if(!isReachedMinimum()) return ServiceStatus.FAILED;
+            return ServiceStatus.FULLED;
+        }
+        if(isReachedMinimum()) return ServiceStatus.SUCCEEDED;
+        return ServiceStatus.RECRUITING;
+    }
 
     public void participate() {
         if (this.isFull()) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
         this.currentMember++;
-
-        if (this.status == ServiceStatus.RECRUITING && isReachedMinimum()) {
-            this.status = ServiceStatus.SUCCEEDED;
-        }
-
-        if (isFull()) {
-            this.status = ServiceStatus.CLOSED;
-        }
     }
 
     public boolean isReachedMinimum() {
@@ -135,40 +132,37 @@ public class ServiceItem extends BaseEntity {
         return this.currentMember >= this.maximumMember;
     }
 
-    public void finish() {
-        this.status = ServiceStatus.CLOSED;
+    // 이용 종료 여부
+    public boolean isTimeOver() {
+        return this.deadline.isBefore(LocalDateTime.now());
+    }
+
+    // 이용중인지 여부
+    public boolean isInUse() {
+        LocalDateTime now = LocalDateTime.now();
+        return isReachedMinimum() && (now.isAfter(startDate) || now.isEqual(startDate)) && now.isBefore(endDate);
+    }
+
+    public boolean isCompleted() {
+        return isReachedMinimum() && LocalDateTime.now().isAfter(endDate);
     }
 
     // 서비스아이템 등록을 위한 검증
-    public void validateAppliable(LocalDateTime now) {
+    public void validateAppliable() {
         // 삭제 여부
-        if (this.isDeleted) {
-            throw new ConflictException(ErrorCode.SERVICE_DELETED);
-        }
+        ServiceStatus status = getStatus();
         // 안되는 상황 구체화
-        switch (this.status) {
+        switch (status) {
             case FAILED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_FAILED);
             case CANCELED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
             case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
-            case CLOSED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
+            case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+
 
         // 마감 기한 확인
-        if (now.isAfter(this.deadline)) {
+        if (LocalDateTime.now().isAfter(this.deadline)) {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
         }
-
-        if (this.currentMember >= this.maximumMember) {
-            throw new ConflictException(ErrorCode.MEMBER_FULL);
-        }
-    }
-
-    public boolean isOwner(Long companyId) {
-        return this.company.getId().equals(companyId);
-    }
-
-    public void delete() {
-        this.status = ServiceStatus.CANCELED;
-        this.isDeleted = true;
     }
 }

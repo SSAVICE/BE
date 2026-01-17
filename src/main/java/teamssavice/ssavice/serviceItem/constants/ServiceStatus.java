@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ServiceStatus {
-    RECRUITING("모집 중"),
-    SUCCEEDED("모집 성공"), // 최소 인원을 충족시켰다는 의미 - 환불이나 취소에서 모집중이랑은 차이가 있음
-    CLOSED("모집 마감"), // 이제 더 이상 신청 불가능
-    FAILED("모집 실패"),
-    CANCELED("모집 취소"),
-    COMPLETED("이용 완료"); // 서비스 이용이 종료돼서 리뷰가 가능한 상태
+    RECRUITING("모집 중"), // 최소 인원 미충족 + 모집 마감 전
+    SUCCEEDED("모집 성공"), // 최소 인원 충족 + 모집 마감 전
+    FULLED("모집 마감"), // (최대 인원 충족) OR (최소 인원 충족 + 모집마감)
+    FAILED("모집 실패"), // 최소 인원 미충족 + 모집 마감
+    CANCELED("모집 취소"), // 게시자가 삭제
+    IN_USE("이용 중"), // 모집 마감된 서비스가 서비스되는 기간 중에 있음
+    COMPLETED("이용 완료"); // 모집 마감된 서비스가 서비스 이용이 종료
 
     private final String description;
 }

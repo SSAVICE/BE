@@ -3,8 +3,10 @@ package teamssavice.ssavice.serviceItem.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
@@ -13,6 +15,7 @@ import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
@@ -21,6 +24,7 @@ import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 import java.util.List;
@@ -90,27 +94,17 @@ public class ServiceItemController {
         return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 
-    @DeleteMapping("/{serviceId}")
-    @RequireRole(Role.COMPANY)
-    public ResponseEntity<Void> deleteServiceItem(
-            @CurrentId Long companyId,
-            @PathVariable Long serviceId
+    @GetMapping("/company/{company-id}")
+    public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
+        @PathVariable("company-id") Long companyId,
+        @PageableDefault(page = 0, size = 10) Pageable pageable,
+        @RequestParam("on-sale") Boolean onSale
     ) {
+        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
-        serviceItemService.delete(serviceId, companyId);
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(command)
+                .map(ServiceItemResponse.Summary::from);
 
-        return ResponseEntity.noContent().build();
-
-    }
-
-    @PutMapping
-    @RequireRole(Role.COMPANY)
-    public ResponseEntity<ServiceItemResponse.Detail> updateServiceItem(
-            @CurrentId Long companyId,
-            @PathVariable Long serviceId,
-            @RequestBody @Valid ServiceItemRequest.Update request
-    ) {
-
-        Long updatedId = serviceItemService.update(request.toCommand(serviceId, companyId));
+        return ResponseEntity.ok(PageResponse.from(responses));
     }
 }

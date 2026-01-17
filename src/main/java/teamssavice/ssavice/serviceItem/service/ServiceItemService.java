@@ -2,11 +2,11 @@ package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.book.service.BookWriteService;
@@ -16,10 +16,8 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ConflictException;
-import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
-import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
@@ -30,7 +28,6 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +44,6 @@ public class ServiceItemService {
     private final BookWriteService bookWriteService;
     private final BookReadService bookReadService;
     private final RegionReadService regionReadService;
-    private final ImageService imageService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -103,39 +99,26 @@ public class ServiceItemService {
 
         serviceItem.participate();
 
-        Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
+        Book book = bookWriteService.apply(user, serviceItem);
 
-        return BookModel.Apply.from(book);
+        return BookModel.Apply.of(book.getId());
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
 
-        serviceItem.validateAppliable(LocalDateTime.now());
+        serviceItem.validateAppliable();
 
         if (bookReadService.existsByUserAndServiceItem(user, serviceItem)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }
 
-
-    @Transactional
-    public void delete(Long serviceId, Long companyId) {
-
-        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
-
-        if (!serviceItem.isOwner(companyId)) {
-            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
+        if (command.onSale()) {
+            Page<ServiceItem> serviceItems = serviceItemReadService.findAllRecruitingByCompany_Id(command.companyId(), command.pageable());
+            return serviceItems.map(ServiceItemModel.Summary::from);
         }
-
-        if (serviceItem.getCurrentMember() > 0) {
-            throw new ConflictException(ErrorCode.SERVICE_HAS_USERS);
-        }
-
-        // 이미지 비활성화 처리해서 - 배치처리 용이하게
-        List<Long> imageIds = serviceItem.getImageIds();
-        imageService.deActivateImages(imageIds);
-
-        serviceItem.delete();
-
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
+        return serviceItems.map(ServiceItemModel.Summary::from);
     }
 }

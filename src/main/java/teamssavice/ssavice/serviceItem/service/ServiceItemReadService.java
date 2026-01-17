@@ -1,6 +1,8 @@
 package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -34,5 +37,15 @@ public class ServiceItemReadService {
     public ServiceItem findById(Long serviceId) {
         return serviceItemRepository.findById(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllByCompany_Id(companyId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ServiceItem> findAllRecruitingByCompany_Id(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllRecruitingByCompany_Id(companyId, LocalDateTime.now(), pageable);
     }
 }

@@ -2,7 +2,6 @@ package teamssavice.ssavice.book.controller.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressResponse;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
 
 import java.time.LocalDateTime;
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
 public class BookResponse {
 
     public record Info(
-        ServiceInfo serviceInfo,
+        ServiceInfo service,
         String bookStatus,
         boolean isReviewed
     ) {
@@ -43,8 +42,7 @@ public class BookResponse {
         Long discountedPrice,
         // 기타
         LocalDateTime deadline,
-        String tag,
-        String status
+        String tag
     ) {
 
         public static ServiceInfo from(BookModel.ServiceDetail model) {
@@ -67,8 +65,7 @@ public class BookResponse {
                 model.discountedPrice(),
 
                 model.deadline(),
-                model.tags(), // List<String> 그대로 전달
-                model.status()
+                model.tags() // List<String> 그대로 전달
             );
         }
     }
@@ -91,13 +88,11 @@ public class BookResponse {
 
     @Builder
     public record Apply(
-            Long bookId,
-            BookModel.DisplayStatus displayStatus
+            Long bookId
     ) {
         public static Apply from(BookModel.Apply model) {
             return Apply.builder()
                     .bookId(model.bookId())
-                    .displayStatus(model.displayStatus())
                     .build();
         }
     }

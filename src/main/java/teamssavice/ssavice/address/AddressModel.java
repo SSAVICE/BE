@@ -19,11 +19,26 @@ public class AddressModel {
     public record RegionDetail(
             String gugun,
             String region,
+            String gugunCode,
+            String regionCode,
             BigDecimal latitude,
             BigDecimal longitude,
             String postCode,
             String address,
             String detailAddress
     ) {
+        public static AddressModel.RegionDetail from(Address entity) {
+            return RegionDetail.builder()
+                    .gugun(entity.getGugun())
+                    .region(entity.getRegion())
+                    .gugunCode(entity.getGugunCode())
+                    .regionCode(entity.getRegionCode())
+                    .latitude(entity.getLatitude())
+                    .longitude(entity.getLongitude())
+                    .postCode(entity.getPostCode())
+                    .address(entity.getAddress())
+                    .detailAddress(entity.getDetailAddress())
+                    .build();
+        }
     }
 }

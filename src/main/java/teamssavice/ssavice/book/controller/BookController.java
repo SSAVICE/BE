@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.book.controller.dto.BookRequest.BookStatusFilter;
+import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.controller.dto.BookResponse;
 import teamssavice.ssavice.book.service.BookService;
 import teamssavice.ssavice.book.service.dto.BookCommand;
@@ -36,10 +36,9 @@ public class BookController {
         @RequestParam BookStatusFilter status
     ) {
 
-        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable,
-            status.toDomainOrNull());
+        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable, status);
 
-        Page<BookModel.Info> models = bookService.getMyBooksByStatue(command);
+        Page<BookModel.Info> models = bookService.getMyBooksByStatus(command);
         Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
 
         return ResponseEntity.ok(PageResponse.from(reponsePage));

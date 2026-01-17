@@ -44,7 +44,23 @@ public class ServiceItemCommand {
         Long maxPrice,
         Integer sortBy,
         Long lastId,      // 커서 ID
-        Pageable pageable
+        Pageable pageable,
+        boolean onSale
     ) {
+    }
+
+    @Builder
+    public record RetrieveByCompanyAndOnSale(
+        Long companyId,
+        Pageable pageable,
+        boolean onSale
+    ) {
+        public static RetrieveByCompanyAndOnSale of(Long companyId, Pageable pageable, Boolean onSale) {
+            return RetrieveByCompanyAndOnSale.builder()
+                    .companyId(companyId)
+                    .pageable(pageable)
+                    .onSale(Boolean.TRUE.equals(onSale))
+                    .build();
+        }
     }
 }

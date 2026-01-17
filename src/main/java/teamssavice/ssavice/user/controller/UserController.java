@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import teamssavice.ssavice.address.AddressModel;
+import teamssavice.ssavice.address.AddressRequest;
+import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
@@ -73,5 +76,24 @@ public class UserController {
     ) {
         userService.updateProfileImage(userId, request.objectKey());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/address")
+    @RequireRole(Role.USER)
+    public ResponseEntity<AddressResponse.RegionDetail> getAddress(
+            @CurrentId Long userId
+    ) {
+        AddressModel.RegionDetail model = userService.getUserAddress(userId);
+        return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
+    }
+
+    @PatchMapping("/address")
+    @RequireRole(Role.USER)
+    public ResponseEntity<AddressResponse.RegionDetail> patchAddress(
+            @CurrentId Long userId,
+            @RequestBody @Valid AddressRequest.Region request
+    ) {
+        AddressModel.RegionDetail model = userService.updateUserAddress(request.toCommand(userId));
+        return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
     }
 }

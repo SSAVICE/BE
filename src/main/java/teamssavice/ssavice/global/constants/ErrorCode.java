@@ -16,10 +16,13 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     USER_EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER_EMAIL_ALREADY_EXISTS", "이미 사용 중인 이메일입니다."),
+    USER_ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_ADDRESS_NOT_FOUND", "사용자의 주소를 찾을 수 없습니다."),
 
     // Company
     COMPANY_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_ALREADY_EXISTS", "이미 업체가 등록되어 있습니다."),
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
+    INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "INVALID_BUSINESS_NUMBER",
+        "유효하지 않은 사업자 등록번호입니다."),
 
     // serviceItem
     SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_ITEM_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
@@ -30,7 +33,6 @@ public enum ErrorCode {
     SERVICE_RECRUITMENT_FAILED(HttpStatus.CONFLICT, "SERVICE_RECRUITMENT_FAILED", "모집이 무산된 서비스입니다."),
     SERVICE_RECRUITMENT_CANCELED(HttpStatus.CONFLICT, "SERVICE_RECRUITMENT_CANCELED", "업체에 의해 취소된 서비스입니다."),
     SERVICE_ALREADY_COMPLETED(HttpStatus.CONFLICT, "SERVICE_ALREADY_COMPLETED", "이미 이용이 완료된 서비스입니다."),
-    SERVICE_HAS_USERS(HttpStatus.CONFLICT, "SERVICE_HAS_USERS", "이미 신청한 사용자가 있어 삭제하거나 수정할 수 없습니다."),
 
     // imageResource
     UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE", "지원하지 않는 contentType입니다."),

@@ -4,6 +4,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
 import teamssavice.ssavice.company.infrastructure.nts.client.NtsApiClient;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationRequest;
 import teamssavice.ssavice.company.infrastructure.nts.dto.NtsValidationResponse;
@@ -24,28 +25,21 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
     private String serviceKey;
 
     @Override
-    public BusinessVerifyResponse validate(BusinessVerifyRequest request) {
+    public void validate(CompanyInfraCommand.Validate command) {
 
-        NtsValidationRequest ntsRequest = NtsValidationRequest.of(
-                request.businessNumber(),
-                request.startDate(),
-                request.name()
-        );
+        NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(),
+            command.startDate(), command.name());
 
         try {
-            NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, ntsRequest);
-
-            NtsValidationResponse.BusinessDataResponse data = response.getData().get(0);
-
-            return BusinessVerifyResponse.builder()
-                    .isValid(data.isValidSuccess())
-                    .build();
-
+            NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);
+            var data = response.getData().get(0);
+            if (!data.getValid().equals(NtsValidationResponse.BusinessDataResponse.VALID_CODE)) {
+                throw new ExternalApiException(ErrorCode.INVALID_BUSINESS_NUMBER);
+            }
         } catch (feign.RetryableException e) {
             throw new ExternalApiException(ErrorCode.EXTERNAL_API_TIMEOUT);
         } catch (FeignException e) {
             throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
-
         }
     }
 }
