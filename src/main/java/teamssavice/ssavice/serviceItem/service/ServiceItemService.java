@@ -113,7 +113,7 @@ public class ServiceItemService {
 
         serviceItem.validateAppliable();
 
-        if (bookReadService.existsByUserAndServiceItem(user, serviceItem)) {
+        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }
@@ -136,7 +136,7 @@ public class ServiceItemService {
         serviceItem.delete();
 
         // 이거는 확장성을 고려해서 만들어둠 - 관련해서 이벤트 처리 방식으로 수정 예정
-        List<Book> canceledBooks = bookReadService.findAllByServiceItemAndBookStatus(serviceItem, BookStatus.RESERVED);
+        List<Book> canceledBooks = bookReadService.findAllByServiceItemIdAndBookStatus(serviceItem.getId(), BookStatus.RESERVED);
 
         if (!canceledBooks.isEmpty()) {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
@@ -147,5 +147,27 @@ public class ServiceItemService {
         if (!serviceItem.getCompany().getId().equals(companyId)) {
             throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);
         }
+    }
+
+    @Transactional
+    public void cancel(ServiceItemCommand.Cancel command) {
+
+        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
+        Users user = userReadService.findById(command.userId());
+
+        Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(user.getId(), serviceItem.getId());
+
+        if (book.isCanceled()) {
+            throw new ConflictException(ErrorCode.ALREADY_CANCELED);
+        }
+
+        // 최소 인원 검증인데 이거는 현재는 못하게 막아놓고 법적인거 조사하면서 따로 수수료 물면서 환불하는 로직으로 전환예정
+        if (serviceItem.isReachedMinimum()) {
+            throw new ConflictException(ErrorCode.AT_MINIMUM_MEMBER_LIMIT);
+        }
+
+        book.cancel();
+        serviceItem.cancelParticipation();
+        refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
     }
 }

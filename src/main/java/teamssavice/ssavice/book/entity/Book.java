@@ -35,4 +35,12 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private boolean isReviewed = false;
+
+    public boolean isCanceled() {
+        return this.bookStatus == BookStatus.CANCELED;
+    }
+
+    public void cancel() {
+        this.bookStatus = BookStatus.CANCELED;
+    }
 }

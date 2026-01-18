@@ -2,12 +2,14 @@ package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
+import teamssavice.ssavice.serviceItem.entity.Price;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class ServiceItemCommand {
+
 
     @Builder
     public record Create(
@@ -72,6 +74,19 @@ public class ServiceItemCommand {
         public static Delete of(Long companyId, Long serviceId) {
             return Delete.builder()
                     .companyId(companyId)
+                    .serviceId(serviceId)
+                    .build();
+        }
+    }
+
+    @Builder
+    public record Cancel(
+            Long userId,
+            Long serviceId
+    ) {
+        public static Cancel of(Long userId, Long serviceId) {
+            return Cancel.builder()
+                    .userId(userId)
                     .serviceId(serviceId)
                     .build();
         }

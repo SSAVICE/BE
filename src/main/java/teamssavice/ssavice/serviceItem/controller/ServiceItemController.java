@@ -118,4 +118,15 @@ public class ServiceItemController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{serviceId}/cancel")
+    @RequireRole(Role.USER)
+    public ResponseEntity<Void> cancelParticipation(
+            @CurrentId Long userId,
+            @PathVariable Long serviceId
+    ) {
+
+        serviceItemService.cancel(ServiceItemCommand.Cancel.of(userId, serviceId));
+        return ResponseEntity.ok().build();
+    }
+
 }

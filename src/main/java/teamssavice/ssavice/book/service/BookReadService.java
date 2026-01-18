@@ -10,11 +10,10 @@ import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.user.entity.Users;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
 
 import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -29,15 +28,21 @@ public class BookReadService {
     }
 
     // 취소한 사람은 다시 신청이 가능
-    public boolean existsByUserAndServiceItem(Users user, ServiceItem serviceItem) {
-        return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED);
+    public boolean existsByUserAndServiceAndStatusNot(Long userId, Long serviceId, BookStatus status) {
+        return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(userId, serviceId, status);
     }
 
     public List<Book> findByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
         return bookRepository.findByUserIdAndBookStatus(userId, bookStatus);
     }
 
-    public List<Book> findAllByServiceItemAndBookStatus(ServiceItem serviceItem, BookStatus bookStatus) {
-        return bookRepository.findAllByServiceItemAndBookStatus(serviceItem, bookStatus);
+    public List<Book> findAllByServiceItemIdAndBookStatus(Long serviceItemId, BookStatus bookStatus) {
+        return bookRepository.findAllByServiceItemIdAndBookStatus(serviceItemId, bookStatus);
+    }
+
+
+    public Book findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId) {
+        return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
     }
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-public class InMemoryRefundService implements RefundService {
+public class TempRefundServiceImpl implements RefundService {
 
     // 임시로 만들어둠 - 나중에 결제 붙이면서 다 수정
     private final Map<Long, RefundInfo> refundStorage = new ConcurrentHashMap<>();
