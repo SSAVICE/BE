@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookRepositor
             @Param("userId") Long userId,
             @Param("bookStatus") BookStatus bookStatus
     );
+
+    List<Book> findAllByServiceItemAndBookStatus(ServiceItem serviceItem, BookStatus bookStatus);
 }

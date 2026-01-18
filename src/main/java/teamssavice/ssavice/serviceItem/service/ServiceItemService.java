@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.book.service.BookWriteService;
 import teamssavice.ssavice.book.service.dto.BookModel;
@@ -19,6 +20,7 @@ import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
@@ -45,6 +47,7 @@ public class ServiceItemService {
     private final BookWriteService bookWriteService;
     private final BookReadService bookReadService;
     private final RegionReadService regionReadService;
+    private final RefundService refundService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -127,11 +130,16 @@ public class ServiceItemService {
     public void delete(ServiceItemCommand.Delete command) {
 
         ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
-
         validateOwner(command.companyId(), serviceItem);
 
         serviceItem.delete();
 
+        // 이거는 확장성을 고려해서 만들어둠 - 관련해서 이벤트 처리 방식으로 수정 예정
+        List<Book> canceledBooks = bookReadService.findAllByServiceItemAndBookStatus(serviceItem, BookStatus.RESERVED);
+
+        if (!canceledBooks.isEmpty()) {
+            refundService.registerRefunds(canceledBooks, serviceItem.getPrice());
+        }
     }
 
     private void validateOwner(Long companyId, ServiceItem serviceItem) {

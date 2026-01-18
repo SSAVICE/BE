@@ -36,4 +36,8 @@ public class BookReadService {
     public List<Book> findByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
         return bookRepository.findByUserIdAndBookStatus(userId, bookStatus);
     }
+
+    public List<Book> findAllByServiceItemAndBookStatus(ServiceItem serviceItem, BookStatus bookStatus) {
+        return bookRepository.findAllByServiceItemAndBookStatus(serviceItem, bookStatus);
+    }
 }
