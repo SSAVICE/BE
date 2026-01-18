@@ -3,6 +3,7 @@ package teamssavice.ssavice.refund.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.entity.RefundInfo;
 import teamssavice.ssavice.serviceItem.entity.Price;
 
@@ -18,13 +19,13 @@ public class InMemoryRefundService implements RefundService {
     private final Map<Long, RefundInfo> refundStorage = new ConcurrentHashMap<>();
 
     @Override
-    public void registerRefunds(List<Book> canceledBooks, Price price) {
+    public void registerRefunds(List<Book> canceledBooks, Price price, RefundReason refundReason) {
         for (Book book : canceledBooks) {
             RefundInfo info = RefundInfo.of(
                     book.getId(),
                     book.getUser().getId(),
                     price.getDiscountedPrice(),
-                    "SERVICE_DELETED"
+                    refundReason
             );
 
             refundStorage.put(book.getId(), info);

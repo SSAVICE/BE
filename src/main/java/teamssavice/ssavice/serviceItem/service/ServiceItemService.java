@@ -20,6 +20,7 @@ import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
@@ -138,7 +139,7 @@ public class ServiceItemService {
         List<Book> canceledBooks = bookReadService.findAllByServiceItemAndBookStatus(serviceItem, BookStatus.RESERVED);
 
         if (!canceledBooks.isEmpty()) {
-            refundService.registerRefunds(canceledBooks, serviceItem.getPrice());
+            refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
         }
     }
 
