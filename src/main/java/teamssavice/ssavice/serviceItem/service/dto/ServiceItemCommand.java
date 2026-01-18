@@ -63,4 +63,17 @@ public class ServiceItemCommand {
                     .build();
         }
     }
+
+    @Builder
+    public record Delete(
+            Long companyId,
+            Long serviceId
+    ) {
+        public static Delete of(Long companyId, Long serviceId) {
+            return Delete.builder()
+                    .companyId(companyId)
+                    .serviceId(serviceId)
+                    .build();
+        }
+    }
 }

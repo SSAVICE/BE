@@ -92,7 +92,4 @@ public class ServiceItemRequest {
         }
     }
 
-    @Builder
-    public record Update {
-    }
 }

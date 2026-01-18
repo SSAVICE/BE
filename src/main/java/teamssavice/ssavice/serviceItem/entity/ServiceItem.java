@@ -165,4 +165,11 @@ public class ServiceItem extends BaseEntity {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
         }
     }
+
+    public void delete() {
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_DELETED);
+        }
+        this.isDeleted = true;
+    }
 }

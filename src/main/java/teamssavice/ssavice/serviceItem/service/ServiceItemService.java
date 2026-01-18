@@ -16,6 +16,7 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.region.Region;
@@ -120,5 +121,22 @@ public class ServiceItemService {
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
         return serviceItems.map(ServiceItemModel.Summary::from);
+    }
+
+    @Transactional
+    public void delete(ServiceItemCommand.Delete command) {
+
+        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
+
+        validateOwner(command.companyId(), serviceItem);
+
+        serviceItem.delete();
+
+    }
+
+    private void validateOwner(Long companyId, ServiceItem serviceItem) {
+        if (!serviceItem.getCompany().getId().equals(companyId)) {
+            throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);
+        }
     }
 }

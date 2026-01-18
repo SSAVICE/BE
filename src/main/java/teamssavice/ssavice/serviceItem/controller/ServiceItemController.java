@@ -96,9 +96,9 @@ public class ServiceItemController {
 
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
-        @PathVariable("company-id") Long companyId,
-        @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam("on-sale") Boolean onSale
+            @PathVariable("company-id") Long companyId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @RequestParam("on-sale") Boolean onSale
     ) {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
@@ -107,4 +107,15 @@ public class ServiceItemController {
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
+
+    @DeleteMapping("/{serviceId}")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<Void> deleteServiceItem(
+            @CurrentId Long companyId,
+            @PathVariable Long serviceId
+    ) {
+        serviceItemService.delete(ServiceItemCommand.Delete.of(companyId,serviceId));
+        return ResponseEntity.noContent().build();
+    }
+
 }
