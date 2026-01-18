@@ -55,7 +55,7 @@ public class ServiceItemServiceTest {
 
         given(serviceItemReadService.findById(serviceId)).willReturn(serviceItem);
         given(userReadService.findById(userId)).willReturn(user);
-        given(bookReadService.existsByUserAndServiceItem(user, serviceItem)).willReturn(false);
+        given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(false);
 
         Book mockBook = BookFixture.book(user, serviceItem, BookStatus.RESERVED);
         given(bookWriteService.apply(any(), any())).willReturn(mockBook);
@@ -89,7 +89,7 @@ public class ServiceItemServiceTest {
 
         given(serviceItemReadService.findById(serviceId)).willReturn(serviceItem);
         given(userReadService.findById(userId)).willReturn(user);
-        given(bookReadService.existsByUserAndServiceItem(user, serviceItem)).willReturn(false);
+        given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(false);
 
         // 저장될 때는 역시나 RESERVED 상태여야 함
         Book mockBook = BookFixture.book(user, serviceItem, BookStatus.RESERVED);

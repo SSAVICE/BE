@@ -29,8 +29,8 @@ public class TempRefundServiceImpl implements RefundService {
             );
 
             refundStorage.put(book.getId(), info);
-            log.info("환불 정보 기록 완료: 예약ID={}, 유저ID={}, 환불 해줄 금액={}",
-                    book.getId(), book.getUser().getId(), price.getDiscountedPrice());
+            log.info("환불 정보 기록 완료: 예약ID={}, 유저ID={}, 환불 해줄 금액={}, 취소 사유={}",
+                    book.getId(), book.getUser().getId(), price.getDiscountedPrice(), refundReason);
         }
     }
 
