@@ -85,7 +85,6 @@ public class ServiceItemController {
         return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 
-    // 이 부분에서 중복된 파라미터와 중괄호를 수정했습니다.
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
             @PathVariable("company-id") Long companyId,
