@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 
@@ -24,5 +26,9 @@ public class BookWriteService {
                 .bookStatus(BookStatus.RESERVED)
                 .build();
         return bookRepository.save(book);
+    }
+
+    public void cancel(Book book) {
+        book.cancel();
     }
 }

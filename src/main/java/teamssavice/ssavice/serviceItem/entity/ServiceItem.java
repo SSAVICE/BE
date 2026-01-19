@@ -134,7 +134,7 @@ public class ServiceItem extends BaseEntity {
 
     // 이용 종료 여부
     public boolean isTimeOver() {
-        return this.deadline.isBefore(LocalDateTime.now());
+        return LocalDateTime.now().isAfter(this.deadline);
     }
 
     // 이용중인지 여부
@@ -161,8 +161,35 @@ public class ServiceItem extends BaseEntity {
 
 
         // 마감 기한 확인
-        if (LocalDateTime.now().isAfter(this.deadline)) {
+        if (isTimeOver()) {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
+    }
+
+    public void delete() {
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
+        }
+
+        if (isInUse() || isCompleted()) {
+            throw new ConflictException(ErrorCode.SERVICE_ALREADY_STARTED);
+        }
+
+        this.isDeleted = true;
+    }
+
+    public void cancelParticipation() {
+
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
+        }
+
+        if (isTimeOver()) {
+            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
+
+        if (this.currentMember > 0) {
+            this.currentMember--;
         }
     }
 }
