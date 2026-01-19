@@ -14,8 +14,6 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 
 import java.util.List;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.user.entity.Users;
 
 
 @Service
@@ -46,8 +44,5 @@ public class BookReadService {
     public Book findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId) {
         return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
-      
-    public List<Book> findByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
-        return bookRepository.findByUserIdAndBookStatus(userId, bookStatus);
     }
 }

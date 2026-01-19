@@ -1,6 +1,5 @@
 package teamssavice.ssavice.serviceItem.controller;
 
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,9 +43,7 @@ public class ServiceItemController {
             @RequestBody @Valid ServiceItemRequest.Create request
     ) {
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
-
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
-
     }
 
     @GetMapping("/search")
@@ -54,12 +51,9 @@ public class ServiceItemController {
             @ModelAttribute @Valid ServiceItemRequest.Search request,
             @RequestParam(defaultValue = "10") int size
     ) {
-
         Pageable pageable = PageRequest.of(0, size);
         CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(pageable));
-
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
-
         return ResponseEntity.ok(response);
     }
 
@@ -67,9 +61,7 @@ public class ServiceItemController {
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
             @PathVariable Long serviceId
     ) {
-
         ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId);
-
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
@@ -90,20 +82,15 @@ public class ServiceItemController {
             @PathVariable Long serviceId
     ) {
         BookModel.Apply model = serviceItemService.apply(userId, serviceId);
-
         return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 
+    // 이 부분에서 중복된 파라미터와 중괄호를 수정했습니다.
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
             @PathVariable("company-id") Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable,
             @RequestParam("on-sale") Boolean onSale
-    ) {
-        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
-        @PathVariable("company-id") Long companyId,
-        @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam("on-sale") Boolean onSale
     ) {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
@@ -116,9 +103,9 @@ public class ServiceItemController {
     @GetMapping("/company/my")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getMyCompanysServiceItems(
-        @CurrentId Long companyId,
-        @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam("on-sale") Boolean onSale
+            @CurrentId Long companyId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @RequestParam("on-sale") Boolean onSale
     ) {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
@@ -134,7 +121,7 @@ public class ServiceItemController {
             @CurrentId Long companyId,
             @PathVariable Long serviceId
     ) {
-        serviceItemService.delete(ServiceItemCommand.Delete.of(companyId,serviceId));
+        serviceItemService.delete(ServiceItemCommand.Delete.of(companyId, serviceId));
         return ResponseEntity.noContent().build();
     }
 
@@ -144,9 +131,7 @@ public class ServiceItemController {
             @CurrentId Long userId,
             @PathVariable Long serviceId
     ) {
-
         serviceItemService.cancel(ServiceItemCommand.Cancel.of(userId, serviceId));
         return ResponseEntity.ok().build();
     }
-
 }
