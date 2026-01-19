@@ -1,4 +1,4 @@
-package teamssavice.ssavice.book.constants;
+package teamssavice.ssavice.book.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

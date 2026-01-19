@@ -4,7 +4,6 @@ package teamssavice.ssavice.book.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;

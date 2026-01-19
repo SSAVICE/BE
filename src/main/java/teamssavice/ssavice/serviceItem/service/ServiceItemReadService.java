@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -40,7 +40,12 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findAllByCompanyAndStatus(Long companyId, ServiceStatus status, Pageable pageable) {
-        return serviceItemRepository.findAllByCompany_IdAndStatus(companyId, status, pageable);
+    public Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllByCompany_Id(companyId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ServiceItem> findAllRecruitingByCompany_Id(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllRecruitingByCompany_Id(companyId, LocalDateTime.now(), pageable);
     }
 }
