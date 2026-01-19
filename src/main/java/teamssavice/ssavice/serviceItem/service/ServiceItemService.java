@@ -157,16 +157,13 @@ public class ServiceItemService {
 
         Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(user.getId(), serviceItem.getId());
 
-        if (book.isCanceled()) {
-            throw new ConflictException(ErrorCode.ALREADY_CANCELED);
-        }
-
         // 최소 인원 검증인데 이거는 현재는 못하게 막아놓고 법적인거 조사하면서 따로 수수료 물면서 환불하는 로직으로 전환예정
         if (serviceItem.isReachedMinimum()) {
             throw new ConflictException(ErrorCode.AT_MINIMUM_MEMBER_LIMIT);
         }
 
-        book.cancel();
+        bookWriteService.cancel(book);
+
         serviceItem.cancelParticipation();
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
     }
