@@ -56,6 +56,38 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
+    @Override
+    public Page<Book> findAllByCompanyIdAndStatus(Long companyId, BookStatusFilter status, Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        BooleanExpression baseCondition = book.serviceItem.company.id.eq(companyId);
+        BooleanExpression statusCondition = statusCondition(status, now);
+
+        List<Book> content = queryFactory
+                .selectFrom(book)
+                .join(book.serviceItem, serviceItem).fetchJoin()
+                .join(book.serviceItem.company, company).fetchJoin()
+                .join(book.serviceItem.address, address1).fetchJoin()
+                .where(
+                    baseCondition,
+                    statusCondition
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.createdAt.desc())
+                .fetch();
+
+        Long total = queryFactory
+                .select(book.count())
+                .from(book)
+                .where(
+                        baseCondition,
+                        statusCondition
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0 : total);
+    }
+
     private BooleanExpression statusCondition(BookStatusFilter status, LocalDateTime now) {
         if (status == null || status == BookStatusFilter.ALL) {
             return null;
