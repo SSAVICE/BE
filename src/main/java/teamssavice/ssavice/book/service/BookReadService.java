@@ -12,7 +12,9 @@ import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -33,8 +35,8 @@ public class BookReadService {
         return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(userId, serviceId, status);
     }
 
-    public List<Book> findByUserIdAndBookStatus(Long userId, BookStatus bookStatus) {
-        return bookRepository.findByUserIdAndBookStatus(userId, bookStatus);
+    public Long countRecruitingBooksByUserId(Long userId) {
+        return bookRepository.countRecruitingBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.RECRUITING, LocalDateTime.now());
     }
 
     public List<Book> findAllByServiceItemIdAndBookStatus(Long serviceItemId, BookStatus bookStatus) {
@@ -44,5 +46,9 @@ public class BookReadService {
     public Book findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId) {
         return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    public Long countSucceededBooksByUserId(Long userId) {
+        return bookRepository.countSucceededBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
 }

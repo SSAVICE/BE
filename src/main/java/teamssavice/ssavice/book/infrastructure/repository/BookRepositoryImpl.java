@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,27 +62,24 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         }
 
         return switch (status) {
-            case RECRUITING -> serviceItem.isDeleted.isFalse()
-                    .and(book.bookStatus.eq(BookStatus.RESERVED))
-                    .and(serviceItem.currentMember.lt(serviceItem.maximumMember))
+            case RECRUITING -> book.bookStatus.eq(BookStatus.RESERVED)
+                    .and(serviceItem.status.eq(ServiceStatus.RECRUITING))
                     .and(serviceItem.deadline.gt(now));
 
-            case CANCELED -> serviceItem.isDeleted.isTrue()
-                    .or(book.bookStatus.eq(BookStatus.CANCELED))
+            case CANCELED -> book.bookStatus.eq(BookStatus.CANCELED)
+                    .or(serviceItem.status.eq(ServiceStatus.CANCELED))
                     .or(
-                        serviceItem.deadline.lt(now)
-                            .and(serviceItem.currentMember.lt(serviceItem.minimumMember))
+                        serviceItem.status.eq(ServiceStatus.RECRUITING)
+                        .and(serviceItem.deadline.loe(now))
                     );
 
-            case COMPLETED -> serviceItem.isDeleted.isFalse()
-                    .and(book.bookStatus.eq(BookStatus.RESERVED))
-                    .and(
-                        serviceItem.currentMember.goe(serviceItem.maximumMember)
-                            .or(serviceItem.currentMember.goe(serviceItem.minimumMember)
-                                .and(serviceItem.deadline.lt(now))
-                            )
-                    );
+            case SUCCEEDED -> book.bookStatus.eq(BookStatus.RESERVED)
+                    .and(serviceItem.status.eq(ServiceStatus.SUCCEEDED))
+                    .and(serviceItem.endDate.gt(now));
 
+            case COMPLETED -> book.bookStatus.eq(BookStatus.RESERVED)
+                    .and(serviceItem.status.eq(ServiceStatus.SUCCEEDED))
+                    .and(serviceItem.endDate.loe(now));
             default -> null;
         };
     }
