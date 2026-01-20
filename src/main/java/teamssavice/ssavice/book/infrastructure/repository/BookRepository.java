@@ -36,4 +36,20 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookRepositor
     List<Book> findAllByServiceItemIdAndBookStatus(Long serviceItemId, BookStatus bookStatus);
 
     Optional<Book> findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
 }
