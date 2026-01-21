@@ -36,7 +36,7 @@ class WishRepositoryConstraintTest {
     void failByNonExistentUserId() {
 
         Users owner = UserFixture.user();
-        tem.persist(owner); // 업체 사장님
+        tem.persist(owner);
 
         Company company = CompanyFixture.company(owner, AddressFixture.address());
         tem.persist(company);
@@ -44,7 +44,7 @@ class WishRepositoryConstraintTest {
         ServiceItem serviceItem = ServiceItemFixture.recruiting(company);
         tem.persist(serviceItem);
 
-        tem.flush(); // 여기까지 정상 데이터 DB 반영
+        tem.flush();
 
         Users nonExistentUser = tem.getEntityManager().getReference(Users.class, 9999L);
 
@@ -83,7 +83,7 @@ class WishRepositoryConstraintTest {
         });
 
         String errorMessage = ex.getMessage() != null ? ex.getMessage().toUpperCase() : "";
-        System.out.println(errorMessage);
+        System.out.println("errorMessage: " + errorMessage);
 
         assertThat(errorMessage).containsAnyOf("FK_WISH_ITEM", "SERVICE_ITEM_ID");
     }

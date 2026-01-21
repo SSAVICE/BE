@@ -13,6 +13,14 @@ public class AddressModel {
             BigDecimal latitude,
             BigDecimal longitude
     ) {
+        public static AddressModel.RegionSummary from(Address address) {
+            return RegionSummary.builder()
+                    .gugun(address.getGugun())
+                    .region(address.getRegion())
+                    .latitude(address.getLatitude())
+                    .longitude(address.getLongitude())
+                    .build();
+        }
     }
 
     @Builder

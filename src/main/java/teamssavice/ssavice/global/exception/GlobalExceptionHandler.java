@@ -181,15 +181,14 @@ public class GlobalExceptionHandler {
                     .body(setCustomProblemDetail(new ConflictException(ErrorCode.WISH_ALREADY_EXISTS)));
         }
 
-        // 2. 외래키 제약 조건
-        if (errorMessage.contains("FK_WISH_USER") || errorMessage.contains("USER_ID")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(setCustomProblemDetail(new EntityNotFoundException(ErrorCode.USER_NOT_FOUND)));
-        }
-
         if (errorMessage.contains("FK_WISH_SERVICE_ITEM") || errorMessage.contains("SERVICE_ITEM_ID")) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(setCustomProblemDetail(new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND)));
+        }
+
+        if (errorMessage.contains("FK_WISH_USER") || errorMessage.contains("USER_ID")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(setCustomProblemDetail(new EntityNotFoundException(ErrorCode.USER_NOT_FOUND)));
         }
 
         return unexpectedException(e);

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.wish.entity.Wish;
 import teamssavice.ssavice.wish.service.dto.WishCommand;
+import teamssavice.ssavice.wish.service.dto.WishModel;
 
 
 @Service
@@ -21,8 +22,9 @@ public class WishService {
         wishWriteService.updateWishStatus(command.userId(), command.serviceId(), command.targetStatus());
     }
 
-//    @Transactional(readOnly = true)
-//    public Page<Wish> getWishList(WishCommand.Retrieve command) {
-//        return wishReadService.getWishList(command);
-//    }
+    @Transactional(readOnly = true)
+    public Page<WishModel.Summary> getWishList(WishCommand.Retrieve command) {
+        return wishReadService.getWishList(command);
+    }
+
 }
