@@ -48,4 +48,9 @@ public class UserReadService {
         return userRepository.findByIdFetchJoinAddressAndImageResource(userId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
+
+    @Transactional(readOnly = true)
+    public Users getReferenceById(Long userId) {
+        return userRepository.getReferenceById(userId);
+    }
 }

@@ -26,7 +26,7 @@ public class Book extends BaseEntity {
     private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "serviceItem_id", nullable = false)
+    @JoinColumn(name = "service_item_id", nullable = false)
     private ServiceItem serviceItem;
 
     @Enumerated(EnumType.STRING)
