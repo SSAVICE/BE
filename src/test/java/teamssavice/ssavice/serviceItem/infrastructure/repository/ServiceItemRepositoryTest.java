@@ -64,7 +64,7 @@ class ServiceItemRepositoryTest {
         List<ServiceItem> serviceItems = serviceItemRepository.saveAll(this.serviceItems);
 
         // when
-        List<ServiceItem> actuals = serviceItemRepository.findTop5ByCompanyOrderByDeadlineDesc(company);
+        List<ServiceItem> actuals = serviceItemRepository.findTop5ByCompanyIdOrderByDeadlineDesc(company.getId(), PageRequest.of(0, 5));
 
         // then
         for (int i = 0; i < 5; i++) {

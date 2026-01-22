@@ -13,7 +13,11 @@ import java.util.List;
 
 public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
-    List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company);
+    @Query("SELECT s FROM ServiceItem s " +
+            "JOIN FETCH s.address " +
+            "WHERE s.company.id = :companyId " +
+            "ORDER BY s.deadline DESC")
+    List<ServiceItem> findTop5ByCompanyIdOrderByDeadlineDesc(Long companyId, Pageable pageable);
 
     Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable);
 

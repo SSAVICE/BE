@@ -2,11 +2,11 @@ package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
@@ -30,8 +30,8 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company) {
-        return serviceItemRepository.findTop5ByCompanyOrderByDeadlineDesc(company);
+    public List<ServiceItem> findTop5ByCompanyIdOrderByDeadlineDesc(Long companyId) {
+        return serviceItemRepository.findTop5ByCompanyIdOrderByDeadlineDesc(companyId, PageRequest.of(0, 5));
     }
 
     @Transactional(readOnly = true)
