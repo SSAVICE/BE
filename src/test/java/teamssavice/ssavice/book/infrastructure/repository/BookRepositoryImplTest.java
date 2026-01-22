@@ -102,9 +102,26 @@ class BookRepositoryImplTest {
         Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
 
         // then
-        assertThat(actualModels.getTotalElements()).isEqualTo(2);
+        assertThat(actualModels.getTotalElements()).isEqualTo(1);
         for (BookModel.Info model : actualModels) {
-            assertThat(model.bookStatus()).isIn(BookViewStatus.RECRUITING, BookViewStatus.SUCCEEDED);
+            assertThat(model.bookStatus()).isEqualTo(BookViewStatus.RECRUITING);
+        }
+    }
+
+    @Test
+    @DisplayName("BookStatusFilter가 SUCCEEDED일 때 findAllByUserIdAndStatus() 테스트")
+    void findAllByUserIdAndStatusTestWhenSucceeded() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.SUCCEEDED, pageable);
+        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
+
+        // then
+        assertThat(actualModels.getTotalElements()).isEqualTo(3);
+        for (BookModel.Info model : actualModels) {
+            assertThat(model.bookStatus()).isIn(BookViewStatus.SUCCEEDED, BookViewStatus.FULLED, BookViewStatus.IN_USE);
         }
     }
 
@@ -119,9 +136,9 @@ class BookRepositoryImplTest {
         Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
 
         // then
-        assertThat(actualModels.getTotalElements()).isEqualTo(3);
+        assertThat(actualModels.getTotalElements()).isEqualTo(1);
         for (BookModel.Info model : actualModels) {
-            assertThat(model.bookStatus()).isIn(BookViewStatus.FULLED, BookViewStatus.IN_USE, BookViewStatus.COMPLETED);
+            assertThat(model.bookStatus()).isEqualTo(BookViewStatus.COMPLETED);
         }
     }
 

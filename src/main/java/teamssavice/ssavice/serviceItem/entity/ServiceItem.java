@@ -96,6 +96,10 @@ public class ServiceItem extends BaseEntity {
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
 
+    @Builder.Default
+    @Column(nullable = false)
+    private ServiceStatus status = ServiceStatus.RECRUITING;
+
     public void addImageId(Long id) {
         imageIds.add(id);
     }
@@ -105,23 +109,26 @@ public class ServiceItem extends BaseEntity {
     }
 
     public ServiceStatus getStatus() {
-        if(this.isDeleted) return ServiceStatus.CANCELED;
-        if(isInUse()) return ServiceStatus.IN_USE;
-        if(isCompleted()) return ServiceStatus.COMPLETED;
-        if(isFull()) return ServiceStatus.FULLED;
-        if (isTimeOver()) {
-            if(!isReachedMinimum()) return ServiceStatus.FAILED;
-            return ServiceStatus.FULLED;
+        if(status == ServiceStatus.RECRUITING) {
+            if(isTimeOver()) return ServiceStatus.FAILED;
+        } else if (status == ServiceStatus.SUCCEEDED) {
+            if(isCompleted()) return ServiceStatus.COMPLETED;
+            else if(isInUse()) return ServiceStatus.IN_USE;
+            else if(isTimeOver() || isFull()) return ServiceStatus.FULLED;
         }
-        if(isReachedMinimum()) return ServiceStatus.SUCCEEDED;
-        return ServiceStatus.RECRUITING;
+        return status;
     }
 
     public void participate() {
         if (this.isFull()) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+        // 마감 기한 확인
+        if (isTimeOver()) {
+            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
         this.currentMember++;
+        if(isReachedMinimum()) status = ServiceStatus.SUCCEEDED;
     }
 
     public boolean isReachedMinimum() {
@@ -158,12 +165,6 @@ public class ServiceItem extends BaseEntity {
             case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
             case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
-
-
-        // 마감 기한 확인
-        if (isTimeOver()) {
-            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
-        }
     }
 
     public void delete() {
@@ -176,6 +177,7 @@ public class ServiceItem extends BaseEntity {
         }
 
         this.isDeleted = true;
+        status = ServiceStatus.CANCELED;
     }
 
     public void cancelParticipation() {

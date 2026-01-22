@@ -9,14 +9,14 @@ public class BookCommand {
 
     @Builder
     public record RetrieveByStatus(
-        Long userId,
+        Long id,
         Pageable pageable,
         BookStatusFilter status
     ) {
 
-        public static RetrieveByStatus of(Long userId, Pageable pageable, BookStatusFilter status) {
+        public static RetrieveByStatus of(Long id, Pageable pageable, BookStatusFilter status) {
             return RetrieveByStatus.builder()
-                .userId(userId)
+                .id(id)
                 .pageable(pageable)
                 .status(status)
                 .build();

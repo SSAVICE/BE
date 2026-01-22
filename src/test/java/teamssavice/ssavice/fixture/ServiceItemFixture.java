@@ -2,6 +2,7 @@ package teamssavice.ssavice.fixture;
 
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
@@ -80,7 +81,9 @@ public class ServiceItemFixture {
     }
 
     public static ServiceItem recruiting(Company company) {
-        return base(company);
+        return base(company).toBuilder()
+                .status(ServiceStatus.RECRUITING)
+                .build();
     }
 
     public static ServiceItem succeeded(Company company) {
@@ -88,6 +91,7 @@ public class ServiceItemFixture {
                 .currentMember(11L)
                 .minimumMember(10L)
                 .maximumMember(20L)
+                .status(ServiceStatus.SUCCEEDED)
                 .build();
     }
 
@@ -96,6 +100,7 @@ public class ServiceItemFixture {
                 .currentMember(20L)
                 .minimumMember(10L)
                 .maximumMember(20L)
+                .status(ServiceStatus.SUCCEEDED)
                 .build();
     }
 
@@ -104,6 +109,7 @@ public class ServiceItemFixture {
                 .deadline(LocalDateTime.now().minusDays(20))
                 .startDate(LocalDateTime.now().minusDays(5))
                 .endDate(LocalDateTime.now().plusDays(5))
+                .status(ServiceStatus.SUCCEEDED)
                 .build();
     }
 
@@ -112,18 +118,21 @@ public class ServiceItemFixture {
                 .deadline(LocalDateTime.now().minusDays(20))
                 .startDate(LocalDateTime.now().minusDays(5))
                 .endDate(LocalDateTime.now().minusDays(1))
+                .status(ServiceStatus.SUCCEEDED)
                 .build();
     }
 
     public static ServiceItem failed(Company company) {
         return base(company).toBuilder()
                 .deadline(LocalDateTime.now().minusDays(1))
+                .status(ServiceStatus.RECRUITING)
                 .build();
     }
 
     public static ServiceItem canceled(Company company) {
         return base(company).toBuilder()
                 .isDeleted(true)
+                .status(ServiceStatus.CANCELED)
                 .build();
     }
 }
