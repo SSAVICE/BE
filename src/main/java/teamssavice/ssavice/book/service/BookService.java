@@ -18,7 +18,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
 
-        Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.userId(), command.status(), command.pageable());
+        Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(), command.pageable());
         return books.map(BookModel.Info::from);
     }
 
@@ -26,6 +26,20 @@ public class BookService {
     public BookModel.BookSummary getBookSummary(Long userId) {
         Long applying = bookReadService.countRecruitingBooksByUserId(userId);
         Long completedCount = bookReadService.countSucceededBooksByUserId(userId);
+
+        return BookModel.BookSummary.from(applying, completedCount);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookModel.Info> getMyCompanysBooksByStatus(BookCommand.RetrieveByStatus command) {
+        Page<Book> books = bookReadService.findAllByCompanyIdAndStatus(command.id(), command.status(), command.pageable());
+        return books.map(BookModel.Info::from);
+    }
+
+    @Transactional(readOnly = true)
+    public BookModel.BookSummary getCompanysBookSummary(Long companyId) {
+        Long applying = bookReadService.countRecruitingBooksByCompanyId(companyId);
+        Long completedCount = bookReadService.countSucceededBooksByCompanyId(companyId);
 
         return BookModel.BookSummary.from(applying, completedCount);
     }

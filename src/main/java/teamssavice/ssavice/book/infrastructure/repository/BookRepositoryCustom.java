@@ -7,4 +7,6 @@ import teamssavice.ssavice.book.entity.Book;
 
 public interface BookRepositoryCustom {
     Page<Book> findAllByUserIdAndStatus(Long userId, BookStatusFilter status, Pageable pageable);
+
+    Page<Book> findAllByCompanyIdAndStatus(Long company, BookStatusFilter status, Pageable pageable);
 }
