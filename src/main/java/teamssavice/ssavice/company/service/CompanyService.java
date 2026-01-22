@@ -98,8 +98,8 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public CompanyModel.MyCompany getMyCompany(Long id) {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
-        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(
-            company);
+        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyIdOrderByDeadlineDesc(
+            company.getId());
         if (company.hasImageResource()) {
             String presignedUrl = s3Service.generateGetPresignedUrl(
                 company.getImageResource().getObjectKey());
@@ -112,8 +112,8 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public CompanyModel.Info getCompanyById(Long id) {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
-        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyOrderByDeadlineDesc(
-            company);
+        List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyIdOrderByDeadlineDesc(
+                company.getId());
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(
             company.getId());
 

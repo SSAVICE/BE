@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
@@ -12,7 +11,11 @@ import java.util.List;
 
 public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
-    List<ServiceItem> findTop5ByCompanyOrderByDeadlineDesc(Company company);
+    @Query("SELECT s FROM ServiceItem s " +
+            "JOIN FETCH s.address " +
+            "WHERE s.company.id = :companyId " +
+            "ORDER BY s.deadline DESC")
+    List<ServiceItem> findTop5ByCompanyIdOrderByDeadlineDesc(Long companyId, Pageable pageable);
 
     Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable);
 
