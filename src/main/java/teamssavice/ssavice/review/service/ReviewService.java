@@ -2,7 +2,6 @@ package teamssavice.ssavice.review.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.review.service.dto.ReviewCommand;
@@ -29,8 +28,8 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReviewModel.Item> getReviewPaging(Long companyId, Pageable pageable) {
-        return reviewReadService.findByCompanyIdPaging(companyId, pageable)
+    public Page<ReviewModel.Item> getReviewPaging(ReviewCommand.RetrieveByCompanyId command) {
+        return reviewReadService.findByCompanyIdPaging(command.companyId(), command.pageable())
                 .map(ReviewModel.Item::from);
     }
 }

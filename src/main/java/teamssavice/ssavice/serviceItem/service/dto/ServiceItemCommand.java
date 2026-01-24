@@ -1,8 +1,9 @@
 package teamssavice.ssavice.serviceItem.service.dto;
 
 import lombok.Builder;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import teamssavice.ssavice.serviceItem.entity.Price;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -60,7 +61,11 @@ public class ServiceItemCommand {
         public static RetrieveByCompanyAndOnSale of(Long companyId, Pageable pageable, Boolean onSale) {
             return RetrieveByCompanyAndOnSale.builder()
                     .companyId(companyId)
-                    .pageable(pageable)
+                    .pageable(PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            Sort.by("createdAt").descending()
+                    ))
                     .onSale(Boolean.TRUE.equals(onSale))
                     .build();
         }
