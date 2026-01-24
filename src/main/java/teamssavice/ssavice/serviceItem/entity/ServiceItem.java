@@ -71,7 +71,7 @@ public class ServiceItem extends BaseEntity {
     private boolean isDeleted = false;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String thumbnailUrl = DEFAULT_IMAGE_URL;
 
 
@@ -96,6 +96,7 @@ public class ServiceItem extends BaseEntity {
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
     private ServiceStatus status = ServiceStatus.RECRUITING;
