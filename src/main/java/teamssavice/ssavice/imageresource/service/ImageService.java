@@ -24,7 +24,7 @@ public class ImageService {
     @Transactional
     public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path,
         ImageContentType contentType) {
-        String tempKey = s3ObjectKeyGenerator.tempGenerator(ImagePath.temp, id, contentType);
+        String tempKey = s3ObjectKeyGenerator.tempGenerator(path, id, contentType);
         String objectKey = s3ObjectKeyGenerator.originGenerator(path, ImageVariant.origin, id,
             contentType);
         imageWriteService.save(objectKey, tempKey, path, contentType);
