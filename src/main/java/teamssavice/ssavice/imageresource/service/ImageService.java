@@ -1,17 +1,19 @@
 package teamssavice.ssavice.imageresource.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.constants.ImageVariant;
 import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class ImageService {
     private final S3Service s3Service;
     private final S3ObjectKeyGenerator s3ObjectKeyGenerator;
     private final ImageWriteService imageWriteService;
+    private final ImageReadService imageReadService;
 
     @Transactional
     public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path,
@@ -39,5 +42,17 @@ public class ImageService {
             models.add(updateImage(command.companyId(), command.path(), contentType));
         }
         return models;
+    }
+
+    @Transactional
+    public void deActivateImages(List<Long> imageIds) {
+
+        if (imageIds == null || imageIds.isEmpty()) {
+            return;
+        }
+
+        List<ImageResource> images = imageReadService.findAllById(imageIds);
+
+        images.forEach(ImageResource::deActivate);
     }
 }

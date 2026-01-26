@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.book.controller.dto.BookRequest.BookStatusFilter;
+import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.controller.dto.BookResponse;
 import teamssavice.ssavice.book.service.BookService;
 import teamssavice.ssavice.book.service.dto.BookCommand;
@@ -22,22 +22,21 @@ import teamssavice.ssavice.global.dto.PageResponse;
 
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 @RequiredArgsConstructor
-@RequireRole(Role.USER)
 public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping("/book")
+    @GetMapping("/user/book")
+    @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<BookResponse.Info>> getMyBooksByStatus(
         @CurrentId Long userId,
         @PageableDefault(size = 10) Pageable pageable,
         @RequestParam BookStatusFilter status
     ) {
 
-        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable,
-            status.toDomainOrNull());
+        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable, status);
 
         Page<BookModel.Info> models = bookService.getMyBooksByStatus(command);
         Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
@@ -45,12 +44,37 @@ public class BookController {
         return ResponseEntity.ok(PageResponse.from(reponsePage));
     }
 
-
-    @GetMapping("/book/summary")
+    @GetMapping("/user/book/summary")
+    @RequireRole(Role.USER)
     public ResponseEntity<BookResponse.BookSummary> getBookSummary(
         @CurrentId Long userId
     ) {
         BookModel.BookSummary model = bookService.getBookSummary(userId);
+
+        return ResponseEntity.ok(BookResponse.BookSummary.from(model));
+    }
+
+    @GetMapping("/company/book")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<PageResponse<BookResponse.Info>> getMyCompanysBooksByStatus(
+        @CurrentId Long companyId,
+        @PageableDefault(size = 10) Pageable pageable,
+        @RequestParam BookStatusFilter status
+    ) {
+        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(companyId, pageable, status);
+
+        Page<BookModel.Info> models = bookService.getMyCompanysBooksByStatus(command);
+        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
+
+        return ResponseEntity.ok(PageResponse.from(reponsePage));
+    }
+
+    @GetMapping("/company/book/summary")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<BookResponse.BookSummary> getCompanyBookSummary(
+        @CurrentId Long companyId
+    ) {
+        BookModel.BookSummary model = bookService.getCompanysBookSummary(companyId);
 
         return ResponseEntity.ok(BookResponse.BookSummary.from(model));
     }

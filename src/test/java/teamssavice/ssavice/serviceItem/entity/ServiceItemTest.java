@@ -17,15 +17,13 @@ public class ServiceItemTest {
     @DisplayName("최대 인원에 도달하도록 참여하면 서비스 상태가 FINISHED로 자동 변경된다")
     void entity_logic_test() {
         // Given: 최대 인원 10명 현재 9명
-        ServiceItem item = ServiceItemFixture.custom("테스트", LocalDateTime.now(), null, null);
+        ServiceItem item = ServiceItemFixture.custom("테스트", LocalDateTime.now().plusDays(5), null, null);
         ReflectionTestUtils.setField(item, "minimumMember", 10L);
         ReflectionTestUtils.setField(item, "maximumMember", 11L);
         ReflectionTestUtils.setField(item, "currentMember", 9L);
-        ReflectionTestUtils.setField(item, "status", ServiceStatus.RECRUITING);
 
         // When 한명 참여시
         item.participate();
-
         // Then 10명이 되면서 서비스 상태가 변하는지
         assertAll(
                 () -> assertThat(item.getCurrentMember()).isEqualTo(10L),

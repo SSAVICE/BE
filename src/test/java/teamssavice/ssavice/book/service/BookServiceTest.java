@@ -6,13 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -31,39 +28,21 @@ class BookServiceTest {
 
         // Mock 데이터 설정
         Long recruitingCount = 5L; // 모집 중
-        Long succeededCount = 3L;  // 모집 성공
-        Long closedCount = 2L;     // 모집 마감
+        Long completedCount = 6L;  // 모집 성공 및 마감
 
         // 각 상태별로 호출될 때 반환할 값 지정
-        given(bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.RECRUITING))
+        given(bookReadService.countRecruitingBooksByUserId(userId))
                 .willReturn(recruitingCount);
-
-        given(bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED))
-                .willReturn(succeededCount);
-
-        given(bookReadService.countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.FULLED))
-                .willReturn(closedCount);
+        given(bookReadService.countSucceededBooksByUserId(userId))
+                .willReturn(completedCount);
 
         // when
         BookModel.BookSummary result = bookService.getBookSummary(userId);
 
         // then
         // 1. 결과 DTO의 필드 검증
-        // applying = recruitingCount (5)
-        assertThat(result.applying()).isEqualTo(5L);
+        assertThat(result.applying()).isEqualTo(recruitingCount);
 
-        // completed(모집완료) = succeededCount(3) + closedCount(2) = 5
-        assertThat(result.completed()).isEqualTo(5L);
-
-        // 2. 각 메서드가 정확히 호출되었는지 검증
-        verify(bookReadService).countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.RECRUITING);
-        verify(bookReadService).countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED);
-        verify(bookReadService).countByUserIdAndBookStatusAndServiceStatus(
-                userId, BookStatus.RESERVED, ServiceStatus.FULLED);
+        assertThat(result.completed()).isEqualTo(completedCount);
     }
 }

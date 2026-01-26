@@ -1,64 +1,55 @@
 package teamssavice.ssavice.book.infrastructure.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import teamssavice.ssavice.book.constants.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long> {
-
-    @Query(value = "SELECT b FROM Book b " +
-            "JOIN FETCH b.user " +
-            "JOIN FETCH b.serviceItem s " +
-            "JOIN FETCH s.company " +
-            "JOIN FETCH s.address " +
-            "WHERE b.user.id = :userId",
-
-            countQuery = "SELECT count(b) FROM Book b WHERE b.user.id = :userId")
-    Page<Book> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
-
-    @Query(
-        value = "SELECT b FROM Book b " +
-            "JOIN FETCH b.user " +
-            "JOIN FETCH b.serviceItem s " +
-            "JOIN FETCH s.company " +
-            "JOIN FETCH s.address " +
-            "WHERE b.user.id = :userId " +
-            "AND (:status IS NULL OR b.bookStatus = :status)",
-        countQuery = "SELECT count(b) FROM Book b " +
-            "WHERE b.user.id = :userId " +
-            "AND (:status IS NULL OR b.bookStatus = :status)"
-    )
-    Page<Book> findAllByUserIdAndStatus(Long userId, BookStatus status, Pageable pageable);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Book b SET b.bookStatus = :targetStatus " +
-            "WHERE b.serviceItem.id = :serviceId " +
-            "AND b.bookStatus = :currentStatus")
-    int updateStatusByServiceId(
-            @Param("serviceId") Long serviceId,
-            @Param("currentStatus") BookStatus currentStatus,
-            @Param("targetStatus") BookStatus targetStatus
-    );
+public interface BookRepository extends JpaRepository<Book, Long>, BookRepositoryCustom {
 
     boolean existsByUserIdAndServiceItemIdAndBookStatusNot(Long userId, Long serviceItemId, BookStatus bookStatus);
 
     @Query("SELECT COUNT(b) FROM Book b " +
-            "JOIN b.serviceItem s " + // 페치 조인이 아닌 일반 조인
+            "JOIN b.serviceItem s " +
             "WHERE b.user.id = :userId " +
             "AND b.bookStatus = :bookStatus " +
-            "AND s.status = :serviceStatus")
-    Long countByUserIdAndBookStatusAndServiceStatus(
-            @Param("userId") Long userId,
-            @Param("bookStatus") BookStatus bookStatus,
-            @Param("serviceStatus") ServiceStatus serviceStatus
-    );
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingBooksByUserId(Long userId, BookStatus bookStatus, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE b.user.id = :userId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededBooksByUserId(Long userId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
+
+    List<Book> findAllByServiceItemIdAndBookStatus(Long serviceItemId, BookStatus bookStatus);
+
+    Optional<Book> findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
 }

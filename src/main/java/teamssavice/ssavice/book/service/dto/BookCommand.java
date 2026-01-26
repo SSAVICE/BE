@@ -3,23 +3,24 @@ package teamssavice.ssavice.book.service.dto;
 
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
-import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.constants.BookStatusFilter;
 
 public class BookCommand {
 
     @Builder
     public record RetrieveByStatus(
-        Long userId,
+        Long id,
         Pageable pageable,
-        BookStatus status
+        BookStatusFilter status
     ) {
 
-        public static RetrieveByStatus of(Long userId, Pageable pageable, BookStatus status) {
+        public static RetrieveByStatus of(Long id, Pageable pageable, BookStatusFilter status) {
             return RetrieveByStatus.builder()
-                .userId(userId)
+                .id(id)
                 .pageable(pageable)
                 .status(status)
                 .build();
         }
     }
+
 }

@@ -48,6 +48,12 @@ public class ServiceItemModel {
                     .endDate(entity.getEndDate())
                     .deadline(entity.getDeadline())
                     .tag(entity.getTag())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(entity.getAddress().getGugun())
+                            .region(entity.getAddress().getRegion())
+                            .latitude(entity.getAddress().getLatitude())
+                            .longitude(entity.getAddress().getLongitude())
+                            .build())
                     .build();
         }
     }
@@ -120,8 +126,8 @@ public class ServiceItemModel {
             LocalDateTime createdAt,
             String category,
             String tag,
-            Long currentMember,
 
+            Long currentMember,
             Long minimumMember,
             Long maximumMember,
 

@@ -8,8 +8,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static teamssavice.ssavice.company.entity.QCompany.company;
@@ -23,8 +26,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<ServiceItem>
-    search(ServiceItemCommand.Search command) {
+    public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
 
         Pageable pageable = command.pageable();
         int pageSize = pageable.getPageSize();
@@ -39,7 +41,8 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
                         eqCategory(command.category()),
                         containsQuery(command.query()),
                         goeMinPrice(command.minPrice()),
-                        loeMaxPrice(command.maxPrice())
+                        loeMaxPrice(command.maxPrice()),
+                        applyOnSaleCondition(command.onSale())
                 )
                 .orderBy(getOrderSpecifier(command.sortBy()))
                 .limit(pageSize + 1)
@@ -78,8 +81,8 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     }
 
     private OrderSpecifier<?>[] getOrderSpecifier(Integer sortBy) {
-        // 기본값: ID 내림차 순 (최신순)
-        OrderSpecifier[] defaultSort = { serviceItem.id.desc() };
+        // 기본값: createdAt 내림차순 (최신순)
+        OrderSpecifier[] defaultSort = { serviceItem.createdAt.desc() };
 
         if (sortBy == null) {
             return defaultSort;
@@ -95,5 +98,13 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             default: // 인기순 하고 마감임박순은 아직 기준이 안정해져서 우선 최신순
                 return defaultSort;
         }
+    }
+
+    private BooleanExpression applyOnSaleCondition(boolean onSale) {
+        if(!onSale) return null;
+        LocalDateTime now = LocalDateTime.now();
+
+        return serviceItem.status.eq(ServiceStatus.RECRUITING)
+                .and(serviceItem.deadline.gt(now));
     }
 }

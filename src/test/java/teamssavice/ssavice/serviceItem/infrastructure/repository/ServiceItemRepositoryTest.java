@@ -18,7 +18,6 @@ import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
@@ -65,7 +64,7 @@ class ServiceItemRepositoryTest {
         List<ServiceItem> serviceItems = serviceItemRepository.saveAll(this.serviceItems);
 
         // when
-        List<ServiceItem> actuals = serviceItemRepository.findTop5ByCompanyOrderByDeadlineDesc(company);
+        List<ServiceItem> actuals = serviceItemRepository.findTop5ByCompanyIdOrderByDeadlineDesc(company.getId(), PageRequest.of(0, 5));
 
         // then
         for (int i = 0; i < 5; i++) {
@@ -75,15 +74,14 @@ class ServiceItemRepositoryTest {
     }
 
     @Test
-    @DisplayName("회사Id와 status로 service 검색 테스트")
+    @DisplayName("회사Id로 service 검색 테스트")
     void findAllByCompanyIdAndStatusTest() {
         // given
         userRepository.save(this.user);
         Company company = companyRepository.save(this.company);
-        ServiceStatus status = ServiceStatus.SUCCEEDED;
         List<ServiceItem> serviceItems = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            serviceItems.add(ServiceItemFixture.setCompanyAndStatus(company, status));
+            serviceItems.add(ServiceItemFixture.setCompany(company));
         }
         serviceItemRepository.saveAll(serviceItems);
         Pageable pageable = PageRequest.of(0, 10);
@@ -91,12 +89,11 @@ class ServiceItemRepositoryTest {
         em.clear();
 
         // when
-        Page<ServiceItem> actuals = serviceItemRepository.findAllByCompany_IdAndStatus(company.getId(), status, pageable);
+        Page<ServiceItem> actuals = serviceItemRepository.findAllByCompany_Id(company.getId(), pageable);
 
         // then
         assertAll(
-                () -> assertThat(actuals.getContent()).hasSize(5),
-                () -> assertThat(actuals.getContent().get(0).getStatus()).isEqualTo(status)
+                () -> assertThat(actuals.getContent()).hasSize(5)
         );
     }
 }

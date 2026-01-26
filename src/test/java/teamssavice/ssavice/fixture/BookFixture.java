@@ -1,6 +1,6 @@
 package teamssavice.ssavice.fixture;
 
-import teamssavice.ssavice.book.constants.BookStatus;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;

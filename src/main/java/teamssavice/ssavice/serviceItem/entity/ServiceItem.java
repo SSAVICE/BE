@@ -1,29 +1,8 @@
 package teamssavice.ssavice.serviceItem.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -32,10 +11,14 @@ import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
 
@@ -78,11 +61,6 @@ public class ServiceItem extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime deadline; // 이벤트 마감 기간
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    @Column(nullable = false)
-    private ServiceStatus status = ServiceStatus.RECRUITING;
-
     private String category;
 
     private String tag; // 엘라스틱 서치 도입 예정
@@ -101,9 +79,9 @@ public class ServiceItem extends BaseEntity {
     private Company company;
 
     @OneToOne(
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
@@ -111,11 +89,15 @@ public class ServiceItem extends BaseEntity {
     @Builder.Default
     @ElementCollection
     @CollectionTable(
-        name = "service_item_image",
-        joinColumns = @JoinColumn(name = "service_item_id")
+            name = "service_item_image",
+            joinColumns = @JoinColumn(name = "service_item_id")
     )
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
+
+    @Builder.Default
+    @Column(nullable = false)
+    private ServiceStatus status = ServiceStatus.RECRUITING;
 
     public void addImageId(Long id) {
         imageIds.add(id);
@@ -125,20 +107,27 @@ public class ServiceItem extends BaseEntity {
         return imageIds.isEmpty();
     }
 
+    public ServiceStatus getStatus() {
+        if(status == ServiceStatus.RECRUITING) {
+            if(isTimeOver()) return ServiceStatus.FAILED;
+        } else if (status == ServiceStatus.SUCCEEDED) {
+            if(isCompleted()) return ServiceStatus.COMPLETED;
+            else if(isInUse()) return ServiceStatus.IN_USE;
+            else if(isTimeOver() || isFull()) return ServiceStatus.FULLED;
+        }
+        return status;
+    }
 
     public void participate() {
         if (this.isFull()) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+        // 마감 기한 확인
+        if (isTimeOver()) {
+            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
         this.currentMember++;
-
-        if (this.status == ServiceStatus.RECRUITING && isReachedMinimum()) {
-            this.status = ServiceStatus.SUCCEEDED;
-        }
-
-        if (isFull()) {
-            this.status = ServiceStatus.FULLED;
-        }
+        if(isReachedMinimum()) status = ServiceStatus.SUCCEEDED;
     }
 
     public boolean isReachedMinimum() {
@@ -149,46 +138,59 @@ public class ServiceItem extends BaseEntity {
         return this.currentMember >= this.maximumMember;
     }
 
-    public void finish() {
-        this.status = ServiceStatus.FULLED;
+    // 이용 종료 여부
+    public boolean isTimeOver() {
+        return LocalDateTime.now().isAfter(this.deadline);
+    }
+
+    // 이용중인지 여부
+    public boolean isInUse() {
+        LocalDateTime now = LocalDateTime.now();
+        return isReachedMinimum() && (now.isAfter(startDate) || now.isEqual(startDate)) && now.isBefore(endDate);
+    }
+
+    public boolean isCompleted() {
+        return isReachedMinimum() && LocalDateTime.now().isAfter(endDate);
     }
 
     // 서비스아이템 등록을 위한 검증
-    public void validateAppliable(LocalDateTime now) {
+    public void validateAppliable() {
         // 삭제 여부
-        if (this.isDeleted) {
-            throw new ConflictException(ErrorCode.SERVICE_DELETED);
-        }
+        ServiceStatus status = getStatus();
         // 안되는 상황 구체화
-        switch (this.status) {
+        switch (status) {
             case FAILED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_FAILED);
             case CANCELED -> throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
             case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
             case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+    }
 
-        // 마감 기한 확인
-        if (now.isAfter(this.deadline)) {
+    public void delete() {
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
+        }
+
+        if (isInUse() || isCompleted()) {
+            throw new ConflictException(ErrorCode.SERVICE_ALREADY_STARTED);
+        }
+
+        this.isDeleted = true;
+        status = ServiceStatus.CANCELED;
+    }
+
+    public void cancelParticipation() {
+
+        if (this.isDeleted) {
+            throw new ConflictException(ErrorCode.SERVICE_RECRUITMENT_CANCELED);
+        }
+
+        if (isTimeOver()) {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
         }
 
-        if (this.currentMember >= this.maximumMember) {
-            throw new ConflictException(ErrorCode.MEMBER_FULL);
+        if (this.currentMember > 0) {
+            this.currentMember--;
         }
     }
-
-    // 이용중인지 여부
-    public boolean isInUse(LocalDateTime now) {
-        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
-            && (now.isAfter(startDate) || now.isEqual(startDate))
-            && now.isBefore(endDate);
-    }
-
-    // 이용 종료 여부
-    public boolean isTimeOver(LocalDateTime now) {
-        return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
-            && (now.isAfter(endDate) || now.isEqual(endDate));
-    }
-
-
 }
