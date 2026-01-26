@@ -1,18 +1,36 @@
 package teamssavice.ssavice.serviceItem.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,8 +38,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
-
-    private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,7 +93,7 @@ public class ServiceItem extends BaseEntity {
 
     @Builder.Default
     @Column(nullable = false)
-    private String thumbnailUrl = DEFAULT_IMAGE_URL;
+    private String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -85,9 +101,9 @@ public class ServiceItem extends BaseEntity {
     private Company company;
 
     @OneToOne(
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
@@ -95,8 +111,8 @@ public class ServiceItem extends BaseEntity {
     @Builder.Default
     @ElementCollection
     @CollectionTable(
-            name = "service_item_image",
-            joinColumns = @JoinColumn(name = "service_item_id")
+        name = "service_item_image",
+        joinColumns = @JoinColumn(name = "service_item_id")
     )
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
@@ -164,14 +180,14 @@ public class ServiceItem extends BaseEntity {
     // 이용중인지 여부
     public boolean isInUse(LocalDateTime now) {
         return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
-                && (now.isAfter(startDate) || now.isEqual(startDate))
-                && now.isBefore(endDate);
+            && (now.isAfter(startDate) || now.isEqual(startDate))
+            && now.isBefore(endDate);
     }
 
     // 이용 종료 여부
     public boolean isTimeOver(LocalDateTime now) {
         return (status == ServiceStatus.SUCCEEDED || status == ServiceStatus.FULLED)
-                && (now.isAfter(endDate) || now.isEqual(endDate));
+            && (now.isAfter(endDate) || now.isEqual(endDate));
     }
 
 
