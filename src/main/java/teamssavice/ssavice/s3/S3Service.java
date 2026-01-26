@@ -65,25 +65,11 @@ public class S3Service {
     }
 
     public void moveObject(String sourceKey, String targetKey, ImageContentType contentType) {
-        // 1) size/type 최종 검증
-        // 없으면 예외
-        HeadObjectResponse head;
-        try {
-            head = s3Client.headObject(HeadObjectRequest.builder()
-                .bucket(properties.bucket())
-                .key(sourceKey)
-                .build());
-        } catch (NoSuchKeyException e) {
-            throw new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND);
-        }
+        copyObject(sourceKey, targetKey, contentType);
+        deleteObject(sourceKey);
+    }
 
-        if (head.contentLength() > maxUploadBytes) {
-            // temp에 남겨두지 말고 즉시 삭제
-            deleteObject(sourceKey);
-            throw new ImageSizeException(ErrorCode.IMAGE_TOO_LARGE, head.contentLength(),
-                maxUploadBytes);
-        }
-
+    public void copyObject(String sourceKey, String targetKey, ImageContentType contentType) {
         CopyObjectRequest request = CopyObjectRequest.builder()
             .sourceBucket(properties.bucket())
             .sourceKey(sourceKey)
@@ -93,8 +79,6 @@ public class S3Service {
             .build();
 
         s3Client.copyObject(request);
-
-        deleteObject(sourceKey);
     }
 
     public void deleteObject(String objectKey) {
