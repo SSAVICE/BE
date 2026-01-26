@@ -22,6 +22,6 @@ public class ThumbnailService {
             return;
         }
         ImageResource imageResource = imageReadService.findByObjectKey(alarm.originKey());
-        imageResource.confirmAsThumbnail(alarm.thumbKey());
+        imageResource.confirmAsThumbnail(alarm.resultKey());
     }
 }

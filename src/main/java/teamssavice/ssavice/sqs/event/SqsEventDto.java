@@ -10,7 +10,7 @@ public class SqsEventDto {
         String status,
         String bucket,
         String originKey,
-        String thumbKey,
+        String resultKey,
         String root,
         Long ownerId,
         Instant ts

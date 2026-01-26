@@ -6,7 +6,7 @@ public record ThumbnailAlarmMessage(
     String status,
     String bucket,
     String originKey,
-    String thumbKey,
+    String resultKey,
     String root,
     String ownerId,
     Instant ts //타임라인
