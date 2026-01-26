@@ -9,8 +9,9 @@ import teamssavice.ssavice.imageresource.constants.ImageVariant;
 @Component
 public class S3ObjectKeyGenerator {
 
-    public String tempGenerator(ImagePath path, Long userId, ImageContentType contentType) {
-        return path.name() + "/" + userId + "/" + UUID.randomUUID() + contentType.extension();
+    public String tempGenerator(ImagePath path, Long id, ImageContentType contentType) {
+        return ImagePath.temp + "/" + path.name() + "/" + id + "/" + UUID.randomUUID()
+            + contentType.extension();
     }
 
     public String originGenerator(ImagePath path, ImageVariant variant, Long userId,
