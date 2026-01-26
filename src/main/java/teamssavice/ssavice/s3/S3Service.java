@@ -89,4 +89,42 @@ public class S3Service {
 
         s3Client.deleteObject(request);
     }
+
+    public void validateTempImageOrDelete(String key) {
+        try {
+            validateTempImage(key); // head + size check
+        } catch (ImageSizeException e) {
+            // 정책: 사이즈 초과면 temp 정리
+            deleteObject(key);
+            throw e;
+        }
+    }
+
+    public void validateTempImage(String key) {
+        HeadObjectResponse head = head(key);
+        validateMaxSize(head);
+    }
+
+    public HeadObjectResponse head(String key) {
+        try {
+            return s3Client.headObject(HeadObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(key)
+                .build());
+        } catch (NoSuchKeyException e) {
+            throw new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND);
+        }
+    }
+
+    public void validateMaxSize(HeadObjectResponse head) {
+        if (head.contentLength() > maxUploadBytes) {
+            throw new ImageSizeException(
+                ErrorCode.IMAGE_TOO_LARGE,
+                head.contentLength(),
+                maxUploadBytes
+            );
+        }
+    }
+
+
 }
