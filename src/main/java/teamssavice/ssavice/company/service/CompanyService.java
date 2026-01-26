@@ -146,12 +146,24 @@ public class CompanyService {
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
+
+        // 1) temp 선검증 (size 초과면 temp 삭제 + 예외)
+        s3Service.validateTempImageOrDelete(objectKey);
+
+        // 2) DB 엔티티 조회/연결
         ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+
+        // 3) 기존 origin 이미지 삭제(커밋 후)
         if (company.hasImageResource()) {
             applicationEventPublisher.publishEvent(
-                S3EventDto.Delete.from(company.getImageResource()));
+                S3EventDto.Delete.from(company.getImageResource())
+            );
         }
+
+        // 4) 새 이미지 연결
         company.updateImage(imageResource);
+
+        // 5) temp -> origin 이동(커밋 후)
         applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
