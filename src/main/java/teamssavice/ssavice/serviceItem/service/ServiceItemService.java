@@ -1,5 +1,8 @@
 package teamssavice.ssavice.serviceItem.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -29,13 +32,10 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ServiceItemService {
+
     private final ApplicationEventPublisher applicationEventPublisher;
     private final CompanyReadService companyReadService;
     private final ServiceItemWriteService serviceItemWriteService;
@@ -50,9 +50,15 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(command.imageObjectKeys());
+
+        //S3 temp 전체 검증 (하나라도 실패하면 전부 삭제 + 예외)
+        s3Service.validateAllTempImagesOrDeleteAll(command.imageObjectKeys());
+
+        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
+            command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
-        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company, AddressCommand.RegionInfo.from(command, region));
+        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
+            AddressCommand.RegionInfo.from(command, region));
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();
@@ -69,8 +75,8 @@ public class ServiceItemService {
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(ServiceItemModel.Search::from)
-                .toList();
+            .map(ServiceItemModel.Search::from)
+            .toList();
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
@@ -104,7 +110,7 @@ public class ServiceItemService {
         Book book = bookWriteService.save(user, serviceItem, BookStatus.RESERVED);
 
         return BookModel.Apply.of(
-                book.getId()
+            book.getId()
         );
     }
 
@@ -117,8 +123,10 @@ public class ServiceItemService {
         }
     }
 
-    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
-        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyAndStatus(command.companyId(), command.status(), command.pageable());
+    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
+        ServiceItemCommand.RetrieveByCompanyAndStatus command) {
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyAndStatus(
+            command.companyId(), command.status(), command.pageable());
         return serviceItems.map(ServiceItemModel.Summary::from);
     }
 }

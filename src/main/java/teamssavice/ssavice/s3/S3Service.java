@@ -1,6 +1,7 @@
 package teamssavice.ssavice.s3;
 
 import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -123,6 +124,26 @@ public class S3Service {
                 head.contentLength(),
                 maxUploadBytes
             );
+        }
+    }
+
+    public void validateAllTempImagesOrDeleteAll(List<String> keys) {
+        // 1) 전부 검증
+        try {
+            for (String key : keys) {
+                HeadObjectResponse head = head(key);     // 없으면 EntityNotFoundException
+                validateMaxSize(head);                   // 크면 ImageSizeException
+            }
+        } catch (RuntimeException e) {
+            // 2) 하나라도 실패하면 전부 삭제
+            deleteAllObject(keys);
+            throw e;
+        }
+    }
+
+    private void deleteAllObject(List<String> keys) {
+        for (String key : keys) {
+            deleteObject(key);
         }
     }
 
