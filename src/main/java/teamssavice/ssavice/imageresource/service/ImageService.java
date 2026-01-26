@@ -1,29 +1,32 @@
 package teamssavice.ssavice.imageresource.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.constants.ImageVariant;
 import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ImageService {
+
     private final S3Service s3Service;
     private final S3ObjectKeyGenerator s3ObjectKeyGenerator;
     private final ImageWriteService imageWriteService;
 
     @Transactional
-    public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path, ImageContentType contentType) {
-        String tempKey = s3ObjectKeyGenerator.generator(ImagePath.temp, id, contentType);
-        String objectKey = s3ObjectKeyGenerator.generator(path, id, contentType);
+    public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path,
+        ImageContentType contentType) {
+        String tempKey = s3ObjectKeyGenerator.tempGenerator(ImagePath.temp, id, contentType);
+        String objectKey = s3ObjectKeyGenerator.originGenerator(path, ImageVariant.origin, id,
+            contentType);
         imageWriteService.save(objectKey, tempKey, path, contentType);
 
         return s3Service.createPutPresignedUrl(tempKey, contentType);
