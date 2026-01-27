@@ -24,6 +24,7 @@ public class Users extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private UserRole userRole;
+    @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false)
     private Provider provider;

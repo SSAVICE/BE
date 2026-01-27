@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +16,7 @@ import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.review.controller.dto.ReviewRequest;
 import teamssavice.ssavice.review.controller.dto.ReviewResponse;
 import teamssavice.ssavice.review.service.ReviewService;
+import teamssavice.ssavice.review.service.dto.ReviewCommand;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,10 +39,11 @@ public class ReviewController {
     @GetMapping("/{company-id}")
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getReview(
             @PathVariable("company-id") @Positive Long companyId,
-            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<ReviewResponse.Item> response = reviewService.getReviewPaging(companyId, pageable)
+        Page<ReviewResponse.Item> response = reviewService.getReviewPaging(ReviewCommand.RetrieveByCompanyId.of(companyId, pageable))
                 .map(ReviewResponse.Item::from);
+
         return ResponseEntity.ok(PageResponse.from(response));
     }
 }
