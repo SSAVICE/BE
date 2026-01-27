@@ -2,12 +2,12 @@ package teamssavice.ssavice.book.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,17 +17,39 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookRepositor
 
     boolean existsByUserIdAndServiceItemIdAndBookStatusNot(Long userId, Long serviceItemId, BookStatus bookStatus);
 
-    @Query("SELECT b FROM Book b " +
-            "JOIN b.serviceItem s " + // 페치 조인이 아닌 일반 조인
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
             "WHERE b.user.id = :userId " +
-            "AND b.bookStatus = :bookStatus")
-    List<Book> findByUserIdAndBookStatus(
-            @Param("userId") Long userId,
-            @Param("bookStatus") BookStatus bookStatus
-    );
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingBooksByUserId(Long userId, BookStatus bookStatus, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE b.user.id = :userId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededBooksByUserId(Long userId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
 
     List<Book> findAllByServiceItemIdAndBookStatus(Long serviceItemId, BookStatus bookStatus);
 
     Optional<Book> findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId);
 
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(b) FROM Book b " +
+            "JOIN b.serviceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND b.bookStatus = :bookStatus " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
 }

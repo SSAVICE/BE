@@ -8,6 +8,7 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
@@ -20,8 +21,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
-
-    private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,7 +71,7 @@ public class ServiceItem extends BaseEntity {
 
     @Builder.Default
     @Column(nullable = false)
-    private String thumbnailUrl = DEFAULT_IMAGE_URL;
+    private String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -96,6 +95,11 @@ public class ServiceItem extends BaseEntity {
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false)
+    private ServiceStatus status = ServiceStatus.RECRUITING;
+
     public void addImageId(Long id) {
         imageIds.add(id);
     }
@@ -105,23 +109,26 @@ public class ServiceItem extends BaseEntity {
     }
 
     public ServiceStatus getStatus() {
-        if(this.isDeleted) return ServiceStatus.CANCELED;
-        if(isInUse()) return ServiceStatus.IN_USE;
-        if(isCompleted()) return ServiceStatus.COMPLETED;
-        if(isFull()) return ServiceStatus.FULLED;
-        if (isTimeOver()) {
-            if(!isReachedMinimum()) return ServiceStatus.FAILED;
-            return ServiceStatus.FULLED;
+        if(status == ServiceStatus.RECRUITING) {
+            if(isTimeOver()) return ServiceStatus.FAILED;
+        } else if (status == ServiceStatus.SUCCEEDED) {
+            if(isCompleted()) return ServiceStatus.COMPLETED;
+            else if(isInUse()) return ServiceStatus.IN_USE;
+            else if(isTimeOver() || isFull()) return ServiceStatus.FULLED;
         }
-        if(isReachedMinimum()) return ServiceStatus.SUCCEEDED;
-        return ServiceStatus.RECRUITING;
+        return status;
     }
 
     public void participate() {
         if (this.isFull()) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
+        // 마감 기한 확인
+        if (isTimeOver()) {
+            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
+        }
         this.currentMember++;
+        if(isReachedMinimum()) status = ServiceStatus.SUCCEEDED;
     }
 
     public boolean isReachedMinimum() {
@@ -158,12 +165,6 @@ public class ServiceItem extends BaseEntity {
             case COMPLETED -> throw new ConflictException(ErrorCode.SERVICE_ALREADY_COMPLETED);
             case FULLED -> throw new ConflictException(ErrorCode.MEMBER_FULL);
         }
-
-
-        // 마감 기한 확인
-        if (isTimeOver()) {
-            throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
-        }
     }
 
     public void delete() {
@@ -176,6 +177,7 @@ public class ServiceItem extends BaseEntity {
         }
 
         this.isDeleted = true;
+        status = ServiceStatus.CANCELED;
     }
 
     public void cancelParticipation() {

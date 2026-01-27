@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
@@ -103,8 +104,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         if(!onSale) return null;
         LocalDateTime now = LocalDateTime.now();
 
-        return serviceItem.isDeleted.isFalse()
-                .and(serviceItem.deadline.gt(now))
-                .and(serviceItem.currentMember.lt(serviceItem.maximumMember));
+        return serviceItem.status.eq(ServiceStatus.RECRUITING)
+                .and(serviceItem.deadline.gt(now));
     }
 }

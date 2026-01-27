@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ProblemDetail> missingServletRequestParameterException(
-            MissingServletRequestParameterException e
+        MissingServletRequestParameterException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Missing Request Parameter");
@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ProblemDetail> httpRequestMethodNotSupportedException(
-            HttpRequestMethodNotSupportedException e
+        HttpRequestMethodNotSupportedException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
         problemDetail.setTitle("Method Not Allowed");
@@ -133,6 +133,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 
+    @ExceptionHandler(ImageSizeException.class)
+    public ResponseEntity<ProblemDetail> imageTooLargeException(
+        ImageSizeException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        problemDetail.setProperty("max_size_bytes", e.getMaxAllowedSize());
+        problemDetail.setProperty("actual_size_bytes", e.getCurrentSize());
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
     private ProblemDetail setCustomProblemDetail(CustomException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(e.getErrorCode().getStatus());
         problemDetail.setTitle(e.getTitle());
@@ -168,6 +177,13 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = setCustomProblemDetail(e);
         problemDetail.setDetail(e.getMessage());
 
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
+    @ExceptionHandler(BusinessAuthenticationException.class)
+    public ResponseEntity<ProblemDetail> businessAuthenticationException(
+        BusinessAuthenticationException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 

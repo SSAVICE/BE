@@ -36,7 +36,7 @@ public class UserService {
 
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
-        String email = "test@test.com";
+        String email = "default@email.com";
 
         // user 저장 및 중복 체크
         Users user = userReadService.findByEmail(email)
@@ -78,11 +78,18 @@ public class UserService {
     @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
+
+        // 1) temp 검증(용량 초과면 temp 삭제까지 S3Service가 책임)
+        s3Service.validateTempImageOrDelete(objectKey);
+
+        // 2) DB 연관관계 갱신
         ImageResource imageResource = imageReadService.findByTempKey(objectKey);
         if (user.hasImageResource()) {
             applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }
         user.updateImage(imageResource);
+
+        // 3) 커밋 후 move
         applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
