@@ -13,7 +13,7 @@ import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.AuthenticationException;
+import teamssavice.ssavice.global.exception.BusinessAuthenticationException;
 import teamssavice.ssavice.global.property.CompanySignupVerifyTokenProperties;
 
 @Component
@@ -56,22 +56,28 @@ public class CompanySignupVerifyTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
         } catch (SecurityException | MalformedJwtException e) {
-            throw new AuthenticationException(ErrorCode.INVALID_TOKEN);
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
-            throw new AuthenticationException(ErrorCode.EXPIRED_TOKEN);
+            throw new BusinessAuthenticationException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
-            throw new AuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
+            throw new BusinessAuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (IllegalArgumentException e) {
-            throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
+            throw new BusinessAuthenticationException(ErrorCode.MISSING_TOKEN);
         } catch (Exception e) {
-            throw new AuthenticationException(ErrorCode.UNKNOWN_TOKEN_ERROR);
+            throw new BusinessAuthenticationException(ErrorCode.UNKNOWN_TOKEN_ERROR);
         }
     }
 
-    public void validatePurpose(Claims claims) {
+    public void validateToken(Claims claims, Long userId, String businessNumber) {
         String purpose = claims.get("purpose", String.class);
         if (!PURPOSE.equals(purpose)) {
-            throw new AuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
+            throw new BusinessAuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
+        }
+        if (!claims.getSubject().equals(String.valueOf(userId))) {
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
+        }
+        if (!claims.get("businessNumber", String.class).equals(businessNumber)) {
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
         }
     }
 }
