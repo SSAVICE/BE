@@ -36,7 +36,7 @@ public class UserService {
 
     public UserModel.Login register(String kakaoToken) {
         // 토큰 검증
-        String email = "test@test.com";
+        String email = "default@email.com";
 
         // user 저장 및 중복 체크
         Users user = userReadService.findByEmail(email)

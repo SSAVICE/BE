@@ -53,7 +53,7 @@ public class CompanyService {
 
     public CompanyModel.Login login(String kakaoToken) {
         // 토큰 검증
-        String email = "company@test.com";
+        String email = "default@email.com";
 
         // user 저장 및 중복 체크
         Users user = userReadService.findByEmail(email)

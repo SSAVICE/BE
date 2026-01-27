@@ -178,5 +178,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 
+    @ExceptionHandler(BusinessAuthenticationException.class)
+    public ResponseEntity<ProblemDetail> businessAuthenticationException(
+        BusinessAuthenticationException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
 
 }

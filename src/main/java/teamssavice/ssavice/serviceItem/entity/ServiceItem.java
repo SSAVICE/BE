@@ -95,6 +95,7 @@ public class ServiceItem extends BaseEntity {
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
     private ServiceStatus status = ServiceStatus.RECRUITING;
