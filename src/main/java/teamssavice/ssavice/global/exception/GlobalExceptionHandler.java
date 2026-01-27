@@ -131,6 +131,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 
+    @ExceptionHandler(ImageSizeException.class)
+    public ResponseEntity<ProblemDetail> imageTooLargeException(
+        ImageSizeException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        problemDetail.setProperty("max_size_bytes", e.getMaxAllowedSize());
+        problemDetail.setProperty("actual_size_bytes", e.getCurrentSize());
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
     private ProblemDetail setCustomProblemDetail(CustomException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(e.getErrorCode().getStatus());
         problemDetail.setTitle(e.getTitle());

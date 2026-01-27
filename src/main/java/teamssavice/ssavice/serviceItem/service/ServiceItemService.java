@@ -54,9 +54,15 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(command.imageObjectKeys());
+
+        //S3 temp 전체 검증 (하나라도 실패하면 전부 삭제 + 예외)
+        s3Service.validateAllTempImagesOrDeleteAll(command.imageObjectKeys());
+
+        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
+            command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
-        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company, AddressCommand.RegionInfo.from(command, region));
+        ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
+            AddressCommand.RegionInfo.from(command, region));
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();

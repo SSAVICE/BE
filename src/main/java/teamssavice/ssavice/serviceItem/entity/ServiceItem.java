@@ -8,6 +8,7 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
@@ -20,8 +21,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class ServiceItem extends BaseEntity {
-
-    private static final String DEFAULT_IMAGE_URL = "https://placehold.co/400x400?text=SSAVICE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,8 +70,8 @@ public class ServiceItem extends BaseEntity {
     private boolean isDeleted = false;
 
     @Builder.Default
-    @Column(nullable = true)
-    private String thumbnailUrl = DEFAULT_IMAGE_URL;
+    @Column(nullable = false)
+    private String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
