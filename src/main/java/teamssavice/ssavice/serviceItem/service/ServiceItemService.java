@@ -1,5 +1,7 @@
 package teamssavice.ssavice.serviceItem.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -33,12 +35,10 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ServiceItemService {
+
     private final ApplicationEventPublisher applicationEventPublisher;
     private final CompanyReadService companyReadService;
     private final ServiceItemWriteService serviceItemWriteService;
@@ -54,10 +54,6 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-
-        //S3 temp 전체 검증 (하나라도 실패하면 전부 삭제 + 예외)
-        s3Service.validateAllTempImagesOrDeleteAll(command.imageObjectKeys());
-
         List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
             command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
@@ -79,8 +75,8 @@ public class ServiceItemService {
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(ServiceItemModel.Search::from)
-                .toList();
+            .map(ServiceItemModel.Search::from)
+            .toList();
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
@@ -120,17 +116,21 @@ public class ServiceItemService {
 
         serviceItem.validateAppliable();
 
-        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
+        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(),
+            BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }
 
-    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
+    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
+        ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
-            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(command.companyId(), ServiceStatus.RECRUITING, command.pageable());
+            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(
+                command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(ServiceItemModel.Summary::from);
         }
-        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(
+            command.companyId(), command.pageable());
         return serviceItems.map(ServiceItemModel.Summary::from);
     }
 
@@ -143,10 +143,12 @@ public class ServiceItemService {
         serviceItem.delete();
 
         // 이거는 확장성을 고려해서 만들어둠 - 관련해서 이벤트 처리 방식으로 수정 예정
-        List<Book> canceledBooks = bookReadService.findAllByServiceItemIdAndBookStatus(serviceItem.getId(), BookStatus.RESERVED);
+        List<Book> canceledBooks = bookReadService.findAllByServiceItemIdAndBookStatus(
+            serviceItem.getId(), BookStatus.RESERVED);
 
         if (!canceledBooks.isEmpty()) {
-            refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
+            refundService.registerRefunds(canceledBooks, serviceItem.getPrice(),
+                RefundReason.SERVICE_DELETED);
         }
     }
 
@@ -162,7 +164,8 @@ public class ServiceItemService {
         ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
         Users user = userReadService.findById(command.userId());
 
-        Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(user.getId(), serviceItem.getId());
+        Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(
+            user.getId(), serviceItem.getId());
 
         // 최소 인원 검증인데 이거는 현재는 못하게 막아놓고 법적인거 조사하면서 따로 수수료 물면서 환불하는 로직으로 전환예정
         if (serviceItem.isReachedMinimum()) {
@@ -172,6 +175,7 @@ public class ServiceItemService {
         bookWriteService.cancel(book);
 
         serviceItem.cancelParticipation();
-        refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
+        refundService.registerRefunds(List.of(book), serviceItem.getPrice(),
+            RefundReason.USER_CANCEL);
     }
 }
