@@ -51,7 +51,7 @@ public class ServiceItemController {
         @CurrentId Long companyId,
         @RequestBody @Valid ServiceItemRequest.Create request
     ) {
-        s3Service.validateAllTempImagesOrDeleteAll(request.toImageConfirmCommand());
+        s3Service.validateAllTempImagesOrDeleteAll(request.toValidateCommand());
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }

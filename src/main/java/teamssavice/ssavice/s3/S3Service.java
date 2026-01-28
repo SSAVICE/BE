@@ -23,6 +23,7 @@ import teamssavice.ssavice.global.exception.ImageSizeException;
 import teamssavice.ssavice.global.property.S3Properties;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.s3.dto.S3Command;
 
 @Service
 @RequiredArgsConstructor
@@ -127,7 +128,8 @@ public class S3Service {
         }
     }
 
-    public void validateAllTempImagesOrDeleteAll(List<String> keys) {
+    public void validateAllTempImagesOrDeleteAll(S3Command.ValidateKeys command) {
+        List<String> keys = command.objectKeys();
         // 1) 전부 검증
         try {
             for (String key : keys) {
