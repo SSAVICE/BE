@@ -26,6 +26,7 @@ import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.s3.S3Service;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class CompanyController {
 
     private final CompanyService companyService;
     private final ImageService imageService;
+    private final S3Service s3Service;
 
     @PostMapping("/login")
     public ResponseEntity<CompanyResponse.Login> login(
@@ -107,6 +109,7 @@ public class CompanyController {
         @CurrentId Long companyId,
         @RequestBody @Valid ImageRequest.Confirm request
     ) {
+        s3Service.validateTempImageOrDelete(request.objectKey());
         companyService.updateCompanyImage(companyId, request.objectKey());
         return ResponseEntity.ok().build();
     }
