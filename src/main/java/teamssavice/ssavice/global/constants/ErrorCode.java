@@ -54,7 +54,10 @@ public enum ErrorCode {
     // Book
     ALREADY_APPLIED(HttpStatus.CONFLICT, "ALREADY_APPLIED", "이미 신청한 서비스입니다."),
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKING_NOT_FOUND", "예약 정보를 찾을 수 없습니다."),
-    ALREADY_CANCELED(HttpStatus.CONFLICT, "ALREADY_CANCELED", "이미 취소된 예약입니다.");
+    ALREADY_CANCELED(HttpStatus.CONFLICT, "ALREADY_CANCELED", "이미 취소된 예약입니다."),
+
+    // Wish
+    WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다.");
 
 
     private final HttpStatus status;

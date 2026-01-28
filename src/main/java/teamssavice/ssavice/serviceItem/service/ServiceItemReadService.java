@@ -49,4 +49,9 @@ public class ServiceItemReadService {
     public Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, Pageable pageable) {
         return serviceItemRepository.findAllByCompany_IdAndStatus(companyId, status, LocalDateTime.now(), pageable);
     }
+
+    @Transactional(readOnly = true)
+    public ServiceItem getReferenceById(Long serviceId) {
+        return serviceItemRepository.getReferenceById(serviceId);
+    }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import teamssavice.ssavice.global.constants.ErrorCode;
 
 @Slf4j
 @RestControllerAdvice
@@ -185,5 +187,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> dataIntegrityViolationException(DataIntegrityViolationException e) {
+        String errorMessage = e.getMessage() != null ? e.getMessage().toUpperCase() : "";
+
+        // 1. 중복 제약 조건 (Unique 관련)
+        if (errorMessage.contains("UK_WISH_USER_SERVICE")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(setCustomProblemDetail(new ConflictException(ErrorCode.WISH_ALREADY_EXISTS)));
+        }
+
+        if (errorMessage.contains("FK_WISH_SERVICE_ITEM") || errorMessage.contains("SERVICE_ITEM_ID")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(setCustomProblemDetail(new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND)));
+        }
+
+        if (errorMessage.contains("FK_WISH_USER") || errorMessage.contains("USER_ID")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(setCustomProblemDetail(new EntityNotFoundException(ErrorCode.USER_NOT_FOUND)));
+        }
+
+        return unexpectedException(e);
+    }
 
 }
