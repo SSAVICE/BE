@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
@@ -44,11 +43,7 @@ public class WishService {
 
         return wishPage.map(wish -> {
             ServiceItem serviceItem = wish.getServiceItem();
-            String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-            if (serviceItem.getThumbnailImageResource() != null) {
-                thumbnailUrl = serviceItem.getThumbnailImageResource().getObjectKey();
-            }
-            String presignedUrl = s3Service.generateGetPresignedUrl(thumbnailUrl);
+            String presignedUrl = s3Service.getPresignedUrl(serviceItem);
             return WishModel.Summary.from(wish, presignedUrl);
         });
     }
