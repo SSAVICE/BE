@@ -8,7 +8,6 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.token.CompanySignupVerifyToken;
 import teamssavice.ssavice.review.entity.Review;
 import teamssavice.ssavice.review.service.dto.ReviewModel;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 
 public class CompanyModel {
@@ -49,9 +48,7 @@ public class CompanyModel {
     ) {
 
         public static CompanyModel.MyCompany from(Company company, String presignedUrl,
-            List<ServiceItem> services) {
-            List<ServiceItemModel.Summary> models = services.stream()
-                .map(ServiceItemModel.Summary::from).toList();
+            List<ServiceItemModel.Summary> models) {
             return CompanyModel.MyCompany.builder()
                 .companyId(company.getId())
                 .companyName(company.getCompanyName())
@@ -77,7 +74,7 @@ public class CompanyModel {
     ) {
 
         public static CompanyModel.Info from(Company company, String presignedUrl,
-            List<ServiceItem> services, List<Review> reviews) {
+            List<ServiceItemModel.Summary> services, List<Review> reviews) {
             CompanyModel.MyCompany my = CompanyModel.MyCompany.from(company, presignedUrl,
                 services);
             List<ReviewModel.Item> models = reviews.stream().map(ReviewModel.Item::from).toList();
