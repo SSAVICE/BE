@@ -1,5 +1,7 @@
 package teamssavice.ssavice.s3;
 
+import static teamssavice.ssavice.imageresource.constants.ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+
 import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +19,17 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.global.exception.ImageSizeException;
 import teamssavice.ssavice.global.property.S3Properties;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.dto.S3Command;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.user.entity.Users;
 
 @Service
 @RequiredArgsConstructor
@@ -147,6 +153,30 @@ public class S3Service {
         for (String key : keys) {
             deleteObject(key);
         }
+    }
+
+    public String getPresignedUrl(Company company) {
+        String objectKey = ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
+        if (company.hasImageResource()) {
+            objectKey = company.getImageResource().getObjectKey();
+        }
+        return generateGetPresignedUrl(objectKey);
+    }
+
+    public String getPresignedUrl(Users user) {
+        String objectKey = ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY;
+        if (user.hasImageResource()) {
+            objectKey = user.getImageResource().getObjectKey();
+        }
+        return generateGetPresignedUrl(objectKey);
+    }
+
+    public String getPresignedUrl(ServiceItem serviceItem) {
+        String objectKey = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+        if (serviceItem.hasThumbnailImage()) {
+            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
+        }
+        return generateGetPresignedUrl(objectKey);
     }
 
 
