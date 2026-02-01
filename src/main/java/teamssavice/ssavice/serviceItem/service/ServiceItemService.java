@@ -79,7 +79,15 @@ public class ServiceItemService {
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-            .map(ServiceItemModel.Search::from)
+            .map(serviceItem -> {
+                String imageUrl = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+                if (serviceItem.hasThumbnailImage()) {
+                    imageUrl = s3Service.generateGetPresignedUrl(
+                        serviceItem.getThumbnailImageResource().getObjectKey()
+                    );
+                }
+                return ServiceItemModel.Search.from(serviceItem, imageUrl);
+            })
             .toList();
 
         Long nextCursor = null;

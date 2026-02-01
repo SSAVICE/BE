@@ -8,18 +8,32 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
+import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookReadService bookReadService;
+    private final S3Service s3Service;
 
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
 
-        Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(), command.pageable());
-        return books.map(BookModel.Info::from);
+        Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(),
+            command.pageable());
+        return books.map(book -> {
+            String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+
+            ServiceItem item = book.getServiceItem();
+            if (item.getThumbnailImageResource() != null) {
+                thumbnailUrl = item.getThumbnailImageResource().getObjectKey();
+            }
+            String presignedUrl = s3Service.generateGetPresignedUrl(thumbnailUrl);
+            return BookModel.Info.from(book, presignedUrl);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -32,8 +46,19 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyCompanysBooksByStatus(BookCommand.RetrieveByStatus command) {
-        Page<Book> books = bookReadService.findAllByCompanyIdAndStatus(command.id(), command.status(), command.pageable());
-        return books.map(BookModel.Info::from);
+        Page<Book> books = bookReadService.findAllByCompanyIdAndStatus(command.id(),
+            command.status(), command.pageable());
+
+        return books.map(book -> {
+            String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+
+            ServiceItem item = book.getServiceItem();
+            if (item.getThumbnailImageResource() != null) {
+                thumbnailUrl = item.getThumbnailImageResource().getObjectKey();
+            }
+            String presignedUrl = s3Service.generateGetPresignedUrl(thumbnailUrl);
+            return BookModel.Info.from(book, presignedUrl);
+        });
     }
 
     @Transactional(readOnly = true)
