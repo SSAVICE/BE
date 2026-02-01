@@ -139,7 +139,7 @@ public class CompanyService {
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
-        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+        ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
         if (company.hasImageResource()) {
             applicationEventPublisher.publishEvent(
                 S3EventDto.Delete.from(company.getImageResource())

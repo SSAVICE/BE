@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.constants.ImageStatus;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -29,11 +30,11 @@ public class ImageResource extends BaseEntity {
 
     @NotNull
     @Column(nullable = false, unique = true)
-    private String objectKey;
+    private String targetKey;
 
     @NotNull
     @Column(nullable = false, unique = true)
-    private String tempKey;
+    private String sourceKey;
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -48,6 +49,12 @@ public class ImageResource extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private boolean isActive = false;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(nullable = false)
+    @Builder.Default
+    private ImageStatus status = ImageStatus.PENDING;
 
     public void deActivate() {
         this.isActive = false;

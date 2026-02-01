@@ -72,7 +72,7 @@ public class UserService {
     @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
-        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+        ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
         if (user.hasImageResource()) {
             applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }

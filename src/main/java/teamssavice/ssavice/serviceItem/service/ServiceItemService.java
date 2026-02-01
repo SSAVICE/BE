@@ -54,7 +54,7 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
+        List<ImageResource> imageResourceList = imageReadService.findAllBySourceKeyIn(
             command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
@@ -95,7 +95,7 @@ public class ServiceItemService {
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
-            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getTargetKey()));
         }
         return ServiceItemModel.Detail.from(serviceItem, imageUrls);
     }
