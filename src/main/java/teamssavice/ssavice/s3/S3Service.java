@@ -84,6 +84,10 @@ public class S3Service {
             .destinationBucket(properties.bucket())
             .destinationKey(targetKey)
             .contentType(contentType.mimeType())
+            .overrideConfiguration(o -> o
+                .apiCallAttemptTimeout(Duration.ofMillis(1000))
+                .apiCallTimeout(Duration.ofMillis(4000))
+            )
             .build();
 
         s3Client.copyObject(request);
@@ -118,6 +122,10 @@ public class S3Service {
             return s3Client.headObject(HeadObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
+                .overrideConfiguration(o -> o
+                    .apiCallAttemptTimeout(Duration.ofMillis(500))
+                    .apiCallTimeout(Duration.ofMillis(2000))
+                )
                 .build());
         } catch (NoSuchKeyException e) {
             throw new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND);
