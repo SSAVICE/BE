@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.constants.ImageStatus;
 
@@ -56,6 +57,7 @@ public class ImageResource extends BaseEntity {
     @Builder.Default
     private ImageStatus status = ImageStatus.PENDING;
 
+
     public void deActivate() {
         this.isActive = false;
     }
@@ -64,11 +66,8 @@ public class ImageResource extends BaseEntity {
         this.isActive = true;
     }
 
-    /**
-     * 썸네일 생성 완료 → 메타데이터 확정
-     */
     public void confirmAsThumbnail(String newObjectKey) {
-        this.objectKey = newObjectKey;
+        this.targetKey = newObjectKey;
     }
 
     public void markDone() {
@@ -79,5 +78,12 @@ public class ImageResource extends BaseEntity {
     public void markFailed() {
         this.status = ImageStatus.FAILED;
         this.isActive = false;
+    }
+
+    public String getResolveKey() {
+        if (this.status != ImageStatus.DONE) {
+            return ImageConstants.defaultKey(this.path);
+        }
+        return this.targetKey;
     }
 }
