@@ -129,12 +129,12 @@ public class ServiceItemService {
     public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
         ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
-            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(
+            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyIdAndStatus(
                 command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
                 s3Service.getPresignedUrl(serviceItem)));
         }
-        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyId(
             command.companyId(), command.pageable());
         return serviceItems.map(
             serviceItem -> ServiceItemModel.Summary.from(serviceItem,
