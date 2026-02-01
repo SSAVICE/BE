@@ -95,7 +95,7 @@ public class ServiceItemService {
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
-            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getTargetKey()));
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
         return ServiceItemModel.Detail.from(serviceItem, imageUrls);
     }
