@@ -89,17 +89,20 @@ public class S3Service {
                 .apiCallTimeout(Duration.ofMillis(4000))
             )
             .build();
-
         s3Client.copyObject(request);
     }
 
     public void deleteObject(String objectKey) {
-        DeleteObjectRequest request = DeleteObjectRequest.builder()
-            .bucket(properties.bucket())
-            .key(objectKey)
-            .build();
+        try {
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .build();
 
-        s3Client.deleteObject(request);
+            s3Client.deleteObject(request);
+        } catch (NoSuchKeyException ignored) {
+            // 멱등: 이미 없으면 OK
+        }
     }
 
     public void validateTempImageOrDelete(String key) {
@@ -186,6 +189,5 @@ public class S3Service {
         }
         return generateGetPresignedUrl(objectKey);
     }
-
 
 }
