@@ -1,5 +1,7 @@
 package teamssavice.ssavice.serviceItem.service;
 
+import static teamssavice.ssavice.imageresource.constants.ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,8 @@ public class ServiceItemService {
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
             AddressCommand.RegionInfo.from(command, region));
+
+        savedServiceItem.updateThumbNailImage(imageResourceList.getFirst());
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.activate();
