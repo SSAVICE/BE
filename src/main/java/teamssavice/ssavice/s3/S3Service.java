@@ -158,7 +158,7 @@ public class S3Service {
     public String getPresignedUrl(Company company) {
         String objectKey = ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
         if (company.hasImageResource()) {
-            objectKey = company.getImageResource().getTargetKey();
+            objectKey = company.getImageResource().getResolveKey();
         }
         return generateGetPresignedUrl(objectKey);
     }
@@ -166,7 +166,7 @@ public class S3Service {
     public String getPresignedUrl(Users user) {
         String objectKey = ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY;
         if (user.hasImageResource()) {
-            objectKey = user.getImageResource().getTargetKey();
+            objectKey = user.getImageResource().getResolveKey();
         }
         return generateGetPresignedUrl(objectKey);
     }
@@ -174,7 +174,7 @@ public class S3Service {
     public String getPresignedUrl(ServiceItem serviceItem) {
         String objectKey = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
         if (serviceItem.hasThumbnailImage()) {
-            objectKey = serviceItem.getThumbnailImageResource().getTargetKey();
+            objectKey = serviceItem.getThumbnailImageResource().getResolveKey();
         }
         return generateGetPresignedUrl(objectKey);
     }
