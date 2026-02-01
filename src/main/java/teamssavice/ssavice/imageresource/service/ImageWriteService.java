@@ -11,6 +11,7 @@ import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResource
 @Service
 @RequiredArgsConstructor
 public class ImageWriteService {
+
     private final ImageResourceRepository imageResourceRepository;
 
     @Transactional
@@ -23,5 +24,17 @@ public class ImageWriteService {
             .contentType(contentType.mimeType())
             .build();
         return imageResourceRepository.save(entity);
+    }
+
+    @Transactional
+    public void markDone(Long imageId) {
+        ImageResource image = imageResourceRepository.findById(imageId).orElseThrow();
+        image.markDone();
+    }
+
+    @Transactional
+    public void markFailed(Long imageId) {
+        ImageResource image = imageResourceRepository.findById(imageId).orElseThrow();
+        image.markFailed();
     }
 }
