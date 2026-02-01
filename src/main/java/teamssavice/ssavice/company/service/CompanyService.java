@@ -27,6 +27,7 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 import teamssavice.ssavice.user.service.UserWriteService;
@@ -100,8 +101,12 @@ public class CompanyService {
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyIdOrderByDeadlineDesc(
             company.getId());
         String presignedUrl = s3Service.getPresignedUrl(company);
+        List<ServiceItemModel.Summary> serviceModels = services.stream()
+            .map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.getPresignedUrl(serviceItem)))
+            .toList();
 
-        return CompanyModel.MyCompany.from(company, presignedUrl, services);
+        return CompanyModel.MyCompany.from(company, presignedUrl, serviceModels);
     }
 
     @Transactional(readOnly = true)
@@ -112,8 +117,12 @@ public class CompanyService {
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(
             company.getId());
         String presignedUrl = s3Service.getPresignedUrl(company);
+        List<ServiceItemModel.Summary> serviceModels = services.stream()
+            .map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.getPresignedUrl(serviceItem)))
+            .toList();
 
-        return CompanyModel.Info.from(company, presignedUrl, services, reviews);
+        return CompanyModel.Info.from(company, presignedUrl, serviceModels, reviews);
     }
 
     @Transactional(readOnly = true)
