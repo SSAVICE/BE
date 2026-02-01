@@ -70,4 +70,14 @@ public class ImageResource extends BaseEntity {
     public void confirmAsThumbnail(String newObjectKey) {
         this.objectKey = newObjectKey;
     }
+
+    public void markDone() {
+        this.status = ImageStatus.DONE;
+        this.isActive = true;
+    }
+
+    public void markFailed() {
+        this.status = ImageStatus.FAILED;
+        this.isActive = false;
+    }
 }
