@@ -25,13 +25,8 @@ public class BookService {
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(),
             command.pageable());
         return books.map(book -> {
-            String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-
-            ServiceItem item = book.getServiceItem();
-            if (item.getThumbnailImageResource() != null) {
-                thumbnailUrl = item.getThumbnailImageResource().getObjectKey();
-            }
-            String presignedUrl = s3Service.generateGetPresignedUrl(thumbnailUrl);
+            String presignedUrl = toPresignedUrl(book,
+                ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY);
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -50,13 +45,8 @@ public class BookService {
             command.status(), command.pageable());
 
         return books.map(book -> {
-            String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-
-            ServiceItem item = book.getServiceItem();
-            if (item.getThumbnailImageResource() != null) {
-                thumbnailUrl = item.getThumbnailImageResource().getObjectKey();
-            }
-            String presignedUrl = s3Service.generateGetPresignedUrl(thumbnailUrl);
+            String presignedUrl = toPresignedUrl(book,
+                ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY);
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -67,6 +57,15 @@ public class BookService {
         Long completedCount = bookReadService.countSucceededBooksByCompanyId(companyId);
 
         return BookModel.BookSummary.from(applying, completedCount);
+    }
+
+    private String toPresignedUrl(Book book, String defaultObjectKey) {
+        String objectKey = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+        ServiceItem serviceItem = book.getServiceItem();
+        if (serviceItem.hasThumbnailImage()) {
+            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
+        }
+        return s3Service.generateGetPresignedUrl(objectKey);
     }
 }
 
