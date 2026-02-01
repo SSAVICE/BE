@@ -1,5 +1,7 @@
 package teamssavice.ssavice.book.infrastructure.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,18 +19,20 @@ import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.fixture.*;
+import teamssavice.ssavice.fixture.AddressFixture;
+import teamssavice.ssavice.fixture.BookFixture;
+import teamssavice.ssavice.fixture.CompanyFixture;
+import teamssavice.ssavice.fixture.ServiceItemFixture;
+import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DataJpaTest
 @Import(QueryDSLConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-
 class BookRepositoryImplTest {
+
     @Autowired
     private BookRepository bookRepository;
     @Autowired
@@ -84,8 +88,10 @@ class BookRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.ALL, pageable);
-        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(),
+            BookStatusFilter.ALL, pageable);
+        Page<BookModel.Info> actualModels =
+            actuals.map(book -> BookModel.Info.from(book, null));
 
         // then
         assertThat(actualModels.getTotalElements()).isEqualTo(8);
@@ -98,9 +104,10 @@ class BookRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.RECRUITING, pageable);
-        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
-
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(),
+            BookStatusFilter.RECRUITING, pageable);
+        Page<BookModel.Info> actualModels =
+            actuals.map(book -> BookModel.Info.from(book, null));
         // then
         assertThat(actualModels.getTotalElements()).isEqualTo(1);
         for (BookModel.Info model : actualModels) {
@@ -115,13 +122,15 @@ class BookRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.SUCCEEDED, pageable);
-        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
-
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(),
+            BookStatusFilter.SUCCEEDED, pageable);
+        Page<BookModel.Info> actualModels =
+            actuals.map(book -> BookModel.Info.from(book, null));
         // then
         assertThat(actualModels.getTotalElements()).isEqualTo(3);
         for (BookModel.Info model : actualModels) {
-            assertThat(model.bookStatus()).isIn(BookViewStatus.SUCCEEDED, BookViewStatus.FULLED, BookViewStatus.IN_USE);
+            assertThat(model.bookStatus()).isIn(BookViewStatus.SUCCEEDED, BookViewStatus.FULLED,
+                BookViewStatus.IN_USE);
         }
     }
 
@@ -132,9 +141,10 @@ class BookRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.COMPLETED, pageable);
-        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
-
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(),
+            BookStatusFilter.COMPLETED, pageable);
+        Page<BookModel.Info> actualModels =
+            actuals.map(book -> BookModel.Info.from(book, null));
         // then
         assertThat(actualModels.getTotalElements()).isEqualTo(1);
         for (BookModel.Info model : actualModels) {
@@ -149,13 +159,15 @@ class BookRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(), BookStatusFilter.CANCELED, pageable);
-        Page<BookModel.Info> actualModels = actuals.map(BookModel.Info::from);
-
+        Page<Book> actuals = bookRepository.findAllByUserIdAndStatus(user.getId(),
+            BookStatusFilter.CANCELED, pageable);
+        Page<BookModel.Info> actualModels =
+            actuals.map(book -> BookModel.Info.from(book, null));
         // then
         assertThat(actualModels.getTotalElements()).isEqualTo(3);
         for (BookModel.Info model : actualModels) {
-            assertThat(model.bookStatus()).isIn(BookViewStatus.FAILED, BookViewStatus.USER_CANCELED, BookViewStatus.SERVICE_CANCELED);
+            assertThat(model.bookStatus()).isIn(BookViewStatus.FAILED, BookViewStatus.USER_CANCELED,
+                BookViewStatus.SERVICE_CANCELED);
         }
     }
 }
