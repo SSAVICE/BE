@@ -79,15 +79,8 @@ public class ServiceItemService {
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-            .map(serviceItem -> {
-                String imageUrl = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-                if (serviceItem.hasThumbnailImage()) {
-                    imageUrl = s3Service.generateGetPresignedUrl(
-                        serviceItem.getThumbnailImageResource().getObjectKey()
-                    );
-                }
-                return ServiceItemModel.Search.from(serviceItem, imageUrl);
-            })
+            .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
+                toPresignedUrl(serviceItem)))
             .toList();
 
         Long nextCursor = null;
@@ -134,17 +127,21 @@ public class ServiceItemService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
         ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(
                 command.companyId(), ServiceStatus.RECRUITING, command.pageable());
-            return serviceItems.map(ServiceItemModel.Summary::from);
+            return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                toPresignedUrl(serviceItem)));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(
             command.companyId(), command.pageable());
-        return serviceItems.map(ServiceItemModel.Summary::from);
+        return serviceItems.map(
+            serviceItem -> ServiceItemModel.Summary.from(serviceItem, toPresignedUrl(serviceItem)));
     }
+
 
     @Transactional
     public void delete(ServiceItemCommand.Delete command) {
@@ -189,5 +186,13 @@ public class ServiceItemService {
         serviceItem.cancelParticipation();
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(),
             RefundReason.USER_CANCEL);
+    }
+
+    private String toPresignedUrl(ServiceItem serviceItem) {
+        String objectKey = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+        if (serviceItem.hasThumbnailImage()) {
+            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
+        }
+        return s3Service.generateGetPresignedUrl(objectKey);
     }
 }
