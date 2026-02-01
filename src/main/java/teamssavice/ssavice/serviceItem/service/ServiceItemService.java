@@ -1,7 +1,5 @@
 package teamssavice.ssavice.serviceItem.service;
 
-import static teamssavice.ssavice.imageresource.constants.ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +78,7 @@ public class ServiceItemService {
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
-                toPresignedUrl(serviceItem)))
+                s3Service.getPresignedUrl(serviceItem)))
             .toList();
 
         Long nextCursor = null;
@@ -134,12 +132,13 @@ public class ServiceItemService {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(
                 command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                toPresignedUrl(serviceItem)));
+                s3Service.getPresignedUrl(serviceItem)));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(
             command.companyId(), command.pageable());
         return serviceItems.map(
-            serviceItem -> ServiceItemModel.Summary.from(serviceItem, toPresignedUrl(serviceItem)));
+            serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.getPresignedUrl(serviceItem)));
     }
 
 
@@ -188,11 +187,4 @@ public class ServiceItemService {
             RefundReason.USER_CANCEL);
     }
 
-    private String toPresignedUrl(ServiceItem serviceItem) {
-        String objectKey = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-        if (serviceItem.hasThumbnailImage()) {
-            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
-        }
-        return s3Service.generateGetPresignedUrl(objectKey);
-    }
 }

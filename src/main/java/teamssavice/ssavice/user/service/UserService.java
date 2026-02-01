@@ -11,7 +11,6 @@ import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.region.Region;
@@ -51,13 +50,8 @@ public class UserService {
     public UserModel.Info getProfile(Long userId) {
         // 사용자 정보 조회
         Users user = userReadService.findByIdFetchJoinAddressAndImageResource(userId);
-        if (user.hasImageResource()) {
-            String presignedUrl = s3Service.generateGetPresignedUrl(
-                user.getImageResource().getObjectKey());
-            return UserModel.Info.from(user, presignedUrl);
-        }
-
-        return UserModel.Info.from(user, ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY);
+        String presignedUrl = s3Service.getPresignedUrl(user);
+        return UserModel.Info.from(user, presignedUrl);
     }
 
     @Transactional
@@ -99,4 +93,5 @@ public class UserService {
         userWriteService.updateAddress(user, region, command);
         return AddressModel.RegionDetail.from(user.getAddress());
     }
+
 }

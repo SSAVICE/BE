@@ -8,9 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.s3.S3Service;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +23,7 @@ public class BookService {
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(),
             command.pageable());
         return books.map(book -> {
-            String presignedUrl = toPresignedUrl(book,
-                ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY);
+            String presignedUrl = s3Service.getPresignedUrl(book.getServiceItem());
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -45,8 +42,7 @@ public class BookService {
             command.status(), command.pageable());
 
         return books.map(book -> {
-            String presignedUrl = toPresignedUrl(book,
-                ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY);
+            String presignedUrl = s3Service.getPresignedUrl(book.getServiceItem());
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -59,14 +55,6 @@ public class BookService {
         return BookModel.BookSummary.from(applying, completedCount);
     }
 
-    private String toPresignedUrl(Book book, String defaultObjectKey) {
-        String objectKey = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-        ServiceItem serviceItem = book.getServiceItem();
-        if (serviceItem.hasThumbnailImage()) {
-            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
-        }
-        return s3Service.generateGetPresignedUrl(objectKey);
-    }
 }
 
 
