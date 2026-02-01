@@ -16,6 +16,7 @@ services:
       S3_REGION: ${S3_REGION}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       NTS_SERVICE_KEY: ${NTS_SERVICE_KEY}
+      SQS_THUMB_ALARM_QUEUE: ${SQS_THUMB_ALARM_QUEUE}
       TZ: Asia/Seoul
     # 항상 최신
     pull_policy: always
