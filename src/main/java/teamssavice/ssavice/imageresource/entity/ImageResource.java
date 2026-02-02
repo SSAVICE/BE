@@ -55,7 +55,7 @@ public class ImageResource extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     @Builder.Default
-    private ImageStatus status = ImageStatus.CREATED;
+    private ImageStatus status = ImageStatus.PENDING;
 
 
     public void deActivate() {
@@ -68,16 +68,6 @@ public class ImageResource extends BaseEntity {
 
     public void confirmAsThumbnail(String newObjectKey) {
         this.targetKey = newObjectKey;
-    }
-
-    public void markDone() {
-        this.status = ImageStatus.DONE;
-        this.isActive = true;
-    }
-
-    public void markFailed() {
-        this.status = ImageStatus.FAILED;
-        this.isActive = false;
     }
 
     public String getResolveKey() {
