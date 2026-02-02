@@ -55,7 +55,7 @@ public class ImageResource extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     @Builder.Default
-    private ImageStatus status = ImageStatus.PENDING;
+    private ImageStatus status = ImageStatus.CREATED;
 
 
     public void deActivate() {
