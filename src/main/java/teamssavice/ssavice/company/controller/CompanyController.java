@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import teamssavice.ssavice.address.AddressModel;
+import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
 import teamssavice.ssavice.company.controller.dto.CompanyResponse;
@@ -124,5 +126,14 @@ public class CompanyController {
         CompanyModel.Validate model = companyService.validateBusinessNumber(userId,
             request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
+    }
+
+    @GetMapping("/address")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<AddressResponse.RegionDetail> getAddress(
+            @CurrentId Long companyId
+    ) {
+        AddressModel.RegionDetail model = companyService.getCompanyAddress(companyId);
+        return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
     }
 }

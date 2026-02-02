@@ -1,12 +1,11 @@
 package teamssavice.ssavice.company.service;
 
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
+import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
@@ -31,6 +30,9 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 import teamssavice.ssavice.user.service.UserWriteService;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -157,5 +159,11 @@ public class CompanyService {
             userId, command.businessNumber());
 
         return CompanyModel.Validate.from(verifyToken);
+    }
+  
+    @Transactional(readOnly = true)
+    public AddressModel.RegionDetail getCompanyAddress(Long companyId) {
+        Company company = companyReadService.findByCompanyIdFetchJoinAddress(companyId);
+        return AddressModel.RegionDetail.from(company.getAddress());
     }
 }
