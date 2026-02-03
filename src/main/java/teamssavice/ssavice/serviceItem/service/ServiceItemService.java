@@ -32,6 +32,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
+import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class ServiceItemService {
     private final BookReadService bookReadService;
     private final RegionReadService regionReadService;
     private final RefundService refundService;
+    private final WishReadService wishReadService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -91,14 +93,17 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItemModel.Detail getServiceDetail(Long serviceId) {
+    public ServiceItemModel.Detail getServiceDetail(Long serviceId, Long userId) {
         ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
             imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
         }
-        return ServiceItemModel.Detail.from(serviceItem, imageUrls);
+
+        boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
+
+        return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked);
     }
 
     @Transactional

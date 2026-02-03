@@ -136,7 +136,7 @@ public class ServiceItemModel {
             List<String> imageUrl,
             Boolean liked
     ) {
-        public static Detail from (ServiceItem entity, List<String> imageUrl) {
+        public static Detail from (ServiceItem entity, List<String> imageUrl, boolean isLiked) {
             return Detail.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -164,7 +164,7 @@ public class ServiceItemModel {
                             .latitude(entity.getAddress().getLatitude())
                             .longitude(entity.getAddress().getLongitude())
                             .build())
-                    .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
+                    .liked(isLiked)
                     .build();
         }
     }

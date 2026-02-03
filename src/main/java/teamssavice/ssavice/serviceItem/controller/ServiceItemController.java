@@ -58,10 +58,12 @@ public class ServiceItemController {
     }
 
     @GetMapping("/{serviceId}")
+    @RequireRole(Role.USER)
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
-            @PathVariable Long serviceId
+            @PathVariable Long serviceId,
+            @CurrentId Long userId
     ) {
-        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId);
+        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, userId);
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
