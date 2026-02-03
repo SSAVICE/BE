@@ -4,12 +4,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
@@ -26,4 +26,10 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
             "AND s.status = :status " +
             "AND s.deadline > :now")
     Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT s FROM ServiceItem s " +
+            "LEFT JOIN FETCH s.imageIds i " +
+            "JOIN FETCH s.address a " +
+            "WHERE s.id = :id")
+    Optional<ServiceItem> findByIdWithAddressAndImageList(Long id);
 }

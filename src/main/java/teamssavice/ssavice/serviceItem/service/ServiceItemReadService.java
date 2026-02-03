@@ -54,4 +54,10 @@ public class ServiceItemReadService {
     public ServiceItem getReferenceById(Long serviceId) {
         return serviceItemRepository.getReferenceById(serviceId);
     }
+
+    @Transactional(readOnly = true)
+    public ServiceItem findByIdWithAddressAndImageList(Long id) {
+        return serviceItemRepository.findByIdWithAddressAndImageList(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+    }
 }

@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
-import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
@@ -45,6 +45,12 @@ public class BookReadService {
     public Book findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(Long userId, Long serviceItemId) {
         return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    public boolean isBookedByUserIdAndServiceId(Long userId, Long serviceItemId) {
+        return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
+                .map(book -> book.getBookStatus() == BookStatus.RESERVED)
+                .orElse(false);
     }
 
     public Long countRecruitingBooksByUserId(Long userId) {

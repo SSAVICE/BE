@@ -94,7 +94,7 @@ public class ServiceItemService {
 
     @Transactional(readOnly = true)
     public ServiceItemModel.Detail getServiceDetail(Long serviceId, Long userId) {
-        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+        ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndImageList(serviceId);
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
@@ -102,8 +102,9 @@ public class ServiceItemService {
         }
 
         boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
+        boolean isBooked = bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
 
-        return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked);
+        return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }
 
     @Transactional

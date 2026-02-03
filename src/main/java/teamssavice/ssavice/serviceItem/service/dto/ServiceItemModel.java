@@ -134,9 +134,10 @@ public class ServiceItemModel {
             AddressModel.RegionSummary region,
 
             List<String> imageUrl,
-            Boolean liked
+            Boolean liked,
+            Boolean booked
     ) {
-        public static Detail from (ServiceItem entity, List<String> imageUrl, boolean isLiked) {
+        public static Detail from (ServiceItem entity, List<String> imageUrl, boolean isLiked, boolean isBooked) {
             return Detail.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -165,6 +166,7 @@ public class ServiceItemModel {
                             .longitude(entity.getAddress().getLongitude())
                             .build())
                     .liked(isLiked)
+                    .booked(isBooked)
                     .build();
         }
     }

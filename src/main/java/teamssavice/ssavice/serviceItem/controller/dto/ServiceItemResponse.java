@@ -127,6 +127,7 @@ public class ServiceItemResponse {
             LocalDateTime startDate,
             LocalDateTime endDate,
             Boolean isLiked,
+            Boolean isBooked,
             String status,
             LocalDateTime createdAt
     ) {
@@ -150,6 +151,7 @@ public class ServiceItemResponse {
                     .startDate(model.startDate())
                     .endDate(model.endDate())
                     .isLiked(model.liked())
+                    .isBooked(model.booked())
                     .status(model.status().name())
                     .createdAt(model.createdAt())
                     .build();
