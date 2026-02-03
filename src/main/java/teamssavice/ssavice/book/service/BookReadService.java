@@ -13,9 +13,12 @@ import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -67,5 +70,16 @@ public class BookReadService {
 
     public Long countSucceededBooksByCompanyId(Long companyId) {
         return bookRepository.countSucceededBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
+    }
+
+    public Set<Long> findReservedServiceItemIdsFromLatestBooks(Long userId, List<ServiceItem> serviceItems) {
+        List<Long> serviceIds = serviceItems.stream()
+            .map(ServiceItem::getId)
+            .toList();
+
+        return bookRepository.findLatestBooksByUserIdAndServiceItemId(userId, serviceIds).stream()
+            .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
+            .map(book -> book.getServiceItem().getId())
+            .collect(Collectors.toSet());
     }
 }

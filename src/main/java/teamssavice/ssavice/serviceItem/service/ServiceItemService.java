@@ -36,6 +36,7 @@ import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -79,9 +80,10 @@ public class ServiceItemService {
     public CursorResult<ServiceItemModel.Search> search(ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
+        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(ServiceItemModel.Search::from)
+                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId())))
                 .toList();
 
         Long nextCursor = null;

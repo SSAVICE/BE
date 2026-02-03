@@ -80,9 +80,11 @@ public class ServiceItemModel {
             Integer discountRatio,
             Long discountedPrice,
 
-            LocalDateTime deadline
+            LocalDateTime deadline,
+
+            boolean isBooked
     ) {
-        public static Search from (ServiceItem entity) {
+        public static Search from (ServiceItem entity, boolean isBooked) {
             return Search.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -105,6 +107,7 @@ public class ServiceItemModel {
                             .latitude(entity.getAddress().getLatitude())
                             .longitude(entity.getAddress().getLongitude())
                             .build())
+                    .isBooked(isBooked)
                     .build();
         }
     }

@@ -1,6 +1,7 @@
 package teamssavice.ssavice.book.infrastructure.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.book.entity.QBook;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 import java.time.LocalDateTime;
@@ -88,6 +90,18 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
+    @Override
+    public List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds) {
+        QBook book2 = new QBook("book2");
+        return queryFactory
+            .selectFrom(book)
+            .where(
+                book.user.id.eq(userId),
+                book.serviceItem.id.in(serviceItemIds),
+                isLatestBook(userId, book2)
+            ).fetch();
+    }
+
     private BooleanExpression statusCondition(BookStatusFilter status, LocalDateTime now) {
         if (status == null || status == BookStatusFilter.ALL) {
             return null;
@@ -114,5 +128,17 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
                     .and(serviceItem.endDate.loe(now));
             default -> null;
         };
+    }
+
+    private BooleanExpression isLatestBook(Long userId, QBook book2) {
+        return book.id.eq(
+            JPAExpressions
+                .select(book2.id.max())
+                .from(book2)
+                .where(
+                    book2.user.id.eq(userId),
+                    book2.serviceItem.id.eq(book.serviceItem.id)
+                )
+        );
     }
 }

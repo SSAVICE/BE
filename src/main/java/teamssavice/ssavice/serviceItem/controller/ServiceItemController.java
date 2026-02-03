@@ -47,12 +47,14 @@ public class ServiceItemController {
     }
 
     @GetMapping("/search")
+    @RequireRole(Role.USER)
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
             @ModelAttribute @Valid ServiceItemRequest.Search request,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @CurrentId Long userId
     ) {
         Pageable pageable = PageRequest.of(0, size);
-        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(pageable));
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(userId, pageable));
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
         return ResponseEntity.ok(response);
     }
