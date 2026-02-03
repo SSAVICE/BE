@@ -59,6 +59,8 @@ public class BookModel {
         Integer discountRate,
         Long discountedPrice,
 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         LocalDateTime deadline,
         String tags
     ) {
@@ -88,6 +90,8 @@ public class BookModel {
                 item.getPrice().getDiscountRate(),
                 item.getPrice().getDiscountedPrice(),
 
+                item.getStartDate(),
+                item.getEndDate(),
                 item.getDeadline(),
                 item.getTag()
             );

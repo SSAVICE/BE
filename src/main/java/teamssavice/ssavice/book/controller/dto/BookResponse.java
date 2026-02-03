@@ -42,6 +42,8 @@ public class BookResponse {
         Long discountedPrice,
         // 기타
         LocalDateTime deadline,
+        LocalDateTime startTime,
+        LocalDateTime endTime,
         String tag
     ) {
 
@@ -65,6 +67,8 @@ public class BookResponse {
                 model.discountedPrice(),
 
                 model.deadline(),
+                model.startDate(),
+                model.endDate(),
                 model.tags() // List<String> 그대로 전달
             );
         }
