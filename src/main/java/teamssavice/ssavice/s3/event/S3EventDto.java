@@ -1,18 +1,23 @@
 package teamssavice.ssavice.s3.event;
 
 import lombok.Builder;
+import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 
 public class S3EventDto {
 
     @Builder
     public record Move(
-        String sourceKey
+        String sourceKey,
+        String targetKey,
+        ImageContentType contentType
     ) {
 
         public static Move from(ImageResource imageResource) {
             return Move.builder()
                 .sourceKey(imageResource.getSourceKey())
+                .targetKey(imageResource.getTargetKey())
+                .contentType(ImageContentType.from(imageResource.getContentType()))
                 .build();
         }
     }
