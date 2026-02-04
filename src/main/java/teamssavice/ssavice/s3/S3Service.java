@@ -100,18 +100,8 @@ public class S3Service {
     }
 
     public void validateTempImageOrDelete(String key) {
-        try {
-            validateTempImage(key); // head + size check
-        } catch (ImageSizeException e) {
-            // 정책: 사이즈 초과면 temp 정리
-            deleteObject(key);
-            throw e;
-        }
-    }
-
-    public void validateTempImage(String key) {
         HeadObjectResponse head = head(key);
-        validateMaxSize(head);
+        validateMaxSizeOrDelete(head, key);
     }
 
     public HeadObjectResponse head(String key) {
@@ -129,8 +119,9 @@ public class S3Service {
         }
     }
 
-    public void validateMaxSize(HeadObjectResponse head) {
+    public void validateMaxSizeOrDelete(HeadObjectResponse head, String key) {
         if (head.contentLength() > maxUploadBytes) {
+            deleteObject(key);
             throw new ImageSizeException(
                 ErrorCode.IMAGE_TOO_LARGE,
                 head.contentLength(),
@@ -144,8 +135,7 @@ public class S3Service {
         // 1) 전부 검증
         try {
             for (String key : keys) {
-                HeadObjectResponse head = head(key);     // 없으면 EntityNotFoundException
-                validateMaxSize(head);                   // 크면 ImageSizeException
+                validateTempImageOrDelete(key);
             }
         } catch (RuntimeException e) {
             // 2) 하나라도 실패하면 전부 삭제
