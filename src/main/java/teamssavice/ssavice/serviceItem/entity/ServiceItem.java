@@ -29,6 +29,7 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
@@ -231,6 +232,14 @@ public class ServiceItem extends BaseEntity {
 
     public boolean hasThumbnailImage() {
         return this.getThumbnailImageResource() != null;
+    }
+
+    public String getObjectKey() {
+        String objectKey = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+        if (this.hasThumbnailImage()) {
+            objectKey = this.getThumbnailImageResource().getResolveKey();
+        }
+        return objectKey;
     }
 
 
