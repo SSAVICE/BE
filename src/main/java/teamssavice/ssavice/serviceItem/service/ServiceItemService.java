@@ -78,7 +78,7 @@ public class ServiceItemService {
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)))
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
             .toList();
 
         Long nextCursor = null;
@@ -132,13 +132,13 @@ public class ServiceItemService {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyIdAndStatus(
                 command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)));
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyId(
             command.companyId(), command.pageable());
         return serviceItems.map(
             serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)));
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
 

@@ -43,7 +43,7 @@ public class WishService {
 
         return wishPage.map(wish -> {
             ServiceItem serviceItem = wish.getServiceItem();
-            String presignedUrl = s3Service.getPresignedUrl(serviceItem);
+            String presignedUrl = s3Service.generateGetPresignedUrl(serviceItem.getObjectKey());
             return WishModel.Summary.from(wish, presignedUrl);
         });
     }
