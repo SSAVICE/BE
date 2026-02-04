@@ -11,16 +11,18 @@ import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResource
 @Service
 @RequiredArgsConstructor
 public class ImageWriteService {
+
     private final ImageResourceRepository imageResourceRepository;
 
     @Transactional
-    public ImageResource save(String objectKey, String tempKey, ImagePath path, ImageContentType contentType) {
+    public ImageResource save(String targetKey, String sourceKey, ImagePath path,
+        ImageContentType contentType) {
         ImageResource entity = ImageResource.builder()
-                .objectKey(objectKey)
-                .tempKey(tempKey)
-                .path(path)
-                .contentType(contentType.mimeType())
-                .build();
+            .targetKey(targetKey)
+            .sourceKey(sourceKey)
+            .path(path)
+            .contentType(contentType.mimeType())
+            .build();
         return imageResourceRepository.save(entity);
     }
 }

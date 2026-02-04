@@ -9,6 +9,7 @@ import teamssavice.ssavice.s3.S3Service;
 @Component
 @RequiredArgsConstructor
 public class S3EventHandler {
+
     private final S3Service s3Service;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -18,6 +19,6 @@ public class S3EventHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void deleteImageEventListener(S3EventDto.Delete event) {
-        s3Service.deleteObject(event.objectKey());
+        s3Service.deleteObject(event.targetKey());
     }
 }

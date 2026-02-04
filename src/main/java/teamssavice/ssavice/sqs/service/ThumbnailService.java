@@ -21,7 +21,7 @@ public class ThumbnailService {
             log.warn("thumbnail not completed: {}", alarm);
             return;
         }
-        ImageResource imageResource = imageReadService.findByObjectKey(alarm.originKey());
+        ImageResource imageResource = imageReadService.findByTargetKey(alarm.originKey());
         imageResource.confirmAsThumbnail(alarm.resultKey());
     }
 }

@@ -14,7 +14,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
+import teamssavice.ssavice.imageresource.constants.ImageStatus;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -29,11 +31,11 @@ public class ImageResource extends BaseEntity {
 
     @NotNull
     @Column(nullable = false, unique = true)
-    private String objectKey;
+    private String targetKey;
 
     @NotNull
     @Column(nullable = false, unique = true)
-    private String tempKey;
+    private String sourceKey;
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -49,6 +51,13 @@ public class ImageResource extends BaseEntity {
     @Builder.Default
     private boolean isActive = false;
 
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(nullable = false)
+    @Builder.Default
+    private ImageStatus status = ImageStatus.PENDING;
+
+
     public void deActivate() {
         this.isActive = false;
     }
@@ -57,10 +66,14 @@ public class ImageResource extends BaseEntity {
         this.isActive = true;
     }
 
-    /**
-     * 썸네일 생성 완료 → 메타데이터 확정
-     */
     public void confirmAsThumbnail(String newObjectKey) {
-        this.objectKey = newObjectKey;
+        this.targetKey = newObjectKey;
+    }
+
+    public String getResolveKey() {
+        if (this.status != ImageStatus.DONE) {
+            return ImageConstants.defaultKey(this.path);
+        }
+        return this.targetKey;
     }
 }

@@ -23,7 +23,8 @@ public class BookService {
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(),
             command.pageable());
         return books.map(book -> {
-            String presignedUrl = s3Service.getPresignedUrl(book.getServiceItem());
+            String presignedUrl = s3Service.generateGetPresignedUrl(
+                book.getServiceItem().getObjectKey());
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -42,7 +43,8 @@ public class BookService {
             command.status(), command.pageable());
 
         return books.map(book -> {
-            String presignedUrl = s3Service.getPresignedUrl(book.getServiceItem());
+            String presignedUrl = s3Service.generateGetPresignedUrl(
+                book.getServiceItem().getObjectKey());
             return BookModel.Info.from(book, presignedUrl);
         });
     }

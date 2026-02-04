@@ -1,8 +1,15 @@
 package teamssavice.ssavice.serviceItem.infrastructure.repository;
 
+import static teamssavice.ssavice.address.QAddress.address1;
+import static teamssavice.ssavice.company.entity.QCompany.company;
+import static teamssavice.ssavice.imageresource.entity.QImageResource.imageResource;
+import static teamssavice.ssavice.serviceItem.entity.QServiceItem.serviceItem;
+
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +18,6 @@ import org.springframework.data.domain.SliceImpl;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static teamssavice.ssavice.company.entity.QCompany.company;
-import static teamssavice.ssavice.address.QAddress.address1;
-
-import static teamssavice.ssavice.serviceItem.entity.QServiceItem.serviceItem;
 
 @RequiredArgsConstructor
 public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
@@ -32,21 +31,22 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         int pageSize = pageable.getPageSize();
 
         List<ServiceItem> content = queryFactory
-                .selectFrom(serviceItem)
+            .selectFrom(serviceItem)
 
-                .join(serviceItem.company, company).fetchJoin()
-                .join(serviceItem.address, address1).fetchJoin()
-                .where(
-                        ltLastId(command.lastId()),
-                        eqCategory(command.category()),
-                        containsQuery(command.query()),
-                        goeMinPrice(command.minPrice()),
-                        loeMaxPrice(command.maxPrice()),
-                        applyOnSaleCondition(command.onSale())
-                )
-                .orderBy(getOrderSpecifier(command.sortBy()))
-                .limit(pageSize + 1)
-                .fetch();
+            .join(serviceItem.company, company).fetchJoin()
+            .join(serviceItem.address, address1).fetchJoin()
+            .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
+            .where(
+                ltLastId(command.lastId()),
+                eqCategory(command.category()),
+                containsQuery(command.query()),
+                goeMinPrice(command.minPrice()),
+                loeMaxPrice(command.maxPrice()),
+                applyOnSaleCondition(command.onSale())
+            )
+            .orderBy(getOrderSpecifier(command.sortBy()))
+            .limit(pageSize + 1)
+            .fetch();
 
         boolean hasNext = false;
         if (content.size() > pageSize) {
@@ -69,7 +69,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
     private BooleanExpression containsQuery(String query) {
         return (query == null || query.isEmpty()) ? null :
-                serviceItem.title.contains(query).or(serviceItem.description.contains(query));
+            serviceItem.title.contains(query).or(serviceItem.description.contains(query));
     }
 
     private BooleanExpression goeMinPrice(Long minPrice) {
@@ -82,7 +82,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
     private OrderSpecifier<?>[] getOrderSpecifier(Integer sortBy) {
         // 기본값: createdAt 내림차순 (최신순)
-        OrderSpecifier[] defaultSort = { serviceItem.createdAt.desc() };
+        OrderSpecifier[] defaultSort = {serviceItem.createdAt.desc()};
 
         if (sortBy == null) {
             return defaultSort;
@@ -90,21 +90,26 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
         switch (sortBy) {
             case 1: // 가격 낮은 순
-                return new OrderSpecifier[]{ serviceItem.price.discountedPrice.asc(), serviceItem.id.desc() };
+                return new OrderSpecifier[]{serviceItem.price.discountedPrice.asc(),
+                    serviceItem.id.desc()};
             case 2: // 가격 높은 순
-                return new OrderSpecifier[]{ serviceItem.price.discountedPrice.desc(), serviceItem.id.desc() };
+                return new OrderSpecifier[]{serviceItem.price.discountedPrice.desc(),
+                    serviceItem.id.desc()};
             case 3: // 할인율 순
-                return new OrderSpecifier[]{ serviceItem.price.discountRate.desc(), serviceItem.id.desc() };
+                return new OrderSpecifier[]{serviceItem.price.discountRate.desc(),
+                    serviceItem.id.desc()};
             default: // 인기순 하고 마감임박순은 아직 기준이 안정해져서 우선 최신순
                 return defaultSort;
         }
     }
 
     private BooleanExpression applyOnSaleCondition(boolean onSale) {
-        if(!onSale) return null;
+        if (!onSale) {
+            return null;
+        }
         LocalDateTime now = LocalDateTime.now();
 
         return serviceItem.status.eq(ServiceStatus.RECRUITING)
-                .and(serviceItem.deadline.gt(now));
+            .and(serviceItem.deadline.gt(now));
     }
 }

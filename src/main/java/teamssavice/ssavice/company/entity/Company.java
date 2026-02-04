@@ -1,11 +1,24 @@
 package teamssavice.ssavice.company.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.user.entity.Users;
 
@@ -15,6 +28,7 @@ import teamssavice.ssavice.user.entity.Users;
 @Getter
 @AllArgsConstructor
 public class Company extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,9 +70,9 @@ public class Company extends BaseEntity {
 
     //주소
     @OneToOne(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
@@ -72,10 +86,10 @@ public class Company extends BaseEntity {
         if (command.companyName() != null) {
             this.companyName = command.companyName();
         }
-        if(command.ownerName() != null) {
+        if (command.ownerName() != null) {
             this.ownerName = command.ownerName();
         }
-        if(command.phoneNumber() != null) {
+        if (command.phoneNumber() != null) {
             this.phoneNumber = command.phoneNumber();
         }
         this.description = command.description();
@@ -98,5 +112,13 @@ public class Company extends BaseEntity {
 
     public boolean hasImageResource() {
         return this.getImageResource() != null;
+    }
+
+    public String getObjectKey() {
+        String objectKey = ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
+        if (this.hasImageResource()) {
+            objectKey = this.getImageResource().getResolveKey();
+        }
+        return objectKey;
     }
 }

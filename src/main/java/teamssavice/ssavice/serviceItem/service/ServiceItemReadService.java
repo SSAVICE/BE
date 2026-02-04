@@ -41,13 +41,15 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable) {
-        return serviceItemRepository.findAllByCompany_Id(companyId, pageable);
+    public Page<ServiceItem> findAllByCompanyId(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllByCompanyId(companyId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, Pageable pageable) {
-        return serviceItemRepository.findAllByCompany_IdAndStatus(companyId, status, LocalDateTime.now(), pageable);
+    public Page<ServiceItem> findAllByCompanyIdAndStatus(Long companyId, ServiceStatus status,
+        Pageable pageable) {
+        return serviceItemRepository.findAllByCompanyIdAndStatus(companyId, status,
+            LocalDateTime.now(), pageable);
     }
 
     @Transactional(readOnly = true)

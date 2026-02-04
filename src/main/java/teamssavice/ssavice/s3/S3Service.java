@@ -1,7 +1,5 @@
 package teamssavice.ssavice.s3;
 
-import static teamssavice.ssavice.imageresource.constants.ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-
 import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +17,13 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.global.exception.ImageSizeException;
 import teamssavice.ssavice.global.property.S3Properties;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.dto.S3Command;
-import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.user.entity.Users;
 
 @Service
 @RequiredArgsConstructor
@@ -84,33 +78,30 @@ public class S3Service {
             .destinationBucket(properties.bucket())
             .destinationKey(targetKey)
             .contentType(contentType.mimeType())
+            .overrideConfiguration(o -> o
+                .apiCallAttemptTimeout(Duration.ofMillis(1000))
+                .apiCallTimeout(Duration.ofMillis(4000))
+            )
             .build();
-
         s3Client.copyObject(request);
     }
 
     public void deleteObject(String objectKey) {
-        DeleteObjectRequest request = DeleteObjectRequest.builder()
-            .bucket(properties.bucket())
-            .key(objectKey)
-            .build();
-
-        s3Client.deleteObject(request);
-    }
-
-    public void validateTempImageOrDelete(String key) {
         try {
-            validateTempImage(key); // head + size check
-        } catch (ImageSizeException e) {
-            // 정책: 사이즈 초과면 temp 정리
-            deleteObject(key);
-            throw e;
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .build();
+
+            s3Client.deleteObject(request);
+        } catch (NoSuchKeyException ignored) {
+            // 멱등: 이미 없으면 OK
         }
     }
 
-    public void validateTempImage(String key) {
+    public void validateTempImageOrDelete(String key) {
         HeadObjectResponse head = head(key);
-        validateMaxSize(head);
+        validateMaxSizeOrDelete(head, key);
     }
 
     public HeadObjectResponse head(String key) {
@@ -118,14 +109,19 @@ public class S3Service {
             return s3Client.headObject(HeadObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
+                .overrideConfiguration(o -> o
+                    .apiCallAttemptTimeout(Duration.ofMillis(500))
+                    .apiCallTimeout(Duration.ofMillis(2000))
+                )
                 .build());
         } catch (NoSuchKeyException e) {
             throw new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND);
         }
     }
 
-    public void validateMaxSize(HeadObjectResponse head) {
+    public void validateMaxSizeOrDelete(HeadObjectResponse head, String key) {
         if (head.contentLength() > maxUploadBytes) {
+            deleteObject(key);
             throw new ImageSizeException(
                 ErrorCode.IMAGE_TOO_LARGE,
                 head.contentLength(),
@@ -139,8 +135,7 @@ public class S3Service {
         // 1) 전부 검증
         try {
             for (String key : keys) {
-                HeadObjectResponse head = head(key);     // 없으면 EntityNotFoundException
-                validateMaxSize(head);                   // 크면 ImageSizeException
+                validateTempImageOrDelete(key);
             }
         } catch (RuntimeException e) {
             // 2) 하나라도 실패하면 전부 삭제
@@ -154,30 +149,5 @@ public class S3Service {
             deleteObject(key);
         }
     }
-
-    public String getPresignedUrl(Company company) {
-        String objectKey = ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
-        if (company.hasImageResource()) {
-            objectKey = company.getImageResource().getObjectKey();
-        }
-        return generateGetPresignedUrl(objectKey);
-    }
-
-    public String getPresignedUrl(Users user) {
-        String objectKey = ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY;
-        if (user.hasImageResource()) {
-            objectKey = user.getImageResource().getObjectKey();
-        }
-        return generateGetPresignedUrl(objectKey);
-    }
-
-    public String getPresignedUrl(ServiceItem serviceItem) {
-        String objectKey = DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-        if (serviceItem.hasThumbnailImage()) {
-            objectKey = serviceItem.getThumbnailImageResource().getObjectKey();
-        }
-        return generateGetPresignedUrl(objectKey);
-    }
-
 
 }

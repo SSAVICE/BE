@@ -102,10 +102,10 @@ public class CompanyService {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<ServiceItem> services = serviceItemReadService.findTop5ByCompanyIdOrderByDeadlineDesc(
             company.getId());
-        String presignedUrl = s3Service.getPresignedUrl(company);
+        String presignedUrl = s3Service.generateGetPresignedUrl(company.getObjectKey());
         List<ServiceItemModel.Summary> serviceModels = services.stream()
             .map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)))
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
             .toList();
 
         return CompanyModel.MyCompany.from(company, presignedUrl, serviceModels);
@@ -118,10 +118,10 @@ public class CompanyService {
             company.getId());
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(
             company.getId());
-        String presignedUrl = s3Service.getPresignedUrl(company);
+        String presignedUrl = s3Service.generateGetPresignedUrl(company.getObjectKey());
         List<ServiceItemModel.Summary> serviceModels = services.stream()
             .map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)))
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
             .toList();
 
         return CompanyModel.Info.from(company, presignedUrl, serviceModels, reviews);
@@ -134,14 +134,14 @@ public class CompanyService {
             company.getId());
         Float companyRate = 10F;
         Long rateCount = 100L;
-        String presignedUrl = s3Service.getPresignedUrl(company);
+        String presignedUrl = s3Service.generateGetPresignedUrl(company.getObjectKey());
         return CompanyModel.Summary.from(company, presignedUrl, companyRate, rateCount, reviews);
     }
 
     @Transactional
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
-        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+        ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
         if (company.hasImageResource()) {
             applicationEventPublisher.publishEvent(
                 S3EventDto.Delete.from(company.getImageResource())

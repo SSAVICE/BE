@@ -54,7 +54,7 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
+        List<ImageResource> imageResourceList = imageReadService.findAllBySourceKeyIn(
             command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
@@ -78,7 +78,7 @@ public class ServiceItemService {
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)))
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
             .toList();
 
         Long nextCursor = null;
@@ -95,7 +95,7 @@ public class ServiceItemService {
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
-            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
         return ServiceItemModel.Detail.from(serviceItem, imageUrls);
     }
@@ -129,16 +129,16 @@ public class ServiceItemService {
     public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
         ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
-            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(
+            Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyIdAndStatus(
                 command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)));
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
         }
-        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(
+        Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyId(
             command.companyId(), command.pageable());
         return serviceItems.map(
             serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.getPresignedUrl(serviceItem)));
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
 

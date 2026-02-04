@@ -12,23 +12,25 @@ public class S3EventDto {
         String targetKey,
         ImageContentType contentType
     ) {
+
         public static Move from(ImageResource imageResource) {
             return Move.builder()
-                    .sourceKey(imageResource.getTempKey())
-                    .targetKey(imageResource.getObjectKey())
-                    .contentType(ImageContentType.from(imageResource.getContentType()))
-                    .build();
+                .sourceKey(imageResource.getSourceKey())
+                .targetKey(imageResource.getTargetKey())
+                .contentType(ImageContentType.from(imageResource.getContentType()))
+                .build();
         }
     }
 
     @Builder
     public record Delete(
-            String objectKey
+        String targetKey
     ) {
+
         public static Delete from(ImageResource imageResource) {
             return Delete.builder()
-                    .objectKey(imageResource.getObjectKey())
-                    .build();
+                .targetKey(imageResource.getTargetKey())
+                .build();
         }
     }
 }

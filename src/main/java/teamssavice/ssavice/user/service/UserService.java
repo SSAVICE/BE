@@ -50,7 +50,7 @@ public class UserService {
     public UserModel.Info getProfile(Long userId) {
         // 사용자 정보 조회
         Users user = userReadService.findByIdFetchJoinAddressAndImageResource(userId);
-        String presignedUrl = s3Service.getPresignedUrl(user);
+        String presignedUrl = s3Service.generateGetPresignedUrl(user.getObjectKey());
         return UserModel.Info.from(user, presignedUrl);
     }
 
@@ -72,7 +72,7 @@ public class UserService {
     @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
-        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+        ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
         if (user.hasImageResource()) {
             applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }
