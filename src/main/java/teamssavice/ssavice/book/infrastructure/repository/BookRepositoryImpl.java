@@ -95,7 +95,11 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     public List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds) {
         return queryFactory
             .selectFrom(book)
-            .where(book.id.in(latestBookIdsSubQuery(userId, serviceItemIds)))
+            .where(
+                book.user.id.eq(userId),
+                book.serviceItem.id.in(serviceItemIds),
+                book.id.in(latestBookIdsSubQuery(userId, serviceItemIds))
+            )
             .fetch();
     }
 

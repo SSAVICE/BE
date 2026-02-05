@@ -23,7 +23,9 @@ import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -184,16 +186,20 @@ class BookRepositoryImplTest {
 
         // when
         List<Book> actuals = bookRepository.findLatestBooksByUserIdAndServiceItemId(user.getId(), serviceIds);
-
+        Map<Long, BookStatus> map = new HashMap<>();
+        for (Book actual : actuals) {
+            map.put(actual.getServiceItem().getId(), actual.getBookStatus());
+        }
         // then
         assertAll(
             () -> assertThat(actuals.size()).isEqualTo(serviceItems.size()),
-            () -> assertThat(actuals.get(0).getBookStatus()).isEqualTo(BookStatus.CANCELED),
-            () -> assertThat(actuals.get(1).getBookStatus()).isEqualTo(BookStatus.RESERVED),
-            () -> assertThat(actuals.get(2).getBookStatus()).isEqualTo(BookStatus.RESERVED),
-            () -> assertThat(actuals.get(3).getBookStatus()).isEqualTo(BookStatus.CANCELED),
-            () -> assertThat(actuals.get(4).getBookStatus()).isEqualTo(BookStatus.RESERVED),
-            () -> assertThat(actuals.get(5).getBookStatus()).isEqualTo(BookStatus.CANCELED)
+            () -> assertThat(map.get(1L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(2L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(3L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(4L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(5L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(6L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(7L)).isEqualTo(BookStatus.RESERVED)
         );
     }
 }
