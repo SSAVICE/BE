@@ -2,6 +2,7 @@ package teamssavice.ssavice.book.infrastructure.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -92,14 +93,10 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
 
     @Override
     public List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds) {
-        QBook book2 = new QBook("book2");
         return queryFactory
             .selectFrom(book)
-            .where(
-                book.user.id.eq(userId),
-                book.serviceItem.id.in(serviceItemIds),
-                isLatestBook(userId, book2)
-            ).fetch();
+            .where(book.id.in(latestBookIdsSubQuery(userId, serviceItemIds)))
+            .fetch();
     }
 
     private BooleanExpression statusCondition(BookStatusFilter status, LocalDateTime now) {
@@ -130,15 +127,16 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         };
     }
 
-    private BooleanExpression isLatestBook(Long userId, QBook book2) {
-        return book.id.eq(
-            JPAExpressions
-                .select(book2.id.max())
-                .from(book2)
-                .where(
-                    book2.user.id.eq(userId),
-                    book2.serviceItem.id.eq(book.serviceItem.id)
-                )
-        );
+    private JPQLQuery<Long> latestBookIdsSubQuery(Long userId, List<Long> serviceItemIds) {
+        QBook bookSub = new QBook("bookSub");
+
+        return JPAExpressions
+            .select(bookSub.id.max())
+            .from(bookSub)
+            .where(
+                    bookSub.user.id.eq(userId),
+                    bookSub.serviceItem.id.in(serviceItemIds)
+            )
+            .groupBy(bookSub.serviceItem.id);
     }
 }

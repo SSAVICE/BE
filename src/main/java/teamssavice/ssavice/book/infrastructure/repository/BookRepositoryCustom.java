@@ -13,4 +13,5 @@ public interface BookRepositoryCustom {
     Page<Book> findAllByCompanyIdAndStatus(Long company, BookStatusFilter status, Pageable pageable);
 
     List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds);
+    // (user_id, service_item_id, id DESC) 인덱스 추가
 }
