@@ -173,4 +173,20 @@ public class ServiceItemModel {
                     .build();
         }
     }
+
+    @Builder
+    public record Count(
+            Long total,
+            Long applying,
+            Long completed
+    ) {
+
+        public static ServiceItemModel.Count from(Long applying, Long completed, Long total) {
+            return Count.builder()
+                    .applying(applying)
+                    .completed(completed)
+                    .total(total)
+                    .build();
+        }
+    }
 }
