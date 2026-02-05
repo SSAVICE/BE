@@ -17,9 +17,6 @@ import teamssavice.ssavice.user.entity.Users;
                         name = "uk_wish_user_service",
                         columnNames = {"user_id", "service_item_id"}
                 )
-        },
-        indexes = {
-                @Index(name = "idx_wish_user_service", columnList = "user_id, service_item_id")
         }
 )
 public class Wish extends BaseEntity {
