@@ -56,7 +56,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     }
 
     @Override
-    public Page<ServiceItem> findByCompany(Long companyId, ServiceStatusFilter status, Pageable pageable) {
+    public Page<ServiceItem> findByCompanyAndStatus(Long companyId, ServiceStatusFilter status, Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
         BooleanExpression companyIdCondition = serviceItem.company.id.eq(companyId);
         BooleanExpression statusCondition = statusCondition(status, now);

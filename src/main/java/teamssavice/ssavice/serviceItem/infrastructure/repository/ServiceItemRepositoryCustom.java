@@ -11,5 +11,5 @@ public interface ServiceItemRepositoryCustom {
 
     Slice<ServiceItem> search(ServiceItemCommand.Search command);
 
-    Page<ServiceItem> findByCompany(Long companyId, ServiceStatusFilter status, Pageable pageable);
+    Page<ServiceItem> findByCompanyAndStatus(Long companyId, ServiceStatusFilter status, Pageable pageable);
 }

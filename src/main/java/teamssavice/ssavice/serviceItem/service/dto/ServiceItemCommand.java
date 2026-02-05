@@ -54,13 +54,13 @@ public class ServiceItemCommand {
     }
 
     @Builder
-    public record RetrieveByCompany(
+    public record RetrieveByCompanyAndStatus(
         Long companyId,
         Pageable pageable,
         ServiceStatusFilter status
     ) {
-        public static RetrieveByCompany of(Long companyId, Pageable pageable, ServiceStatusFilter status) {
-            return RetrieveByCompany.builder()
+        public static RetrieveByCompanyAndStatus of(Long companyId, Pageable pageable, ServiceStatusFilter status) {
+            return RetrieveByCompanyAndStatus.builder()
                     .companyId(companyId)
                     .pageable(PageRequest.of(
                             pageable.getPageNumber(),
@@ -68,6 +68,25 @@ public class ServiceItemCommand {
                             Sort.by("createdAt").descending()
                     ))
                     .status(status)
+                    .build();
+        }
+    }
+
+    @Builder
+    public record RetrieveByCompanyAndOnSale(
+            Long companyId,
+            Pageable pageable,
+            boolean onSale
+    ) {
+        public static RetrieveByCompanyAndOnSale of(Long companyId, Pageable pageable, Boolean onSale) {
+            return RetrieveByCompanyAndOnSale.builder()
+                    .companyId(companyId)
+                    .pageable(PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            Sort.by("createdAt").descending()
+                    ))
+                    .onSale(Boolean.TRUE.equals(onSale))
                     .build();
         }
     }

@@ -105,7 +105,7 @@ class ServiceItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<ServiceItem> actual = serviceItemRepository.findByCompany(company.getId(), ServiceStatusFilter.ALL, pageable);
+        Page<ServiceItem> actual = serviceItemRepository.findByCompanyAndStatus(company.getId(), ServiceStatusFilter.ALL, pageable);
 
         // then
         assertThat(actual.getTotalElements()).isEqualTo(7);
@@ -129,7 +129,7 @@ class ServiceItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<ServiceItem> actual = serviceItemRepository.findByCompany(company.getId(), ServiceStatusFilter.RECRUITING, pageable);
+        Page<ServiceItem> actual = serviceItemRepository.findByCompanyAndStatus(company.getId(), ServiceStatusFilter.RECRUITING, pageable);
 
         // then
         assertThat(actual.getTotalElements()).isEqualTo(1);
@@ -153,7 +153,7 @@ class ServiceItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<ServiceItem> actual = serviceItemRepository.findByCompany(company.getId(), ServiceStatusFilter.SUCCEEDED, pageable);
+        Page<ServiceItem> actual = serviceItemRepository.findByCompanyAndStatus(company.getId(), ServiceStatusFilter.SUCCEEDED, pageable);
 
         // then
         assertThat(actual.getTotalElements()).isEqualTo(3);
@@ -177,7 +177,7 @@ class ServiceItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        Page<ServiceItem> actual = serviceItemRepository.findByCompany(company.getId(), ServiceStatusFilter.CANCELED, pageable);
+        Page<ServiceItem> actual = serviceItemRepository.findByCompanyAndStatus(company.getId(), ServiceStatusFilter.CANCELED, pageable);
 
         // then
         assertThat(actual.getTotalElements()).isEqualTo(2);

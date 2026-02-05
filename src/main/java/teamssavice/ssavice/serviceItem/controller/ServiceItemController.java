@@ -90,11 +90,11 @@ public class ServiceItemController {
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
             @PathVariable("company-id") Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable,
-            @RequestParam("status") ServiceStatusFilter status
+            @RequestParam("on-sale") Boolean onSale
             ) {
-        ServiceItemCommand.RetrieveByCompany command = ServiceItemCommand.RetrieveByCompany.of(companyId, pageable, status);
+        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompany(command)
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
                 .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
@@ -107,9 +107,9 @@ public class ServiceItemController {
             @PageableDefault(page = 0, size = 10) Pageable pageable,
             @RequestParam("status") ServiceStatusFilter status
     ) {
-        ServiceItemCommand.RetrieveByCompany command = ServiceItemCommand.RetrieveByCompany.of(companyId, pageable, status);
+        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompany(command)
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
                 .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
