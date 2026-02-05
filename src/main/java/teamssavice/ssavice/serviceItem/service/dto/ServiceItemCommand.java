@@ -4,6 +4,7 @@ import lombok.Builder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -54,10 +55,29 @@ public class ServiceItemCommand {
     }
 
     @Builder
-    public record RetrieveByCompanyAndOnSale(
+    public record RetrieveByCompanyAndStatus(
         Long companyId,
         Pageable pageable,
-        boolean onSale
+        ServiceStatusFilter status
+    ) {
+        public static RetrieveByCompanyAndStatus of(Long companyId, Pageable pageable, ServiceStatusFilter status) {
+            return RetrieveByCompanyAndStatus.builder()
+                    .companyId(companyId)
+                    .pageable(PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            Sort.by("createdAt").descending()
+                    ))
+                    .status(status)
+                    .build();
+        }
+    }
+
+    @Builder
+    public record RetrieveByCompanyAndOnSale(
+            Long companyId,
+            Pageable pageable,
+            boolean onSale
     ) {
         public static RetrieveByCompanyAndOnSale of(Long companyId, Pageable pageable, Boolean onSale) {
             return RetrieveByCompanyAndOnSale.builder()

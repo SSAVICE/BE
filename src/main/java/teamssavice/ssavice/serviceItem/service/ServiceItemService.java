@@ -133,7 +133,12 @@ public class ServiceItemService {
         }
     }
 
-    public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
+    public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
+        Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
+        return serviceItems.map(ServiceItemModel.Summary::from);
+    }
+
+    public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndOnSale(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(ServiceItemModel.Summary::from);
