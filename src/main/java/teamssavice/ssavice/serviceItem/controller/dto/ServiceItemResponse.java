@@ -83,7 +83,8 @@ public class ServiceItemResponse {
             Integer discountRatio,
             Long discountedPrice,
 
-            LocalDateTime deadline
+            LocalDateTime deadline,
+            boolean isBooked
     ) {
         public static Search from(ServiceItemModel.Search model) {
             return Search.builder()
@@ -103,6 +104,7 @@ public class ServiceItemResponse {
                     .discountRatio(model.discountRatio())
                     .discountedPrice(model.discountedPrice())
                     .deadline(model.deadline())
+                    .isBooked(model.isBooked())
                     .build();
         }
     }
@@ -127,6 +129,7 @@ public class ServiceItemResponse {
             LocalDateTime startDate,
             LocalDateTime endDate,
             Boolean isLiked,
+            Boolean isBooked,
             String status,
             LocalDateTime createdAt
     ) {
@@ -150,6 +153,7 @@ public class ServiceItemResponse {
                     .startDate(model.startDate())
                     .endDate(model.endDate())
                     .isLiked(model.liked())
+                    .isBooked(model.booked())
                     .status(model.status().name())
                     .createdAt(model.createdAt())
                     .build();

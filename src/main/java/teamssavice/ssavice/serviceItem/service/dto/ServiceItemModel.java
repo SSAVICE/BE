@@ -80,9 +80,11 @@ public class ServiceItemModel {
             Integer discountRatio,
             Long discountedPrice,
 
-            LocalDateTime deadline
+            LocalDateTime deadline,
+
+            boolean isBooked
     ) {
-        public static Search from (ServiceItem entity) {
+        public static Search from (ServiceItem entity, boolean isBooked) {
             return Search.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -105,6 +107,7 @@ public class ServiceItemModel {
                             .latitude(entity.getAddress().getLatitude())
                             .longitude(entity.getAddress().getLongitude())
                             .build())
+                    .isBooked(isBooked)
                     .build();
         }
     }
@@ -134,9 +137,10 @@ public class ServiceItemModel {
             AddressModel.RegionSummary region,
 
             List<String> imageUrl,
-            Boolean liked
+            Boolean liked,
+            Boolean booked
     ) {
-        public static Detail from (ServiceItem entity, List<String> imageUrl) {
+        public static Detail from (ServiceItem entity, List<String> imageUrl, boolean isLiked, boolean isBooked) {
             return Detail.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
@@ -164,7 +168,8 @@ public class ServiceItemModel {
                             .latitude(entity.getAddress().getLatitude())
                             .longitude(entity.getAddress().getLongitude())
                             .build())
-                    .liked(false) // wish 도입하면서 유저 별 조회 로직 추가 예정
+                    .liked(isLiked)
+                    .booked(isBooked)
                     .build();
         }
     }

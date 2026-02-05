@@ -87,7 +87,7 @@ public class ServiceItem extends BaseEntity {
     private Address address;
 
     @Builder.Default
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "service_item_image",
             joinColumns = @JoinColumn(name = "service_item_id")

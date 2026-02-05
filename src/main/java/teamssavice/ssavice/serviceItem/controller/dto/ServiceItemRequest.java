@@ -72,10 +72,9 @@ public class ServiceItemRequest {
             // 커서 방식 (안드로이드 무한 스크롤과)
             @PositiveOrZero
             Long lastId,
-
             Boolean onSale
     ) {
-        public ServiceItemCommand.Search toCommand(Pageable pageable) {
+        public ServiceItemCommand.Search toCommand(Long userId, Pageable pageable) {
             return ServiceItemCommand.Search.builder()
                     .category(category)
                     .query(query)
@@ -88,6 +87,7 @@ public class ServiceItemRequest {
                     .lastId(lastId)
                     .pageable(pageable)
                     .onSale(Boolean.TRUE.equals(onSale))
+                    .userId(userId)
                     .build();
         }
     }

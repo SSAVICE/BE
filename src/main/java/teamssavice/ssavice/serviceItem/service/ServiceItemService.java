@@ -32,9 +32,11 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
+import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +52,7 @@ public class ServiceItemService {
     private final BookReadService bookReadService;
     private final RegionReadService regionReadService;
     private final RefundService refundService;
+    private final WishReadService wishReadService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -77,9 +80,10 @@ public class ServiceItemService {
     public CursorResult<ServiceItemModel.Search> search(ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
+        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(ServiceItemModel.Search::from)
+                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId())))
                 .toList();
 
         Long nextCursor = null;
@@ -91,14 +95,18 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItemModel.Detail getServiceDetail(Long serviceId) {
-        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+    public ServiceItemModel.Detail getServiceDetail(Long serviceId, Long userId) {
+        ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndImageList(serviceId);
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
             imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
         }
-        return ServiceItemModel.Detail.from(serviceItem, imageUrls);
+
+        boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
+        boolean isBooked = bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
+
+        return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }
 
     @Transactional

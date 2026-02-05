@@ -41,11 +41,6 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItem getReferenceById(Long serviceId) {
-        return serviceItemRepository.getReferenceById(serviceId);
-    }
-
-    @Transactional(readOnly = true)
     public Page<ServiceItem> findByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         return serviceItemRepository.findByCompanyAndStatus(command.companyId(), command.status(), command.pageable());
     }
@@ -58,5 +53,16 @@ public class ServiceItemReadService {
     @Transactional(readOnly = true)
     public Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, Pageable pageable) {
         return serviceItemRepository.findAllByCompany_IdAndStatus(companyId, status, LocalDateTime.now(), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceItem getReferenceById(Long serviceId) {
+        return serviceItemRepository.getReferenceById(serviceId);
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceItem findByIdWithAddressAndImageList(Long id) {
+        return serviceItemRepository.findByIdWithAddressAndImageList(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
     }
 }

@@ -49,7 +49,8 @@ public class ServiceItemCommand {
         Integer sortBy,
         Long lastId,      // 커서 ID
         Pageable pageable,
-        boolean onSale
+        boolean onSale,
+        Long userId
     ) {
     }
 
