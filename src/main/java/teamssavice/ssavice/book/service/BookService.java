@@ -26,8 +26,10 @@ public class BookService {
     public BookModel.BookSummary getBookSummary(Long userId) {
         Long applying = bookReadService.countRecruitingBooksByUserId(userId);
         Long completedCount = bookReadService.countSucceededBooksByUserId(userId);
+        Long totalCount = bookReadService.countAllBooksByUserId(userId);
 
-        return BookModel.BookSummary.from(applying, completedCount);
+
+        return BookModel.BookSummary.from(applying, completedCount, totalCount);
     }
 
     @Transactional(readOnly = true)
@@ -40,8 +42,9 @@ public class BookService {
     public BookModel.BookSummary getCompanysBookSummary(Long companyId) {
         Long applying = bookReadService.countRecruitingBooksByCompanyId(companyId);
         Long completedCount = bookReadService.countSucceededBooksByCompanyId(companyId);
+        Long totalCount = applying + completedCount;
 
-        return BookModel.BookSummary.from(applying, completedCount);
+        return BookModel.BookSummary.from(applying, completedCount, totalCount);
     }
 }
 
