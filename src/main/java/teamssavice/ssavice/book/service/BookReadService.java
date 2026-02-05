@@ -32,10 +32,6 @@ public class BookReadService {
         return bookRepository.findAllByUserIdAndStatus(userId, status, pageable);
     }
 
-    public Page<Book> findAllByCompanyIdAndStatus(Long userId, BookStatusFilter status, Pageable pageable) {
-        return bookRepository.findAllByCompanyIdAndStatus(userId, status, pageable);
-    }
-
     // 취소한 사람은 다시 신청이 가능
     public boolean existsByUserAndServiceAndStatusNot(Long userId, Long serviceId, BookStatus status) {
         return bookRepository.existsByUserIdAndServiceItemIdAndBookStatusNot(userId, serviceId, status);
@@ -62,14 +58,6 @@ public class BookReadService {
 
     public Long countSucceededBooksByUserId(Long userId) {
         return bookRepository.countSucceededBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
-    }
-
-    public Long countRecruitingBooksByCompanyId(Long companyId) {
-        return bookRepository.countRecruitingBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.RECRUITING, LocalDateTime.now());
-    }
-
-    public Long countSucceededBooksByCompanyId(Long companyId) {
-        return bookRepository.countSucceededBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
 
     public Set<Long> findReservedServiceItemIdsFromLatestBooks(Long userId, List<ServiceItem> serviceItems) {

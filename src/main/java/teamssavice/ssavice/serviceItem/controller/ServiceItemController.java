@@ -9,8 +9,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.book.controller.dto.BookResponse;
-import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
@@ -80,16 +78,6 @@ public class ServiceItemController {
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
     }
 
-    @PostMapping("/{serviceId}/apply")
-    @RequireRole(Role.USER)
-    public ResponseEntity<BookResponse.Apply> applyServiceItem(
-            @CurrentId Long userId,
-            @PathVariable Long serviceId
-    ) {
-        BookModel.Apply model = serviceItemService.apply(userId, serviceId);
-        return ResponseEntity.ok(BookResponse.Apply.from(model));
-    }
-
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
             @PathVariable("company-id") Long companyId,
@@ -127,15 +115,5 @@ public class ServiceItemController {
     ) {
         serviceItemService.delete(ServiceItemCommand.Delete.of(companyId, serviceId));
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{serviceId}/cancel")
-    @RequireRole(Role.USER)
-    public ResponseEntity<Void> cancelParticipation(
-            @CurrentId Long userId,
-            @PathVariable Long serviceId
-    ) {
-        serviceItemService.cancel(ServiceItemCommand.Cancel.of(userId, serviceId));
-        return ResponseEntity.ok().build();
     }
 }
