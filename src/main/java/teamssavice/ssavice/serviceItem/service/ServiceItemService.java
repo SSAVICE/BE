@@ -132,6 +132,15 @@ public class ServiceItemService {
         }
     }
 
+    @Transactional
+    public ServiceItemModel.Count getCompanysServiceItemCount(Long companyId) {
+        Long applying = serviceItemReadService.countRecruitingServiceItemsByCompanyId(companyId);
+        Long completedCount = serviceItemReadService.countSucceededServiceItemsByCompanyId(companyId);
+        Long totalCount = serviceItemReadService.countAllServiceItemsByCompanyId(companyId);
+
+        return ServiceItemModel.Count.from(applying, completedCount, totalCount);
+    }
+
     private void validateOwner(Long companyId, ServiceItem serviceItem) {
         if (!serviceItem.getCompany().getId().equals(companyId)) {
             throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);

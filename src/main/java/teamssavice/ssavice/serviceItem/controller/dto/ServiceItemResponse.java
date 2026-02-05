@@ -159,4 +159,19 @@ public class ServiceItemResponse {
                     .build();
         }
     }
+
+    @Builder
+    public record Count(
+        Long total,
+        Long applying,
+        Long completed
+    ) {
+        public static Count from(ServiceItemModel.Count model) {
+            return Count.builder()
+                .total(model.total())
+                .applying(model.applying())
+                .completed(model.completed())
+                .build();
+        }
+    }
 }

@@ -39,13 +39,12 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public BookModel.BookSummary getBookSummary(Long userId) {
+    public BookModel.Count getBookSummary(Long userId) {
         Long applying = bookReadService.countRecruitingBooksByUserId(userId);
         Long completedCount = bookReadService.countSucceededBooksByUserId(userId);
         Long totalCount = bookReadService.countAllBooksByUserId(userId);
 
-
-        return BookModel.BookSummary.from(applying, completedCount, totalCount);
+        return BookModel.Count.from(applying, completedCount, totalCount);
     }
 
     @Transactional

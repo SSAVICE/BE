@@ -99,18 +99,18 @@ public class BookModel {
     }
 
     @Builder
-    public record BookSummary(
+    public record Count(
         Long applying,
         Long completed,
         Long total
     ) {
 
-        public static BookSummary from(
+        public static Count from(
             Long applying,
             Long completed,
             Long total
         ) {
-            return BookSummary.builder()
+            return Count.builder()
                 .applying(applying)
                 .completed(completed)
                 .total(total)

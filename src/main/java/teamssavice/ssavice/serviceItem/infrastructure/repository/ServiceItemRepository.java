@@ -32,4 +32,18 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
             "JOIN FETCH s.address a " +
             "WHERE s.id = :id")
     Optional<ServiceItem> findByIdWithAddressAndImageList(Long id);
+
+    @Query("SELECT COUNT(s) FROM ServiceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingServiceItemsByCompanyId(Long companyId, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(s) FROM ServiceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededServiceItemsByCompanyId(Long companyId, ServiceStatus succeeded, LocalDateTime now);
+
+    Long countAllByCompany_Id(Long companyId);
 }

@@ -38,8 +38,8 @@ public class ServiceItemController {
     @PostMapping
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Register> createServiceItem(
-            @CurrentId Long companyId,
-            @RequestBody @Valid ServiceItemRequest.Create request
+        @CurrentId Long companyId,
+        @RequestBody @Valid ServiceItemRequest.Create request
     ) {
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
@@ -48,9 +48,9 @@ public class ServiceItemController {
     @GetMapping("/search")
     @RequireRole(Role.USER)
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
-            @ModelAttribute @Valid ServiceItemRequest.Search request,
-            @RequestParam(defaultValue = "10") int size,
-            @CurrentId Long userId
+        @ModelAttribute @Valid ServiceItemRequest.Search request,
+        @RequestParam(defaultValue = "10") int size,
+        @CurrentId Long userId
     ) {
         Pageable pageable = PageRequest.of(0, size);
         CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(userId, pageable));
@@ -61,8 +61,8 @@ public class ServiceItemController {
     @GetMapping("/{serviceId}")
     @RequireRole(Role.USER)
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
-            @PathVariable Long serviceId,
-            @CurrentId Long userId
+        @PathVariable Long serviceId,
+        @CurrentId Long userId
     ) {
         ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, userId);
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
@@ -71,8 +71,8 @@ public class ServiceItemController {
     @PostMapping("/image")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ImageResponse.PresignedUrls> createServiceItemPresignedUrls(
-            @CurrentId Long companyId,
-            @RequestBody @Valid ImageRequest.ServiceImages request
+        @CurrentId Long companyId,
+        @RequestBody @Valid ImageRequest.ServiceImages request
     ) {
         List<ImageModel.PutPresignedUrl> models = imageService.updateImages(request.toCommand(companyId, ImagePath.serviceItem));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
@@ -80,10 +80,10 @@ public class ServiceItemController {
 
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
-            @PathVariable("company-id") Long companyId,
-            @PageableDefault(page = 0, size = 10) Pageable pageable,
-            @RequestParam("on-sale") Boolean onSale
-            ) {
+        @PathVariable("company-id") Long companyId,
+        @PageableDefault(page = 0, size = 10) Pageable pageable,
+        @RequestParam("on-sale") Boolean onSale
+    ) {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
@@ -95,9 +95,9 @@ public class ServiceItemController {
     @GetMapping("/company/my")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getMyCompanysServiceItems(
-            @CurrentId Long companyId,
-            @PageableDefault(page = 0, size = 10) Pageable pageable,
-            @RequestParam("status") ServiceStatusFilter status
+        @CurrentId Long companyId,
+        @PageableDefault(page = 0, size = 10) Pageable pageable,
+        @RequestParam("status") ServiceStatusFilter status
     ) {
         ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
@@ -107,11 +107,20 @@ public class ServiceItemController {
         return ResponseEntity.ok(PageResponse.from(responses));
     }
 
+    @GetMapping("/company/summary")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<ServiceItemResponse.Count> getCompanysServiceItemCount(
+        @CurrentId Long companyId
+    ){
+        ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(companyId);
+        return ResponseEntity.ok(ServiceItemResponse.Count.from(model));
+    }
+
     @DeleteMapping("/{serviceId}")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<Void> deleteServiceItem(
-            @CurrentId Long companyId,
-            @PathVariable Long serviceId
+        @CurrentId Long companyId,
+        @PathVariable Long serviceId
     ) {
         serviceItemService.delete(ServiceItemCommand.Delete.of(companyId, serviceId));
         return ResponseEntity.noContent().build();

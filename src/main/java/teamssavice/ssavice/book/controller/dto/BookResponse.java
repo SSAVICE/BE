@@ -75,14 +75,14 @@ public class BookResponse {
     }
 
     @Builder
-    public record BookSummary(
+    public record Count(
         Long total,
         Long applying,
         Long completed
     ) {
 
-        public static BookSummary from(BookModel.BookSummary model) {
-            return BookSummary.builder()
+        public static Count from(BookModel.Count model) {
+            return BookResponse.Count.builder()
                 .total(model.total())
                 .applying(model.applying())
                 .completed(model.completed())

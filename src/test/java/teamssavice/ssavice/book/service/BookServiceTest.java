@@ -54,7 +54,7 @@ class BookServiceTest {
                 .willReturn(completedCount);
 
         // when
-        BookModel.BookSummary result = bookService.getBookSummary(userId);
+        BookModel.Count result = bookService.getBookSummary(userId);
 
         // then
         // 1. 결과 DTO의 필드 검증

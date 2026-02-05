@@ -44,12 +44,12 @@ public class BookController {
 
     @GetMapping("/user/summary")
     @RequireRole(Role.USER)
-    public ResponseEntity<BookResponse.BookSummary> getBookSummary(
+    public ResponseEntity<BookResponse.Count> getBookSummary(
         @CurrentId Long userId
     ) {
-        BookModel.BookSummary model = bookService.getBookSummary(userId);
+        BookModel.Count model = bookService.getBookSummary(userId);
 
-        return ResponseEntity.ok(BookResponse.BookSummary.from(model));
+        return ResponseEntity.ok(BookResponse.Count.from(model));
     }
 
     @PostMapping("/{serviceId}/apply")
