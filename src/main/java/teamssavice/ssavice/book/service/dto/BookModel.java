@@ -59,6 +59,8 @@ public class BookModel {
         Integer discountRate,
         Long discountedPrice,
 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         LocalDateTime deadline,
         String tags
     ) {
@@ -88,6 +90,8 @@ public class BookModel {
                 item.getPrice().getDiscountRate(),
                 item.getPrice().getDiscountedPrice(),
 
+                item.getStartDate(),
+                item.getEndDate(),
                 item.getDeadline(),
                 item.getTag()
             );
@@ -97,21 +101,20 @@ public class BookModel {
     @Builder
     public record BookSummary(
         Long applying,
-        Long completed
+        Long completed,
+        Long total
     ) {
 
         public static BookSummary from(
             Long applying,
-            Long completed
+            Long completed,
+            Long total
         ) {
             return BookSummary.builder()
                 .applying(applying)
                 .completed(completed)
+                .total(total)
                 .build();
-        }
-
-        public Long total() {
-            return applying + completed;
         }
     }
 

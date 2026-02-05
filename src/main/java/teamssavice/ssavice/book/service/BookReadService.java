@@ -82,4 +82,8 @@ public class BookReadService {
             .map(book -> book.getServiceItem().getId())
             .collect(Collectors.toSet());
     }
+  
+    public Long countAllBooksByUserId(Long userId) {
+        return bookRepository.countByUserId(userId);
+    }
 }
