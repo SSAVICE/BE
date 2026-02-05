@@ -62,4 +62,8 @@ public class BookReadService {
     public Long countSucceededBooksByCompanyId(Long companyId) {
         return bookRepository.countSucceededBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
+
+    public Long countAllBooksByUserId(Long userId) {
+        return bookRepository.countByUserId(userId);
+    }
 }

@@ -101,21 +101,20 @@ public class BookModel {
     @Builder
     public record BookSummary(
         Long applying,
-        Long completed
+        Long completed,
+        Long total
     ) {
 
         public static BookSummary from(
             Long applying,
-            Long completed
+            Long completed,
+            Long total
         ) {
             return BookSummary.builder()
                 .applying(applying)
                 .completed(completed)
+                .total(total)
                 .build();
-        }
-
-        public Long total() {
-            return applying + completed;
         }
     }
 

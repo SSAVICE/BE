@@ -52,4 +52,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookRepositor
             "AND s.status = :succeeded " +
             "AND s.endDate > :now")
     Long countSucceededBooksByCompanyId(Long companyId, BookStatus bookStatus, ServiceStatus succeeded, LocalDateTime now);
+
+    Long countByUserId(Long userId);
+
 }
