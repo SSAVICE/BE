@@ -4,11 +4,9 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.*;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
@@ -27,7 +25,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
     @Override
     public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
-
+        LocalDateTime now = LocalDateTime.now();
         Pageable pageable = command.pageable();
         int pageSize = pageable.getPageSize();
 
@@ -42,7 +40,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
                         containsQuery(command.query()),
                         goeMinPrice(command.minPrice()),
                         loeMaxPrice(command.maxPrice()),
-                        applyOnSaleCondition(command.onSale())
+                        applyOnSaleCondition(now, command.onSale())
                 )
                 .orderBy(getOrderSpecifier(command.sortBy()))
                 .limit(pageSize + 1)
@@ -55,7 +53,34 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         }
 
         return new SliceImpl<>(content, PageRequest.of(0, pageSize), hasNext);
+    }
 
+    @Override
+    public Page<ServiceItem> findByCompanyAndStatus(Long companyId, ServiceStatusFilter status, Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        BooleanExpression companyIdCondition = serviceItem.company.id.eq(companyId);
+        BooleanExpression statusCondition = statusCondition(status, now);
+        // Status 검증
+
+        List<ServiceItem> content = queryFactory
+                .selectFrom(serviceItem)
+                .where(
+                    companyIdCondition,
+                    statusCondition
+                ).offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(serviceItem.createdAt.desc())
+                .fetch();
+
+        Long total = queryFactory
+                .select(serviceItem.count())
+                .from(serviceItem)
+                .where(
+                    companyIdCondition,
+                    statusCondition
+                ).fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
 
@@ -100,11 +125,32 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         }
     }
 
-    private BooleanExpression applyOnSaleCondition(boolean onSale) {
+    private BooleanExpression applyOnSaleCondition(LocalDateTime now, boolean onSale) {
         if(!onSale) return null;
-        LocalDateTime now = LocalDateTime.now();
 
         return serviceItem.status.eq(ServiceStatus.RECRUITING)
                 .and(serviceItem.deadline.gt(now));
+    }
+
+    private BooleanExpression statusCondition(ServiceStatusFilter status, LocalDateTime now) {
+        if(status == null || status == ServiceStatusFilter.ALL) {
+            return null;
+        }
+
+        return switch (status) {
+            case RECRUITING -> serviceItem.status.eq(ServiceStatus.RECRUITING)
+                    .and(serviceItem.deadline.gt(now));
+
+            case CANCELED -> serviceItem.status.eq(ServiceStatus.CANCELED)
+                    .or(serviceItem.status.eq(ServiceStatus.RECRUITING).and(serviceItem.deadline.loe(now)));
+
+            case SUCCEEDED -> serviceItem.status.eq(ServiceStatus.SUCCEEDED)
+                    .and(serviceItem.endDate.gt(now));
+
+            case COMPLETED -> serviceItem.status.eq(ServiceStatus.SUCCEEDED)
+                    .and(serviceItem.endDate.loe(now));
+
+            default -> null;
+        };
     }
 }

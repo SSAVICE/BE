@@ -20,6 +20,7 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
@@ -90,10 +91,10 @@ public class ServiceItemController {
             @PathVariable("company-id") Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable,
             @RequestParam("on-sale") Boolean onSale
-    ) {
+            ) {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(command)
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
                 .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
@@ -104,11 +105,11 @@ public class ServiceItemController {
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getMyCompanysServiceItems(
             @CurrentId Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable,
-            @RequestParam("on-sale") Boolean onSale
+            @RequestParam("status") ServiceStatusFilter status
     ) {
-        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
+        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(command)
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
                 .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
