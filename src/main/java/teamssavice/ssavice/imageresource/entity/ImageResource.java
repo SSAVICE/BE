@@ -76,4 +76,16 @@ public class ImageResource extends BaseEntity {
         }
         return this.targetKey;
     }
+
+    public void startProcessing() {
+        this.status = ImageStatus.PROCESSING;
+    }
+
+    public void markAsDone() {
+        this.status = ImageStatus.DONE;
+    }
+
+    public void markAsFailed() {
+        this.status = ImageStatus.FAILED;
+    }
 }

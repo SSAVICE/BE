@@ -1,18 +1,13 @@
 package teamssavice.ssavice.s3;
 
-import java.time.Duration;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -25,6 +20,10 @@ import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.dto.S3Command;
 
+import java.time.Duration;
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -36,17 +35,17 @@ public class S3Service {
     private long maxUploadBytes;
 
     public ImageModel.PutPresignedUrl createPutPresignedUrl(String objectKey,
-        ImageContentType contentType) {
+                                                            ImageContentType contentType) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-            .bucket(properties.bucket())
-            .key(objectKey)
-            .contentType(contentType.mimeType())
-            .build();
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .contentType(contentType.mimeType())
+                .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofSeconds(properties.putExpirationSecond()))
-            .putObjectRequest(putObjectRequest)
-            .build();
+                .signatureDuration(Duration.ofSeconds(properties.putExpirationSecond()))
+                .putObjectRequest(putObjectRequest)
+                .build();
 
         PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
         return ImageModel.PutPresignedUrl.from(presigned.url().toString(), objectKey);
@@ -54,14 +53,14 @@ public class S3Service {
 
     public String generateGetPresignedUrl(String objectKey) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-            .bucket(properties.bucket())
-            .key(objectKey)
-            .build();
+                .bucket(properties.bucket())
+                .key(objectKey)
+                .build();
 
         GetObjectPresignRequest presign = GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(properties.getExpirationMin()))
-            .getObjectRequest(getObjectRequest)
-            .build();
+                .signatureDuration(Duration.ofMinutes(properties.getExpirationMin()))
+                .getObjectRequest(getObjectRequest)
+                .build();
 
         return s3Presigner.presignGetObject(presign).url().toString();
     }
@@ -72,7 +71,6 @@ public class S3Service {
             backoff = @Backoff(delay = 1000, multiplier = 2.0)
     )
     public void copyObject(String sourceKey, String targetKey, ImageContentType contentType) {
-        log.info("Moving S3 object from {} to {}", sourceKey, targetKey);
         CopyObjectRequest request = CopyObjectRequest.builder()
                 .sourceBucket(properties.bucket())
                 .sourceKey(sourceKey)
@@ -81,15 +79,14 @@ public class S3Service {
                 .contentType(contentType.mimeType())
                 .build();
         s3Client.copyObject(request);
-        log.info("Successfully moved S3 object from {} to {}", sourceKey, targetKey);
     }
 
     public void deleteObject(String objectKey) {
         try {
             DeleteObjectRequest request = DeleteObjectRequest.builder()
-                .bucket(properties.bucket())
-                .key(objectKey)
-                .build();
+                    .bucket(properties.bucket())
+                    .key(objectKey)
+                    .build();
 
             s3Client.deleteObject(request);
         } catch (NoSuchKeyException ignored) {
@@ -120,9 +117,9 @@ public class S3Service {
         if (head.contentLength() > maxUploadBytes) {
             deleteObject(key);
             throw new ImageSizeException(
-                ErrorCode.IMAGE_TOO_LARGE,
-                head.contentLength(),
-                maxUploadBytes
+                    ErrorCode.IMAGE_TOO_LARGE,
+                    head.contentLength(),
+                    maxUploadBytes
             );
         }
     }

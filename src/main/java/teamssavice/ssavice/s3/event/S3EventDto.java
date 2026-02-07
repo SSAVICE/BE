@@ -8,6 +8,7 @@ public class S3EventDto {
 
     @Builder
     public record Move(
+        Long imageResourceId,
         String sourceKey,
         String targetKey,
         ImageContentType contentType
@@ -15,6 +16,7 @@ public class S3EventDto {
 
         public static Move from(ImageResource imageResource) {
             return Move.builder()
+                .imageResourceId(imageResource.getId())
                 .sourceKey(imageResource.getSourceKey())
                 .targetKey(imageResource.getTargetKey())
                 .contentType(ImageContentType.from(imageResource.getContentType()))
