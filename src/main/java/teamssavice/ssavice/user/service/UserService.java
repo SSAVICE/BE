@@ -73,6 +73,7 @@ public class UserService {
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
         ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
+        imageResource.checkedConfirmed();
         if (user.hasImageResource()) {
             applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }

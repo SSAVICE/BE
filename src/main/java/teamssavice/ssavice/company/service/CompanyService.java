@@ -142,6 +142,7 @@ public class CompanyService {
     public void updateCompanyImage(Long companyId, String objectKey) {
         Company company = companyReadService.findByIdFetchJoinImageResource(companyId);
         ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
+        imageResource.checkedConfirmed();
         if (company.hasImageResource()) {
             applicationEventPublisher.publishEvent(
                 S3EventDto.Delete.from(company.getImageResource())

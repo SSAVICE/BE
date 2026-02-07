@@ -88,4 +88,10 @@ public class ImageResource extends BaseEntity {
     public void markAsFailed() {
         this.status = ImageStatus.FAILED;
     }
+
+    public void checkedConfirmed() {
+        if (this.status != ImageStatus.PENDING) {
+            throw new ConflictException(ErrorCode.ALREADY_CONFIRMED_IMAGE);
+        }
+    }
 }

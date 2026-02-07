@@ -63,6 +63,7 @@ public class ServiceItemService {
         savedServiceItem.updateThumbNailImage(imageResourceList.getFirst());
 
         for (ImageResource imageResource : imageResourceList) {
+            imageResource.checkedConfirmed();
             imageResource.activate();
             savedServiceItem.addImageId(imageResource.getId());
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
