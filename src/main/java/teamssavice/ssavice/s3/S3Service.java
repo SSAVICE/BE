@@ -66,24 +66,22 @@ public class S3Service {
         return s3Presigner.presignGetObject(presign).url().toString();
     }
 
-    public void moveObject(String sourceKey, String targetKey, ImageContentType contentType) {
-        copyObject(sourceKey, targetKey, contentType);
-        deleteObject(sourceKey);
-    }
-
+    @Retryable(
+            retryFor = S3Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2.0)
+    )
     public void copyObject(String sourceKey, String targetKey, ImageContentType contentType) {
+        log.info("Moving S3 object from {} to {}", sourceKey, targetKey);
         CopyObjectRequest request = CopyObjectRequest.builder()
-            .sourceBucket(properties.bucket())
-            .sourceKey(sourceKey)
-            .destinationBucket(properties.bucket())
-            .destinationKey(targetKey)
-            .contentType(contentType.mimeType())
-            .overrideConfiguration(o -> o
-                .apiCallAttemptTimeout(Duration.ofMillis(1000))
-                .apiCallTimeout(Duration.ofMillis(4000))
-            )
-            .build();
+                .sourceBucket(properties.bucket())
+                .sourceKey(sourceKey)
+                .destinationBucket(properties.bucket())
+                .destinationKey(targetKey)
+                .contentType(contentType.mimeType())
+                .build();
         s3Client.copyObject(request);
+        log.info("Successfully moved S3 object from {} to {}", sourceKey, targetKey);
     }
 
     public void deleteObject(String objectKey) {
@@ -107,13 +105,12 @@ public class S3Service {
     public HeadObjectResponse head(String key) {
         try {
             return s3Client.headObject(HeadObjectRequest.builder()
-                .bucket(properties.bucket())
-                .key(key)
-                .overrideConfiguration(o -> o
-                    .apiCallAttemptTimeout(Duration.ofMillis(500))
-                    .apiCallTimeout(Duration.ofMillis(2000))
-                )
-                .build());
+                    .bucket(properties.bucket())
+                    .key(key)
+                    .overrideConfiguration(o -> o
+                            .apiCallAttemptTimeout(Duration.ofMillis(500))
+                    )
+                    .build());
         } catch (NoSuchKeyException e) {
             throw new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND);
         }
