@@ -9,6 +9,7 @@ import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
@@ -25,4 +26,24 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
             "AND s.status = :status " +
             "AND s.deadline > :now")
     Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT s FROM ServiceItem s " +
+            "LEFT JOIN FETCH s.imageIds i " +
+            "JOIN FETCH s.address a " +
+            "WHERE s.id = :id")
+    Optional<ServiceItem> findByIdWithAddressAndImageList(Long id);
+
+    @Query("SELECT COUNT(s) FROM ServiceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND s.status = :recruiting " +
+            "AND s.deadline > :now")
+    Long countRecruitingServiceItemsByCompanyId(Long companyId, ServiceStatus recruiting, LocalDateTime now);
+
+    @Query("SELECT COUNT(s) FROM ServiceItem s " +
+            "WHERE s.company.id = :companyId " +
+            "AND s.status = :succeeded " +
+            "AND s.endDate > :now")
+    Long countSucceededServiceItemsByCompanyId(Long companyId, ServiceStatus succeeded, LocalDateTime now);
+
+    Long countAllByCompany_Id(Long companyId);
 }

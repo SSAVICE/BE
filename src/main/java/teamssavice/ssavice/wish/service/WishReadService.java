@@ -31,4 +31,11 @@ public class WishReadService {
         Page<Wish> wishPage = wishRepository.findAllByUserId(command.userId(), command.pageable());
         return wishPage.map(WishModel.Summary::from);
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUserIdAndServiceItemId(Long userId, Long serviceId) {
+
+        return wishRepository.existsByUserIdAndServiceItemId(userId, serviceId);
+    }
+
 }

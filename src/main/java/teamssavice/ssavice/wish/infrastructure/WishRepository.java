@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.wish.entity.Wish;
 
 import java.util.Optional;
@@ -21,4 +21,8 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
             "order by w.id desc",
             countQuery = "select count(w) from Wish w where w.user.id = :userId")
     Page<Wish> findAllByUserId(Long userId, Pageable pageable);
+
+    boolean existsByUserIdAndServiceItemId(Long userId, Long serviceItemId);
+
+    Long user(Users user);
 }

@@ -7,15 +7,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
-import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,10 +30,6 @@ public class BookReadService {
 
     public Page<Book> findAllByUserIdAndStatus(Long userId, BookStatusFilter status, Pageable pageable) {
         return bookRepository.findAllByUserIdAndStatus(userId, status, pageable);
-    }
-
-    public Page<Book> findAllByCompanyIdAndStatus(Long userId, BookStatusFilter status, Pageable pageable) {
-        return bookRepository.findAllByCompanyIdAndStatus(userId, status, pageable);
     }
 
     // 취소한 사람은 다시 신청이 가능
@@ -47,6 +46,12 @@ public class BookReadService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
     }
 
+    public boolean isBookedByUserIdAndServiceId(Long userId, Long serviceItemId) {
+        return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
+                .map(book -> book.getBookStatus() == BookStatus.RESERVED)
+                .orElse(false);
+    }
+
     public Long countRecruitingBooksByUserId(Long userId) {
         return bookRepository.countRecruitingBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.RECRUITING, LocalDateTime.now());
     }
@@ -55,12 +60,19 @@ public class BookReadService {
         return bookRepository.countSucceededBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
 
-    public Long countRecruitingBooksByCompanyId(Long companyId) {
-        return bookRepository.countRecruitingBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.RECRUITING, LocalDateTime.now());
-    }
+    public Set<Long> findReservedServiceItemIdsFromLatestBooks(Long userId, List<ServiceItem> serviceItems) {
+        List<Long> serviceIds = serviceItems.stream()
+            .map(ServiceItem::getId)
+            .toList();
 
-    public Long countSucceededBooksByCompanyId(Long companyId) {
-        return bookRepository.countSucceededBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
+        return bookRepository.findLatestBooksByUserIdAndServiceItemId(userId, serviceIds).stream()
+            .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
+            .map(book -> book.getServiceItem().getId())
+            .collect(Collectors.toSet());
+    }
+  
+    public Long countAllBooksByUserId(Long userId) {
+        return bookRepository.countByUserId(userId);
     }
 
     public Page<Book> findAllParticipantsByServiceItemId(Long serviceItemId, Pageable pageable) {
