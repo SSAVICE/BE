@@ -27,7 +27,7 @@ public class ThumbnailAlarmConsumer {
                 .status(alarm.status())
                 .bucket(alarm.bucket())
                 .originKey(alarm.originKey())
-                .resultKey(alarm.resultKey())
+                .thumbKey(alarm.thumbKey())
                 .root(alarm.root())
                 .ownerId(Long.valueOf(alarm.ownerId()))
                 .ts(alarm.ts())
