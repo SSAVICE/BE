@@ -1,6 +1,7 @@
 package teamssavice.ssavice.book.service;
 
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.global.exception.ForbiddenException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.s3.S3Service;
