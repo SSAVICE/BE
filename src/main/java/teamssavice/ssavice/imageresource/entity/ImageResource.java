@@ -1,19 +1,11 @@
 package teamssavice.ssavice.imageresource.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.constants.ImageStatus;
@@ -67,6 +59,7 @@ public class ImageResource extends BaseEntity {
     }
 
     public void confirmAsThumbnail(String newObjectKey) {
+        this.sourceKey = this.targetKey;
         this.targetKey = newObjectKey;
     }
 
@@ -74,7 +67,15 @@ public class ImageResource extends BaseEntity {
         if (this.status != ImageStatus.DONE) {
             return ImageConstants.defaultKey(this.path);
         }
+        if (!this.isActive) {
+            return ImageConstants.defaultKey(this.path);
+        }
         return this.targetKey;
+    }
+
+    public void changeTargetKeyAsThumbnail() {
+        int lastSlash = this.targetKey.lastIndexOf('/');
+        this.targetKey = this.targetKey.substring(0, lastSlash + 1) + "thumb_" + this.targetKey.substring(lastSlash + 1);
     }
 
     public void startProcessing() {

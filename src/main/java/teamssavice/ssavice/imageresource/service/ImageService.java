@@ -68,6 +68,6 @@ public class ImageService {
 
     @Transactional
     public void changeMetaDataToThumbnail(String originKey, String thumbKey) {
-        imageWriteService.confirmThumbnail(originKey, thumbKey);
+        imageWriteService.changeMetaDataToThumb(originKey, thumbKey);
     }
 }

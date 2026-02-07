@@ -1,7 +1,5 @@
 package teamssavice.ssavice.serviceItem.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -35,6 +33,9 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ServiceItemService {
@@ -55,12 +56,19 @@ public class ServiceItemService {
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
         List<ImageResource> imageResourceList = imageReadService.findAllBySourceKeyIn(
-            command.imageObjectKeys());
+                command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
-            AddressCommand.RegionInfo.from(command, region));
+                AddressCommand.RegionInfo.from(command, region));
 
-        savedServiceItem.updateThumbNailImage(imageResourceList.getFirst());
+        if (!imageResourceList.isEmpty()) {
+            ImageResource thumbnailImage = imageResourceList.getFirst();
+            thumbnailImage.checkedConfirmed();
+            thumbnailImage.changeTargetKeyAsThumbnail();
+            savedServiceItem.updateThumbNailImage(thumbnailImage);
+            applicationEventPublisher.publishEvent(S3EventDto.Move.from(thumbnailImage));
+            imageResourceList.removeFirst();
+        }
 
         for (ImageResource imageResource : imageResourceList) {
             imageResource.checkedConfirmed();
@@ -78,9 +86,9 @@ public class ServiceItemService {
         Slice<ServiceItem> items = serviceItemReadService.search(command);
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-            .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
-                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
-            .toList();
+                .map(serviceItem -> ServiceItemModel.Search.from(serviceItem,
+                        s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())))
+                .toList();
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
@@ -121,25 +129,25 @@ public class ServiceItemService {
         serviceItem.validateAppliable();
 
         if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(),
-            BookStatus.CANCELED)) {
+                BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }
 
     @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceByCompanyAndStatus(
-        ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
+            ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyIdAndStatus(
-                command.companyId(), ServiceStatus.RECRUITING, command.pageable());
+                    command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
+                    s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompanyId(
-            command.companyId(), command.pageable());
+                command.companyId(), command.pageable());
         return serviceItems.map(
-            serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
+                serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                        s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
 
@@ -153,11 +161,11 @@ public class ServiceItemService {
 
         // 이거는 확장성을 고려해서 만들어둠 - 관련해서 이벤트 처리 방식으로 수정 예정
         List<Book> canceledBooks = bookReadService.findAllByServiceItemIdAndBookStatus(
-            serviceItem.getId(), BookStatus.RESERVED);
+                serviceItem.getId(), BookStatus.RESERVED);
 
         if (!canceledBooks.isEmpty()) {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(),
-                RefundReason.SERVICE_DELETED);
+                    RefundReason.SERVICE_DELETED);
         }
     }
 
@@ -174,7 +182,7 @@ public class ServiceItemService {
         Users user = userReadService.findById(command.userId());
 
         Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(
-            user.getId(), serviceItem.getId());
+                user.getId(), serviceItem.getId());
 
         // 최소 인원 검증인데 이거는 현재는 못하게 막아놓고 법적인거 조사하면서 따로 수수료 물면서 환불하는 로직으로 전환예정
         if (serviceItem.isReachedMinimum()) {
@@ -185,7 +193,7 @@ public class ServiceItemService {
 
         serviceItem.cancelParticipation();
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(),
-            RefundReason.USER_CANCEL);
+                RefundReason.USER_CANCEL);
     }
 
 }
