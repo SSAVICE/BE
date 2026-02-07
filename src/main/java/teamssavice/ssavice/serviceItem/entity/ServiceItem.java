@@ -194,4 +194,8 @@ public class ServiceItem extends BaseEntity {
             this.currentMember--;
         }
     }
+
+    public boolean isOwnedBy(Long companyId) {
+        return this.company.getId().equals(companyId);
+    }
 }
