@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,12 +37,13 @@ public class BookController {
         @RequestParam BookStatusFilter status
     ) {
 
-        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable, status);
+        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable,
+            status);
 
         Page<BookModel.Info> models = bookService.getMyBooksByStatus(command);
-        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
+        Page<BookResponse.Info> responsePage = models.map(BookResponse.Info::from);
 
-        return ResponseEntity.ok(PageResponse.from(reponsePage));
+        return ResponseEntity.ok(PageResponse.from(responsePage));
     }
 
     @GetMapping("/user/book/summary")
@@ -61,12 +63,13 @@ public class BookController {
         @PageableDefault(size = 10) Pageable pageable,
         @RequestParam BookStatusFilter status
     ) {
-        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(companyId, pageable, status);
+        BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(companyId, pageable,
+            status);
 
         Page<BookModel.Info> models = bookService.getMyCompanysBooksByStatus(command);
-        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
+        Page<BookResponse.Info> responsePage = models.map(BookResponse.Info::from);
 
-        return ResponseEntity.ok(PageResponse.from(reponsePage));
+        return ResponseEntity.ok(PageResponse.from(responsePage));
     }
 
     @GetMapping("/company/book/summary")
@@ -77,5 +80,19 @@ public class BookController {
         BookModel.BookSummary model = bookService.getCompanysBookSummary(companyId);
 
         return ResponseEntity.ok(BookResponse.BookSummary.from(model));
+    }
+
+    @GetMapping("/book/{service-id}/participant")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<PageResponse<BookResponse.Participant>> getParticipants(
+        @CurrentId Long companyId,
+        @PathVariable("service-id") Long serviceItemId,
+        @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<BookModel.Participant> models = bookService.getParticipants(companyId, serviceItemId,
+            pageable);
+        Page<BookResponse.Participant> responsePage = models.map(BookResponse.Participant::from);
+
+        return ResponseEntity.ok(PageResponse.from(responsePage));
     }
 }
