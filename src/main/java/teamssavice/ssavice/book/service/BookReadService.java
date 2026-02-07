@@ -62,4 +62,8 @@ public class BookReadService {
     public Long countSucceededBooksByCompanyId(Long companyId) {
         return bookRepository.countSucceededBooksByCompanyId(companyId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
+
+    public Page<Book> findAllParticipantsByServiceItemId(Long serviceItemId, Pageable pageable) {
+        return bookRepository.findAllByServiceItemIdWithUserAndImageResource(serviceItemId, BookStatus.RESERVED, pageable);
+    }
 }

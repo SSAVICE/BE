@@ -77,13 +77,41 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
                 .fetch();
 
         Long total = queryFactory
-                .select(book.count())
-                .from(book)
-                .where(
-                        baseCondition,
-                        statusCondition
-                )
-                .fetchOne();
+            .select(book.count())
+            .from(book)
+            .where(
+                baseCondition,
+                statusCondition
+            )
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0 : total);
+    }
+
+    @Override
+    public Page<Book> findAllByServiceItemIdWithUserAndImageResource(Long serviceItemId,
+        BookStatus bookStatus, Pageable pageable) {
+        List<Book> content = queryFactory
+            .selectFrom(book)
+            .join(book.user, users).fetchJoin()
+            .leftJoin(users.imageResource, imageResource).fetchJoin()
+            .where(
+                book.serviceItem.id.eq(serviceItemId),
+                book.bookStatus.eq(bookStatus)
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(book.createdAt.asc())
+            .fetch();
+
+        Long total = queryFactory
+            .select(book.count())
+            .from(book)
+            .where(
+                book.serviceItem.id.eq(serviceItemId),
+                book.bookStatus.eq(bookStatus)
+            )
+            .fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
