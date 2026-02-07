@@ -68,6 +68,9 @@ dependencies {
 
     //sqs
     implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs:3.2.0")
+
+    // spring-retry
+    implementation 'org.springframework.retry:spring-retry'
 }
 
 tasks.named('test') {
