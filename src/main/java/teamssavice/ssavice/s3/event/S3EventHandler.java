@@ -18,14 +18,7 @@ public class S3EventHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void moveImageEventListener(S3EventDto.Move event) {
-        log.info("S3 Move event received: imageResourceId={}, source={}, target={}",
-                event.imageResourceId(), event.sourceKey(), event.targetKey());
-        try {
-            imageService.handleImageMove(event.imageResourceId(), event.sourceKey(), event.targetKey(), event.contentType());
-            log.info("S3 Move completed successfully: imageResourceId={}", event.imageResourceId());
-        } catch (Exception e) {
-            log.error("Failed to move image from {} to {}: {}", event.sourceKey(), event.targetKey(), e.getMessage(), e);
-        }
+        imageService.handleImageMove(event.imageResourceId(), event.sourceKey(), event.targetKey(), event.contentType());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

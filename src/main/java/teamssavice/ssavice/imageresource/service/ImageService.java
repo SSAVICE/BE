@@ -1,6 +1,7 @@
 package teamssavice.ssavice.imageresource.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
@@ -15,6 +16,7 @@ import teamssavice.ssavice.s3.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -62,7 +64,8 @@ public class ImageService {
             imageWriteService.updateStatusToDone(imageResourceId);
         } catch (Exception e) {
             imageWriteService.updateStatusToFailed(imageResourceId);
-            throw e;
+            log.error("Failed to move image: {}", sourceKey, e);
+            // TODO 디스코드 도입 검토
         }
     }
 
