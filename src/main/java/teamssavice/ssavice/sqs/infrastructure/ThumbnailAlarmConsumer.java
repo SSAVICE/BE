@@ -38,7 +38,7 @@ public class ThumbnailAlarmConsumer {
 
         } catch (Exception e) {
             log.error("[SQS] failed to consume message: {}", message, e);
-            throw new RuntimeException(e); // 재시도/DLQ 목적
+            // TODO 디스코드 알람
         }
     }
 }
