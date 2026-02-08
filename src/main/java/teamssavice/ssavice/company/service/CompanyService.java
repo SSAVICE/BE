@@ -133,16 +133,12 @@ public class CompanyService {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(
             company.getId());
-        Float companyRate = 10F;
-        Long rateCount = 100L;
         if (company.hasImageResource()) {
             String presignedUrl = s3Service.generateGetPresignedUrl(
                 company.getImageResource().getObjectKey());
-            return CompanyModel.Summary.from(company, presignedUrl, companyRate, rateCount,
-                reviews);
+            return CompanyModel.Summary.from(company, presignedUrl, reviews);
         }
-        return CompanyModel.Summary.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY,
-            companyRate, rateCount, reviews);
+        return CompanyModel.Summary.from(company, ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY, reviews);
     }
 
     @Transactional
