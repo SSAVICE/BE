@@ -6,15 +6,31 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.refund.constants.RefundReason;
+import teamssavice.ssavice.refund.service.RefundService;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
+import teamssavice.ssavice.user.entity.Users;
+import teamssavice.ssavice.user.service.UserReadService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookReadService bookReadService;
+    private final BookWriteService bookWriteService;
+    private final ServiceItemReadService serviceItemReadService;
+    private final UserReadService userReadService;
+    private final RefundService refundService;
     private final S3Service s3Service;
 
     @Transactional(readOnly = true)
@@ -30,33 +46,56 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public BookModel.BookSummary getBookSummary(Long userId) {
+    public BookModel.Count getBookSummary(Long userId) {
         Long applying = bookReadService.countRecruitingBooksByUserId(userId);
         Long completedCount = bookReadService.countSucceededBooksByUserId(userId);
+        Long totalCount = bookReadService.countAllBooksByUserId(userId);
 
-        return BookModel.BookSummary.from(applying, completedCount);
+        return BookModel.Count.from(applying, completedCount, totalCount);
     }
 
-    @Transactional(readOnly = true)
-    public Page<BookModel.Info> getMyCompanysBooksByStatus(BookCommand.RetrieveByStatus command) {
-        Page<Book> books = bookReadService.findAllByCompanyIdAndStatus(command.id(),
-            command.status(), command.pageable());
+    @Transactional
+    public BookModel.Apply apply(Long userId, Long serviceId) {
 
-        return books.map(book -> {
-            String presignedUrl = s3Service.generateGetPresignedUrl(
-                book.getServiceItem().getObjectKey());
-            return BookModel.Info.from(book, presignedUrl);
-        });
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+        Users user = userReadService.findById(userId);
+
+        validateApply(user, serviceItem);
+
+        serviceItem.participate();
+
+        Book book = bookWriteService.apply(user, serviceItem);
+
+        return BookModel.Apply.of(book.getId());
     }
 
-    @Transactional(readOnly = true)
-    public BookModel.BookSummary getCompanysBookSummary(Long companyId) {
-        Long applying = bookReadService.countRecruitingBooksByCompanyId(companyId);
-        Long completedCount = bookReadService.countSucceededBooksByCompanyId(companyId);
+    @Transactional
+    public void cancel(ServiceItemCommand.Cancel command) {
 
-        return BookModel.BookSummary.from(applying, completedCount);
+        ServiceItem serviceItem = serviceItemReadService.findById(command.serviceId());
+        Users user = userReadService.findById(command.userId());
+
+        Book book = bookReadService.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(user.getId(), serviceItem.getId());
+
+        // 최소 인원 검증인데 이거는 현재는 못하게 막아놓고 법적인거 조사하면서 따로 수수료 물면서 환불하는 로직으로 전환예정
+        if (serviceItem.isReachedMinimum()) {
+            throw new ConflictException(ErrorCode.AT_MINIMUM_MEMBER_LIMIT);
+        }
+
+        bookWriteService.cancel(book);
+
+        serviceItem.cancelParticipation();
+        refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
     }
 
+    private void validateApply(Users user, ServiceItem serviceItem) {
+
+        serviceItem.validateAppliable();
+
+        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
+            throw new ConflictException(ErrorCode.ALREADY_APPLIED);
+        }
+    }
 }
 
 

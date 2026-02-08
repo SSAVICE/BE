@@ -28,4 +28,11 @@ public class WishReadService {
 
         return wishRepository.findAllByUserId(command.userId(), command.pageable());
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUserIdAndServiceItemId(Long userId, Long serviceId) {
+
+        return wishRepository.existsByUserIdAndServiceItemId(userId, serviceId);
+    }
+
 }

@@ -1,7 +1,5 @@
 package teamssavice.ssavice.book.infrastructure.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,26 +17,31 @@ import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.company.entity.Company;
-import teamssavice.ssavice.fixture.AddressFixture;
-import teamssavice.ssavice.fixture.BookFixture;
-import teamssavice.ssavice.fixture.CompanyFixture;
-import teamssavice.ssavice.fixture.ServiceItemFixture;
-import teamssavice.ssavice.fixture.UserFixture;
+import teamssavice.ssavice.fixture.*;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 @DataJpaTest
 @Import(QueryDSLConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class BookRepositoryImplTest {
 
+class BookRepositoryImplTest {
     @Autowired
     private BookRepository bookRepository;
     @Autowired
     private TestEntityManager tem;
 
     private Users user;
+    private final List<ServiceItem> serviceItems = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -61,6 +64,14 @@ class BookRepositoryImplTest {
         tem.persist(completeService);
         tem.persist(failService);
         tem.persist(canceledService);
+
+        serviceItems.add(recruitingService);
+        serviceItems.add(succeededService);
+        serviceItems.add(fulledService);
+        serviceItems.add(inUseService);
+        serviceItems.add(completeService);
+        serviceItems.add(failService);
+        serviceItems.add(canceledService);
 
         Book recruitingBook = BookFixture.book(user, recruitingService, BookStatus.RESERVED);
         Book succeededBook = BookFixture.book(user, succeededService, BookStatus.RESERVED);
@@ -169,5 +180,35 @@ class BookRepositoryImplTest {
             assertThat(model.bookStatus()).isIn(BookViewStatus.FAILED, BookViewStatus.USER_CANCELED,
                 BookViewStatus.SERVICE_CANCELED);
         }
+    }
+
+    @Test
+    @DisplayName("서비스별 마지막 예약 조회 테스트")
+    void findLatestBooksByUserIdAndServiceItemIdTest() {
+        // given
+        tem.persist(BookFixture.book(user, serviceItems.get(0), BookStatus.CANCELED));
+        tem.persist(BookFixture.book(user, serviceItems.get(3), BookStatus.CANCELED));
+        tem.persist(BookFixture.book(user, serviceItems.get(5), BookStatus.CANCELED));
+        List<Long> serviceIds = serviceItems.stream().map(ServiceItem::getId).toList();
+        tem.flush();
+        tem.clear();
+
+        // when
+        List<Book> actuals = bookRepository.findLatestBooksByUserIdAndServiceItemId(user.getId(), serviceIds);
+        Map<Long, BookStatus> map = new HashMap<>();
+        for (Book actual : actuals) {
+            map.put(actual.getServiceItem().getId(), actual.getBookStatus());
+        }
+        // then
+        assertAll(
+            () -> assertThat(actuals.size()).isEqualTo(serviceItems.size()),
+            () -> assertThat(map.get(1L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(2L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(3L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(4L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(5L)).isEqualTo(BookStatus.RESERVED),
+            () -> assertThat(map.get(6L)).isEqualTo(BookStatus.CANCELED),
+            () -> assertThat(map.get(7L)).isEqualTo(BookStatus.RESERVED)
+        );
     }
 }

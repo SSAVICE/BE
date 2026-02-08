@@ -1,25 +1,14 @@
 package teamssavice.ssavice.serviceItem.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.book.controller.dto.BookResponse;
-import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.CursorResult;
@@ -29,12 +18,14 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
-import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,7 +34,6 @@ public class ServiceItemController {
 
     private final ServiceItemService serviceItemService;
     private final ImageService imageService;
-    private final S3Service s3Service;
 
     @PostMapping
     @RequireRole(Role.COMPANY)
@@ -51,29 +41,30 @@ public class ServiceItemController {
         @CurrentId Long companyId,
         @RequestBody @Valid ServiceItemRequest.Create request
     ) {
-        s3Service.validateAllTempImagesOrDeleteAll(request.toValidateCommand());
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }
 
     @GetMapping("/search")
+    @RequireRole(Role.USER)
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
         @ModelAttribute @Valid ServiceItemRequest.Search request,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @CurrentId Long userId
     ) {
         Pageable pageable = PageRequest.of(0, size);
-        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(
-            request.toCommand(pageable));
-        CursorResult<ServiceItemResponse.Search> response = models.map(
-            ServiceItemResponse.Search::from);
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(userId, pageable));
+        CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{serviceId}")
+    @RequireRole(Role.USER)
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
-        @PathVariable Long serviceId
+        @PathVariable Long serviceId,
+        @CurrentId Long userId
     ) {
-        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId);
+        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, userId);
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
@@ -83,19 +74,8 @@ public class ServiceItemController {
         @CurrentId Long companyId,
         @RequestBody @Valid ImageRequest.ServiceImages request
     ) {
-        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(
-            request.toCommand(companyId, ImagePath.serviceItem));
+        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(request.toCommand(companyId, ImagePath.serviceItem));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
-    }
-
-    @PostMapping("/{serviceId}/apply")
-    @RequireRole(Role.USER)
-    public ResponseEntity<BookResponse.Apply> applyServiceItem(
-        @CurrentId Long userId,
-        @PathVariable Long serviceId
-    ) {
-        BookModel.Apply model = serviceItemService.apply(userId, serviceId);
-        return ResponseEntity.ok(BookResponse.Apply.from(model));
     }
 
     @GetMapping("/company/{company-id}")
@@ -104,12 +84,10 @@ public class ServiceItemController {
         @PageableDefault(page = 0, size = 10) Pageable pageable,
         @RequestParam("on-sale") Boolean onSale
     ) {
-        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(
-            companyId, pageable, onSale);
+        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(
-                command)
-            .map(ServiceItemResponse.Summary::from);
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
+                .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
@@ -119,16 +97,23 @@ public class ServiceItemController {
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getMyCompanysServiceItems(
         @CurrentId Long companyId,
         @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam("on-sale") Boolean onSale
+        @RequestParam("status") ServiceStatusFilter status
     ) {
-        ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(
-            companyId, pageable, onSale);
+        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
-        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceByCompanyAndStatus(
-                command)
-            .map(ServiceItemResponse.Summary::from);
+        Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
+                .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
+    }
+
+    @GetMapping("/company/summary")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<ServiceItemResponse.Count> getCompanysServiceItemCount(
+        @CurrentId Long companyId
+    ){
+        ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(companyId);
+        return ResponseEntity.ok(ServiceItemResponse.Count.from(model));
     }
 
     @DeleteMapping("/{serviceId}")
@@ -139,15 +124,5 @@ public class ServiceItemController {
     ) {
         serviceItemService.delete(ServiceItemCommand.Delete.of(companyId, serviceId));
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{serviceId}/cancel")
-    @RequireRole(Role.USER)
-    public ResponseEntity<Void> cancelParticipation(
-        @CurrentId Long userId,
-        @PathVariable Long serviceId
-    ) {
-        serviceItemService.cancel(ServiceItemCommand.Cancel.of(userId, serviceId));
-        return ResponseEntity.ok().build();
     }
 }

@@ -42,6 +42,8 @@ public class BookResponse {
         Long discountedPrice,
         // 기타
         LocalDateTime deadline,
+        LocalDateTime startTime,
+        LocalDateTime endTime,
         String tag
     ) {
 
@@ -65,20 +67,22 @@ public class BookResponse {
                 model.discountedPrice(),
 
                 model.deadline(),
+                model.startDate(),
+                model.endDate(),
                 model.tags() // List<String> 그대로 전달
             );
         }
     }
 
     @Builder
-    public record BookSummary(
+    public record Count(
         Long total,
         Long applying,
         Long completed
     ) {
 
-        public static BookSummary from(BookModel.BookSummary model) {
-            return BookSummary.builder()
+        public static Count from(BookModel.Count model) {
+            return BookResponse.Count.builder()
                 .total(model.total())
                 .applying(model.applying())
                 .completed(model.completed())

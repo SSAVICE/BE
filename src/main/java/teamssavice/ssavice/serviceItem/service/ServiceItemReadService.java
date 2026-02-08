@@ -41,19 +41,43 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findAllByCompanyId(Long companyId, Pageable pageable) {
-        return serviceItemRepository.findAllByCompanyId(companyId, pageable);
+    public Page<ServiceItem> findByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
+        return serviceItemRepository.findByCompanyAndStatus(command.companyId(), command.status(), command.pageable());
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findAllByCompanyIdAndStatus(Long companyId, ServiceStatus status,
-        Pageable pageable) {
-        return serviceItemRepository.findAllByCompanyIdAndStatus(companyId, status,
-            LocalDateTime.now(), pageable);
+    public Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable) {
+        return serviceItemRepository.findAllByCompany_Id(companyId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ServiceItem> findAllByCompany_IdAndStatus(Long companyId, ServiceStatus status, Pageable pageable) {
+        return serviceItemRepository.findAllByCompany_IdAndStatus(companyId, status, LocalDateTime.now(), pageable);
     }
 
     @Transactional(readOnly = true)
     public ServiceItem getReferenceById(Long serviceId) {
         return serviceItemRepository.getReferenceById(serviceId);
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceItem findByIdWithAddressAndImageList(Long id) {
+        return serviceItemRepository.findByIdWithAddressAndImageList(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public Long countRecruitingServiceItemsByCompanyId(Long companyId) {
+        return serviceItemRepository.countRecruitingServiceItemsByCompanyId(companyId, ServiceStatus.RECRUITING, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long countSucceededServiceItemsByCompanyId(Long companyId) {
+        return serviceItemRepository.countSucceededServiceItemsByCompanyId(companyId, ServiceStatus.SUCCEEDED, LocalDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public Long countAllServiceItemsByCompanyId(Long companyId) {
+        return serviceItemRepository.countAllByCompany_Id(companyId);
     }
 }
