@@ -142,8 +142,8 @@ class S3ServiceRetryTest {
     }
 
     @Test
-    @DisplayName("재시도 간격이 exponential backoff로 증가한다 (1초, 2초)")
-    void moveObject_uses_exponential_backoff() {
+    @DisplayName("재시도 간격이 jitter를 포함한 exponential backoff로 동작한다")
+    void moveObject_uses_exponential_backoff_with_jitter() {
         // given
         S3Exception s3Exception = (S3Exception) S3Exception.builder()
                 .message("Temporary error")
@@ -160,10 +160,11 @@ class S3ServiceRetryTest {
         Instant end = Instant.now();
 
         // then
-        // 총 소요 시간은 최소 1초(첫 재시도) + 2초(두 번째 재시도) = 3초 이상
-        // CI 환경의 지터를 고려하여 2.9초 이상으로 검증
+        // random=true이므로 재시도 간격은 [delay, delay*multiplier) 범위에서 랜덤
+        // 1회차: [500ms, 1000ms), 2회차: [1000ms, 2000ms)
+        // 최소 총 대기: 500 + 1000 = 1500ms
         Duration elapsed = Duration.between(start, end);
-        assertThat(elapsed.toMillis()).isGreaterThanOrEqualTo(2900);
+        assertThat(elapsed.toMillis()).isGreaterThanOrEqualTo(1500);
 
         // 3회 시도 확인
         verify(s3Client, times(3)).copyObject(any(CopyObjectRequest.class));
