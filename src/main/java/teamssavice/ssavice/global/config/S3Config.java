@@ -3,6 +3,7 @@ package teamssavice.ssavice.global.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -28,6 +29,9 @@ public class S3Config {
     public S3Client s3Client() {
         return S3Client.builder()
                 .region(Region.of(s3Properties.region()))
+                .overrideConfiguration(o -> o
+                        .retryPolicy(RetryPolicy.none())
+                )
                 .httpClient(
                         ApacheHttpClient.builder()
                                 .connectionTimeout(Duration.ofMillis(300)) //TCP 연결을 맺기까지 기다리는 최대 시간

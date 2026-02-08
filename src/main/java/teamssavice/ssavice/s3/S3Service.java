@@ -68,7 +68,7 @@ public class S3Service {
     @Retryable(
             retryFor = S3Exception.class,
             maxAttempts = 3,
-            backoff = @Backoff(delay = 1000, multiplier = 2.0)
+            backoff = @Backoff(delay = 500, multiplier = 2.0, random = true)
     )
     public void copyObject(String sourceKey, String targetKey, ImageContentType contentType) {
         CopyObjectRequest request = CopyObjectRequest.builder()
