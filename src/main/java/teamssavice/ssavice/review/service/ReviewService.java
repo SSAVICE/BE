@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.company.service.CompanyReadService;
+import teamssavice.ssavice.company.service.CompanyWriteService;
 import teamssavice.ssavice.review.service.dto.ReviewCommand;
 import teamssavice.ssavice.review.service.dto.ReviewModel;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -19,11 +22,14 @@ public class ReviewService {
     private final UserReadService userReadService;
     private final ServiceItemReadService serviceItemReadService;
     private final ReviewReadService reviewReadService;
+    private final CompanyWriteService companyWriteService;
 
     @Transactional
     public void saveReview(ReviewCommand.Input command) {
         Users user = userReadService.findById(command.userId());
         ServiceItem item = serviceItemReadService.findById(command.serviceId());
+
+        companyWriteService.updateCompanyRating(command.companyId(), command.rating());
         reviewWriteService.save(user.getName(), item.getTitle(), command);
     }
 

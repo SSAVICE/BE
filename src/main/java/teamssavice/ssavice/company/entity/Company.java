@@ -52,6 +52,15 @@ public class Company extends BaseEntity {
     @Column(nullable = true)
     private String detail;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Long ratingSum = 0L;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Long rateCount = 0L;
+
+
     // boolean isApproved; <-- 업체 등록 시 승인 여부
 
     //주소
@@ -98,5 +107,15 @@ public class Company extends BaseEntity {
 
     public boolean hasImageResource() {
         return this.getImageResource() != null;
+    }
+
+    public void addRating(Integer score) {
+        this.ratingSum += score;
+        this.rateCount += 1;
+    }
+
+    public Float getAverageRate() {
+        if (this.rateCount == 0) return 0.0F;
+        return (float) this.ratingSum / this.rateCount;
     }
 }

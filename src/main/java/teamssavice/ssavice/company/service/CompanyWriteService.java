@@ -13,6 +13,7 @@ import teamssavice.ssavice.user.entity.Users;
 @RequiredArgsConstructor
 public class CompanyWriteService {
     private final CompanyRepository companyRepository;
+    private final CompanyReadService companyReadService;
 
     public Company save(CompanyCommand.Create command, Users user, AddressCommand.RegionInfo addressCommand) {
         Address address = Address.builder()
@@ -41,5 +42,10 @@ public class CompanyWriteService {
                 .build();
 
         return companyRepository.save(company);
+    }
+
+    public void updateCompanyRating(Long companyId, Integer rating) {
+        Company company = companyReadService.findById(companyId);
+        company.addRating(rating);
     }
 }
