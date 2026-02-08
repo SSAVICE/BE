@@ -82,7 +82,8 @@ public class ServiceItemService {
         Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId())))
+                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
+                        s3Service.generateGetPresignedUrl(entity.getObjectKey())))
                 .toList();
 
         Long nextCursor = null;
@@ -99,7 +100,7 @@ public class ServiceItemService {
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
-            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
 
         boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
@@ -110,7 +111,8 @@ public class ServiceItemService {
 
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
-        return serviceItems.map(ServiceItemModel.Summary::from);
+        return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndOnSale(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
