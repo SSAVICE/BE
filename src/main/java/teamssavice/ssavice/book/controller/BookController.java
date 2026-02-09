@@ -37,9 +37,9 @@ public class BookController {
         BookCommand.RetrieveByStatus command = BookCommand.RetrieveByStatus.of(userId, pageable, status);
 
         Page<BookModel.Info> models = bookService.getMyBooksByStatus(command);
-        Page<BookResponse.Info> reponsePage = models.map(BookResponse.Info::from);
+        Page<BookResponse.Info> responsePage = models.map(BookResponse.Info::from);
 
-        return ResponseEntity.ok(PageResponse.from(reponsePage));
+        return ResponseEntity.ok(PageResponse.from(responsePage));
     }
 
     @GetMapping("/user/summary")
@@ -71,5 +71,19 @@ public class BookController {
     ) {
         bookService.cancel(ServiceItemCommand.Cancel.of(userId, serviceId));
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/book/{service-id}/participant")
+    @RequireRole(Role.COMPANY)
+    public ResponseEntity<PageResponse<BookResponse.Participant>> getParticipants(
+        @CurrentId Long companyId,
+        @PathVariable("service-id") Long serviceItemId,
+        @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<BookModel.Participant> models = bookService.getParticipants(companyId, serviceItemId,
+            pageable);
+        Page<BookResponse.Participant> responsePage = models.map(BookResponse.Participant::from);
+
+        return ResponseEntity.ok(PageResponse.from(responsePage));
     }
 }
