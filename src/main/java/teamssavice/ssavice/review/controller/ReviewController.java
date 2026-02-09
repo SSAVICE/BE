@@ -59,4 +59,15 @@ public class ReviewController {
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
+    @RequireRole(Role.USER)
+    @GetMapping("/user")
+    public ResponseEntity<PageResponse<ReviewResponse.Item>> getUserReview(
+            @CurrentId Long userId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        Page<ReviewResponse.Item> response = reviewService.getReviewByUserIdPaging(ReviewCommand.RetrieveByUserId.of(userId, pageable))
+                .map(ReviewResponse.Item::from);
+
+        return ResponseEntity.ok(PageResponse.from(response));
+    }
 }

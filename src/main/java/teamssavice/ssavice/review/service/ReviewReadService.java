@@ -25,4 +25,9 @@ public class ReviewReadService {
     public List<Review> findTop3ByCompanyIdOrderByCreatedAt(Long companyId) {
         return reviewRepository.findTop3ByCompanyIdOrderByCreatedAtDesc(companyId);
     }
+
+    @Transactional(readOnly = true)
+    public Page<Review> findByUserIdPaging(Long userId, Pageable pageable) {
+        return reviewRepository.findByUserId(userId, pageable);
+    }
 }
