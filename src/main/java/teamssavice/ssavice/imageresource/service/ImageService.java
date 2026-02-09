@@ -58,7 +58,6 @@ public class ImageService {
     }
 
     public void handleImageMove(Long imageResourceId, String sourceKey, String targetKey, ImageContentType contentType) {
-        imageWriteService.updateStatusToProcessing(imageResourceId);
         try {
             s3Service.copyObject(sourceKey, targetKey, contentType);
             imageWriteService.updateStatusToDone(imageResourceId);

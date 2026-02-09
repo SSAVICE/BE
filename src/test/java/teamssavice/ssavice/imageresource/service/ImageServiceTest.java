@@ -19,7 +19,6 @@ import teamssavice.ssavice.s3.S3Service;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -172,7 +171,7 @@ class ImageServiceTest {
     class HandleImageMove {
 
         @Test
-        @DisplayName("S3 복사 성공 시 상태를 PROCESSING → DONE으로 변경한다")
+        @DisplayName("S3 복사 성공 시 상태를 DONE으로 변경한다")
         void S3_복사_성공() {
             // given
             Long imageResourceId = 1L;
@@ -184,7 +183,6 @@ class ImageServiceTest {
             imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType);
 
             // then
-            verify(imageWriteService).updateStatusToProcessing(imageResourceId);
             verify(s3Service).copyObject(sourceKey, targetKey, contentType);
             verify(imageWriteService).updateStatusToDone(imageResourceId);
             verify(imageWriteService, never()).updateStatusToFailed(any());
@@ -206,7 +204,6 @@ class ImageServiceTest {
             imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType);
 
             // then
-            verify(imageWriteService).updateStatusToProcessing(imageResourceId);
             verify(s3Service).copyObject(sourceKey, targetKey, contentType);
             verify(imageWriteService).updateStatusToFailed(imageResourceId);
             verify(imageWriteService, never()).updateStatusToDone(any());
