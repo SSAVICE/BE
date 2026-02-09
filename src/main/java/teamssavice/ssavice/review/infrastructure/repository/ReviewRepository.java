@@ -15,7 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                 "JOIN FETCH r.user " +
                 "JOIN FETCH r.serviceItem " +
                 "WHERE r.companyId = :companyId",
-        countQuery = "SELECT COUNT(r) FROM Review r WHERE r.user.id = :userId")
+        countQuery = "SELECT COUNT(r) FROM Review r WHERE r.companyId = :companyId")
     Page<Review> findByCompanyId(Long companyId, Pageable pageable);
 
     @Query(
