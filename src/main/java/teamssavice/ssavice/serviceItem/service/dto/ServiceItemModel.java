@@ -30,31 +30,32 @@ public class ServiceItemModel {
             String tag,
             AddressModel.RegionSummary region
     ) {
-        public static ServiceItemModel.Summary from (ServiceItem entity) {
+
+        public static ServiceItemModel.Summary from(ServiceItem entity, String thumbnailUrl) {
             return Summary.builder()
-                    .serviceId(entity.getId())
-                    .thumbnailUrl(entity.getThumbnailUrl())
-                    .category(entity.getCategory())
-                    .title(entity.getTitle())
-                    .currentMember(entity.getCurrentMember())
-                    .minimumMember(entity.getMinimumMember())
-                    .maximumMember(entity.getMaximumMember())
-                    .description(entity.getDescription())
-                    .basePrice(entity.getPrice().getBasePrice())
-                    .discountRate(entity.getPrice().getDiscountRate())
-                    .discountedPrice(entity.getPrice().getDiscountedPrice())
-                    .status(entity.getStatus())
-                    .startDate(entity.getStartDate())
-                    .endDate(entity.getEndDate())
-                    .deadline(entity.getDeadline())
-                    .tag(entity.getTag())
-                    .region(AddressModel.RegionSummary.builder()
-                            .gugun(entity.getAddress().getGugun())
-                            .region(entity.getAddress().getRegion())
-                            .latitude(entity.getAddress().getLatitude())
-                            .longitude(entity.getAddress().getLongitude())
-                            .build())
-                    .build();
+                .serviceId(entity.getId())
+                .thumbnailUrl(thumbnailUrl)
+                .category(entity.getCategory())
+                .title(entity.getTitle())
+                .currentMember(entity.getCurrentMember())
+                .minimumMember(entity.getMinimumMember())
+                .maximumMember(entity.getMaximumMember())
+                .description(entity.getDescription())
+                .basePrice(entity.getPrice().getBasePrice())
+                .discountRate(entity.getPrice().getDiscountRate())
+                .discountedPrice(entity.getPrice().getDiscountedPrice())
+                .status(entity.getStatus())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .deadline(entity.getDeadline())
+                .tag(entity.getTag())
+                .region(AddressModel.RegionSummary.builder()
+                    .gugun(entity.getAddress().getGugun())
+                    .region(entity.getAddress().getRegion())
+                    .latitude(entity.getAddress().getLatitude())
+                    .longitude(entity.getAddress().getLongitude())
+                    .build())
+                .build();
         }
     }
 
@@ -84,12 +85,12 @@ public class ServiceItemModel {
 
             boolean isBooked
     ) {
-        public static Search from (ServiceItem entity, boolean isBooked) {
+        public static Search from (ServiceItem entity, boolean isBooked, String imageUrl) {
             return Search.builder()
                     .serviceId(entity.getId())
                     .companyId(entity.getCompany().getId())
                     .companyName(entity.getCompany().getCompanyName())
-                    .serviceImageUrl(entity.getThumbnailUrl())
+                    .serviceImageUrl(imageUrl)
                     .title(entity.getTitle())
                     .basePrice(entity.getPrice().getBasePrice())
                     .discountRatio(entity.getPrice().getDiscountRate())

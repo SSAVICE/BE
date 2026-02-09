@@ -9,11 +9,12 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
-import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
+import teamssavice.ssavice.imageresource.entity.ImageResource;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -69,10 +70,10 @@ public class ServiceItem extends BaseEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private String thumbnailUrl = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_image_resource_id")
+    private ImageResource thumbnailImageResource;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
@@ -198,4 +199,26 @@ public class ServiceItem extends BaseEntity {
     public boolean isOwnedBy(Long companyId) {
         return this.company.getId().equals(companyId);
     }
+
+    public void updateThumbNailImage(ImageResource imageResource) {
+        if (this.thumbnailImageResource != null) {
+            this.thumbnailImageResource.deActivate();
+        }
+        this.thumbnailImageResource = imageResource;
+        imageResource.activate();
+    }
+
+    public boolean hasThumbnailImage() {
+        return this.getThumbnailImageResource() != null;
+    }
+
+    public String getObjectKey() {
+        String objectKey = ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+        if (this.hasThumbnailImage()) {
+            objectKey = this.getThumbnailImageResource().getResolveKey();
+        }
+        return objectKey;
+    }
+
+
 }

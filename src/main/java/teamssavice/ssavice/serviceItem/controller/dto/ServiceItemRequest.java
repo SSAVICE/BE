@@ -5,6 +5,7 @@ import lombok.Builder;
 import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
+import teamssavice.ssavice.s3.dto.S3Command;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.time.LocalDateTime;
@@ -51,6 +52,12 @@ public class ServiceItemRequest {
                     .address(region().address())
                     .detailAddress(region().detailAddress())
                     .imageObjectKeys(objectKeys)
+                    .build();
+        }
+        public S3Command.ValidateKeys toValidateCommand() {
+            return S3Command.ValidateKeys.builder()
+                    .objectKeys(
+                            imageConfirms.stream().map(ImageRequest.Confirm::objectKey).toList())
                     .build();
         }
     }
