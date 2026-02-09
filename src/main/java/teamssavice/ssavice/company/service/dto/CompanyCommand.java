@@ -13,6 +13,8 @@ public class CompanyCommand {
             Long userId,
             String verifyToken,
             String companyName,
+            String businessName,
+            String startDate,
             String ownerName,
             String phoneNumber,
             String businessNumber,
@@ -32,6 +34,8 @@ public class CompanyCommand {
                     .userId(userId)
                     .verifyToken(request.verifyToken())
                     .companyName(request.companyName())
+                    .businessName(request.businessName())
+                    .startDate(request.startDate())
                     .ownerName(request.ownerName())
                     .phoneNumber(request.phoneNumber())
                     .businessNumber(request.businessNumber())

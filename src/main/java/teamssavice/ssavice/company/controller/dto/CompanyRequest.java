@@ -22,6 +22,10 @@ public class CompanyRequest {
         @NotNull
         String companyName,
         @NotNull
+        String businessName,
+        @NotNull
+        String startDate,
+        @NotNull
         String ownerName,
         @NotNull
         String phoneNumber,
