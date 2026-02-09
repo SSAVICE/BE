@@ -29,6 +29,8 @@ public class CompanyWriteService {
 
         Company company = Company.builder()
                 .companyName(command.companyName())
+                .businessName(command.businessName())
+                .startDate(command.startDate())
                 .ownerName(command.ownerName())
                 .phoneNumber(command.phoneNumber())
                 .businessNumber(command.businessNumber())
