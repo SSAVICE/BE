@@ -2,6 +2,7 @@ package teamssavice.ssavice.company.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.company.entity.Company;
@@ -13,8 +14,8 @@ import teamssavice.ssavice.user.entity.Users;
 @RequiredArgsConstructor
 public class CompanyWriteService {
     private final CompanyRepository companyRepository;
-    private final CompanyReadService companyReadService;
 
+    @Transactional
     public Company save(CompanyCommand.Create command, Users user, AddressCommand.RegionInfo addressCommand) {
         Address address = Address.builder()
                 .gugun(addressCommand.gugun())
@@ -42,10 +43,5 @@ public class CompanyWriteService {
                 .build();
 
         return companyRepository.save(company);
-    }
-
-    public void updateCompanyRating(Long companyId, Integer rating) {
-        Company company = companyReadService.findById(companyId);
-        company.addRating(rating);
     }
 }
