@@ -2,6 +2,7 @@ package teamssavice.ssavice.review.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +24,11 @@ public class ReviewReadService {
 
     @Transactional(readOnly = true)
     public List<Review> findTop3ByCompanyIdOrderByCreatedAt(Long companyId) {
-        return reviewRepository.findTop3ByCompanyIdOrderByCreatedAtDesc(companyId);
+        return reviewRepository.findTop3ByCompanyIdOrderByCreatedAtDesc(companyId, PageRequest.of(0, 3));
     }
 
     @Transactional(readOnly = true)
     public Page<Review> findByUserIdPaging(Long userId, Pageable pageable) {
-        return reviewRepository.findByUserId(userId, pageable);
+        return reviewRepository.findByUser_Id(userId, pageable);
     }
 }

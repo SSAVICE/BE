@@ -24,7 +24,7 @@ public class ReviewService {
     public void saveReview(ReviewCommand.Input command) {
         Users user = userReadService.findById(command.userId());
         ServiceItem item = serviceItemReadService.findById(command.serviceId());
-        reviewWriteService.save(user.getName(), item.getTitle(), command);
+        reviewWriteService.save(command.companyId(), user, item, command.rating(), command.comment());
     }
 
     @Transactional(readOnly = true)
