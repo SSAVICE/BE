@@ -64,6 +64,7 @@ public class ImageService {
             imageWriteService.updateStatusToDone(imageResourceId);
         } catch (S3Exception e) {
             imageWriteService.updateStatusToFailed(imageResourceId);
+            throw e;
         }
     }
 

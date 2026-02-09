@@ -15,10 +15,12 @@ import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -189,7 +191,7 @@ class ImageServiceTest {
         }
 
         @Test
-        @DisplayName("S3 복사 실패 시 상태를 FAILED로 변경하고 예외를 잡아서 처리한다")
+        @DisplayName("S3 복사 실패 시 상태를 FAILED로 변경하고 예외를 다시 던진다")
         void S3_복사_실패() {
             // given
             Long imageResourceId = 1L;
@@ -197,14 +199,17 @@ class ImageServiceTest {
             String targetKey = "profile/origin/1/image.jpg";
             ImageContentType contentType = ImageContentType.JPEG;
 
-            doThrow(new RuntimeException("S3 copy failed"))
+            S3Exception s3Exception = (S3Exception) S3Exception.builder()
+                    .message("S3 copy failed")
+                    .build();
+
+            doThrow(s3Exception)
                     .when(s3Service).copyObject(sourceKey, targetKey, contentType);
 
-            // when
-            imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType);
+            // when & then
+            assertThatThrownBy(() -> imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType))
+                    .isInstanceOf(S3Exception.class);
 
-            // then
-            verify(s3Service).copyObject(sourceKey, targetKey, contentType);
             verify(imageWriteService).updateStatusToFailed(imageResourceId);
             verify(imageWriteService, never()).updateStatusToDone(any());
         }
