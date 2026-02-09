@@ -191,7 +191,7 @@ class ImageServiceTest {
         }
 
         @Test
-        @DisplayName("S3 복사 실패 시 상태를 FAILED로 변경하고 예외를 던진다")
+        @DisplayName("S3 복사 실패 시 상태를 FAILED로 변경하고 예외를 잡아서 처리한다")
         void S3_복사_실패() {
             // given
             Long imageResourceId = 1L;
@@ -202,12 +202,12 @@ class ImageServiceTest {
             doThrow(new RuntimeException("S3 copy failed"))
                     .when(s3Service).copyObject(sourceKey, targetKey, contentType);
 
-            // when & then
-            assertThatThrownBy(() -> imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("S3 copy failed");
+            // when
+            imageService.handleImageMove(imageResourceId, sourceKey, targetKey, contentType);
 
+            // then
             verify(imageWriteService).updateStatusToProcessing(imageResourceId);
+            verify(s3Service).copyObject(sourceKey, targetKey, contentType);
             verify(imageWriteService).updateStatusToFailed(imageResourceId);
             verify(imageWriteService, never()).updateStatusToDone(any());
         }
