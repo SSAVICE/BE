@@ -36,14 +36,27 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{company-id}")
+    @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getReview(
             @PathVariable("company-id") @Positive Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<ReviewResponse.Item> response = reviewService.getReviewPaging(ReviewCommand.RetrieveByCompanyId.of(companyId, pageable))
+        Page<ReviewResponse.Item> response = reviewService.getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId.of(companyId, pageable))
                 .map(ReviewResponse.Item::from);
 
         return ResponseEntity.ok(PageResponse.from(response));
     }
+
+    @RequireRole(Role.COMPANY)
+    @GetMapping("/company")
+    public ResponseEntity<PageResponse<ReviewResponse.Item>> getCompanysReview(
+            @CurrentId Long companyId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        Page<ReviewResponse.Item> response = reviewService.getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId.of(companyId, pageable))
+                .map(ReviewResponse.Item::from);
+
+        return ResponseEntity.ok(PageResponse.from(response));
+    }
+
 }
