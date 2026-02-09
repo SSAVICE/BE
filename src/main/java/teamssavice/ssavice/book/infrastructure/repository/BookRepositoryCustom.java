@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 
 import java.util.List;
 
@@ -14,4 +15,7 @@ public interface BookRepositoryCustom {
 
     List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds);
     // (user_id, service_item_id, id DESC) 인덱스 추가
+
+    Page<Book> findAllByServiceItemIdWithUserAndImageResource(Long serviceItemId,
+        BookStatus bookStatus, Pageable pageable);
 }

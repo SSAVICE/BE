@@ -131,4 +131,20 @@ public class BookModel {
         }
     }
 
+    public record Participant(
+            Long bookId,
+            Long userId,
+            String name,
+            String thumbnailUrl
+    ) {
+        public static Participant of(Book book, String thumbnailUrl) {
+            return new Participant(
+                    book.getId(),
+                    book.getUser().getId(),
+                    book.getUser().getName(),
+                    thumbnailUrl
+            );
+        }
+    }
+
 }

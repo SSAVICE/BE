@@ -100,4 +100,20 @@ public class BookResponse {
                     .build();
         }
     }
+
+    public record Participant(
+            Long bookId,
+            Long userId,
+            String name,
+            String thumbnailUrl
+    ) {
+        public static Participant from(BookModel.Participant model) {
+            return new Participant(
+                    model.bookId(),
+                    model.userId(),
+                    model.name(),
+                    model.thumbnailUrl()
+            );
+        }
+    }
 }

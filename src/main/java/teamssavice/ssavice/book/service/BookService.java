@@ -1,8 +1,10 @@
 package teamssavice.ssavice.book.service;
 
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.Book;
@@ -12,8 +14,11 @@ import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
+import teamssavice.ssavice.global.exception.ForbiddenException;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
@@ -95,6 +100,27 @@ public class BookService {
         if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookModel.Participant> getParticipants(Long companyId, Long serviceItemId,
+        Pageable pageable) {
+        ServiceItem serviceItem = serviceItemReadService.findById(serviceItemId);
+        if (!serviceItem.isOwnedBy(companyId)) {
+            throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);
+        }
+        Page<Book> books = bookReadService.findAllParticipantsByServiceItemId(serviceItemId,
+            pageable);
+
+        // S3 presigned URL 생성
+        return books.map(book -> {
+            String thumbnailUrl = book.getUser().hasImageResource()
+                ? s3Service.generateGetPresignedUrl(
+                book.getUser().getImageResource().getObjectKey())
+                : s3Service.generateGetPresignedUrl(
+                    ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY);
+            return BookModel.Participant.of(book, thumbnailUrl);
+        });
     }
 }
 

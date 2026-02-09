@@ -1,29 +1,8 @@
 package teamssavice.ssavice.serviceItem.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -97,9 +76,9 @@ public class ServiceItem extends BaseEntity {
     private Company company;
 
     @OneToOne(
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
@@ -107,8 +86,8 @@ public class ServiceItem extends BaseEntity {
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
-        name = "service_item_image",
-        joinColumns = @JoinColumn(name = "service_item_id")
+            name = "service_item_image",
+            joinColumns = @JoinColumn(name = "service_item_id")
     )
     @Column(name = "image_id")
     private List<Long> imageIds = new ArrayList<>();
@@ -127,18 +106,12 @@ public class ServiceItem extends BaseEntity {
     }
 
     public ServiceStatus getStatus() {
-        if (status == ServiceStatus.RECRUITING) {
-            if (isTimeOver()) {
-                return ServiceStatus.FAILED;
-            }
+        if(status == ServiceStatus.RECRUITING) {
+            if(isTimeOver()) return ServiceStatus.FAILED;
         } else if (status == ServiceStatus.SUCCEEDED) {
-            if (isCompleted()) {
-                return ServiceStatus.COMPLETED;
-            } else if (isInUse()) {
-                return ServiceStatus.IN_USE;
-            } else if (isTimeOver() || isFull()) {
-                return ServiceStatus.FULLED;
-            }
+            if(isCompleted()) return ServiceStatus.COMPLETED;
+            else if(isInUse()) return ServiceStatus.IN_USE;
+            else if(isTimeOver() || isFull()) return ServiceStatus.FULLED;
         }
         return status;
     }
@@ -152,9 +125,7 @@ public class ServiceItem extends BaseEntity {
             throw new ConflictException(ErrorCode.SERVICE_DEADLINE_EXPIRED);
         }
         this.currentMember++;
-        if (isReachedMinimum()) {
-            status = ServiceStatus.SUCCEEDED;
-        }
+        if(isReachedMinimum()) status = ServiceStatus.SUCCEEDED;
     }
 
     public boolean isReachedMinimum() {
@@ -173,8 +144,7 @@ public class ServiceItem extends BaseEntity {
     // 이용중인지 여부
     public boolean isInUse() {
         LocalDateTime now = LocalDateTime.now();
-        return isReachedMinimum() && (now.isAfter(startDate) || now.isEqual(startDate))
-            && now.isBefore(endDate);
+        return isReachedMinimum() && (now.isAfter(startDate) || now.isEqual(startDate)) && now.isBefore(endDate);
     }
 
     public boolean isCompleted() {
@@ -220,6 +190,10 @@ public class ServiceItem extends BaseEntity {
         if (this.currentMember > 0) {
             this.currentMember--;
         }
+    }
+
+    public boolean isOwnedBy(Long companyId) {
+        return this.company.getId().equals(companyId);
     }
 
     public void updateThumbNailImage(ImageResource imageResource) {
