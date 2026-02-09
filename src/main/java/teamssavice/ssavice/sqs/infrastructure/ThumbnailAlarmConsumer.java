@@ -1,5 +1,6 @@
 package teamssavice.ssavice.sqs.infrastructure;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,11 @@ public class ThumbnailAlarmConsumer {
     private final ApplicationEventPublisher eventPublisher;
 
     @SqsListener("${sqs.queue.thumbnail-alarm}")
-    public void consume(String message) {
-        try {
-            ThumbnailAlarmMessage alarm =
+    public void consume(String message) throws JsonProcessingException {
+        ThumbnailAlarmMessage alarm =
                 objectMapper.readValue(message, ThumbnailAlarmMessage.class);
 
-            SqsEventDto.ThumbnailEvent event = SqsEventDto.ThumbnailEvent.builder()
+        SqsEventDto.ThumbnailEvent event = SqsEventDto.ThumbnailEvent.builder()
                 .status(alarm.status())
                 .bucket(alarm.bucket())
                 .originKey(alarm.originKey())
@@ -33,12 +33,8 @@ public class ThumbnailAlarmConsumer {
                 .ts(alarm.ts())
                 .build();
 
-            log.info("[SQS] thumbnail alarm received: {}", event);
-            eventPublisher.publishEvent(event);
+        log.info("[SQS] thumbnail alarm received: {}", event);
+        eventPublisher.publishEvent(event);
 
-        } catch (Exception e) {
-            log.error("[SQS] failed to consume message: {}", message, e);
-            //TODO DLQ나 디스코드 알람 고려
-        }
     }
 }

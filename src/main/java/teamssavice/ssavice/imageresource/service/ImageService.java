@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.constants.ImageVariant;
@@ -61,10 +62,8 @@ public class ImageService {
         try {
             s3Service.copyObject(sourceKey, targetKey, contentType);
             imageWriteService.updateStatusToDone(imageResourceId);
-        } catch (Exception e) {
+        } catch (S3Exception e) {
             imageWriteService.updateStatusToFailed(imageResourceId);
-            log.error("Failed to move image: {}", sourceKey, e);
-            // TODO 디스코드 도입 검토
         }
     }
 
