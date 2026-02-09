@@ -20,7 +20,9 @@ import java.util.List;
 import static teamssavice.ssavice.address.QAddress.address1;
 import static teamssavice.ssavice.book.entity.QBook.book;
 import static teamssavice.ssavice.company.entity.QCompany.company;
+import static teamssavice.ssavice.imageresource.entity.QImageResource.imageResource;
 import static teamssavice.ssavice.serviceItem.entity.QServiceItem.serviceItem;
+import static teamssavice.ssavice.user.entity.QUsers.users;
 
 @RequiredArgsConstructor
 public class BookRepositoryImpl implements BookRepositoryCustom {
@@ -29,68 +31,96 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
 
     @Override
     public Page<Book> findAllByUserIdAndStatus(Long userId, BookStatusFilter status,
-        Pageable pageable) {
+                                               Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
         BooleanExpression baseCondition = book.user.id.eq(userId);
         BooleanExpression statusCondition = statusCondition(status, now);
 
         List<Book> content = queryFactory
-            .selectFrom(book)
-            .join(book.serviceItem, serviceItem).fetchJoin()
-            .join(book.serviceItem.company, company).fetchJoin()
-            .join(book.serviceItem.address, address1).fetchJoin()
-            .leftJoin(book.serviceItem.thumbnailImageResource, imageResource).fetchJoin()
-            .where(
-                baseCondition,
-                statusCondition
-            )
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .orderBy(book.createdAt.desc())
-            .fetch();
+                .selectFrom(book)
+                .join(book.serviceItem, serviceItem).fetchJoin()
+                .join(book.serviceItem.company, company).fetchJoin()
+                .join(book.serviceItem.address, address1).fetchJoin()
+                .leftJoin(book.serviceItem.thumbnailImageResource, imageResource).fetchJoin()
+                .where(
+                        baseCondition,
+                        statusCondition
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.createdAt.desc())
+                .fetch();
 
         Long total = queryFactory
-            .select(book.count())
-            .from(book)
-            .where(
-                baseCondition,
-                statusCondition
-            )
-            .fetchOne();
+                .select(book.count())
+                .from(book)
+                .where(
+                        baseCondition,
+                        statusCondition
+                )
+                .fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
     @Override
     public Page<Book> findAllByCompanyIdAndStatus(Long companyId, BookStatusFilter status,
-        Pageable pageable) {
+                                                  Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
         BooleanExpression baseCondition = book.serviceItem.company.id.eq(companyId);
         BooleanExpression statusCondition = statusCondition(status, now);
 
         List<Book> content = queryFactory
-            .selectFrom(book)
-            .join(book.serviceItem, serviceItem).fetchJoin()
-            .join(book.serviceItem.company, company).fetchJoin()
-            .join(book.serviceItem.address, address1).fetchJoin()
-            .leftJoin(book.serviceItem.thumbnailImageResource, imageResource).fetchJoin()
-            .where(
-                baseCondition,
-                statusCondition
-            )
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .orderBy(book.createdAt.desc())
-            .fetch();
+                .selectFrom(book)
+                .join(book.serviceItem, serviceItem).fetchJoin()
+                .join(book.serviceItem.company, company).fetchJoin()
+                .join(book.serviceItem.address, address1).fetchJoin()
+                .leftJoin(book.serviceItem.thumbnailImageResource, imageResource).fetchJoin()
+                .where(
+                        baseCondition,
+                        statusCondition
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.createdAt.desc())
+                .fetch();
 
         Long total = queryFactory
-            .select(book.count())
-            .from(book)
-            .where(
-                baseCondition,
-                statusCondition
-            )
-            .fetchOne();
+                .select(book.count())
+                .from(book)
+                .where(
+                        baseCondition,
+                        statusCondition
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0 : total);
+    }
+
+    @Override
+    public Page<Book> findAllByServiceItemIdWithUserAndImageResource(Long serviceItemId,
+                                                                     BookStatus bookStatus, Pageable pageable) {
+        List<Book> content = queryFactory
+                .selectFrom(book)
+                .join(book.user, users).fetchJoin()
+                .leftJoin(users.imageResource, imageResource).fetchJoin()
+                .where(
+                        book.serviceItem.id.eq(serviceItemId),
+                        book.bookStatus.eq(bookStatus)
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.createdAt.asc())
+                .fetch();
+
+        Long total = queryFactory
+                .select(book.count())
+                .from(book)
+                .where(
+                        book.serviceItem.id.eq(serviceItemId),
+                        book.bookStatus.eq(bookStatus)
+                )
+                .fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
@@ -98,13 +128,13 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     @Override
     public List<Book> findLatestBooksByUserIdAndServiceItemId(Long userId, List<Long> serviceItemIds) {
         return queryFactory
-            .selectFrom(book)
-            .where(
-                book.user.id.eq(userId),
-                book.serviceItem.id.in(serviceItemIds),
-                book.id.in(latestBookIdsSubQuery(userId, serviceItemIds))
-            )
-            .fetch();
+                .selectFrom(book)
+                .where(
+                        book.user.id.eq(userId),
+                        book.serviceItem.id.in(serviceItemIds),
+                        book.id.in(latestBookIdsSubQuery(userId, serviceItemIds))
+                )
+                .fetch();
     }
 
     private BooleanExpression statusCondition(BookStatusFilter status, LocalDateTime now) {
@@ -120,8 +150,8 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
             case CANCELED -> book.bookStatus.eq(BookStatus.CANCELED)
                     .or(serviceItem.status.eq(ServiceStatus.CANCELED))
                     .or(
-                        serviceItem.status.eq(ServiceStatus.RECRUITING)
-                        .and(serviceItem.deadline.loe(now))
+                            serviceItem.status.eq(ServiceStatus.RECRUITING)
+                                    .and(serviceItem.deadline.loe(now))
                     );
 
             case SUCCEEDED -> book.bookStatus.eq(BookStatus.RESERVED)
@@ -139,12 +169,12 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         QBook bookSub = new QBook("bookSub");
 
         return JPAExpressions
-            .select(bookSub.id.max())
-            .from(bookSub)
-            .where(
-                    bookSub.user.id.eq(userId),
-                    bookSub.serviceItem.id.in(serviceItemIds)
-            )
-            .groupBy(bookSub.serviceItem.id);
+                .select(bookSub.id.max())
+                .from(bookSub)
+                .where(
+                        bookSub.user.id.eq(userId),
+                        bookSub.serviceItem.id.in(serviceItemIds)
+                )
+                .groupBy(bookSub.serviceItem.id);
     }
 }

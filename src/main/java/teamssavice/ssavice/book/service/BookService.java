@@ -2,6 +2,7 @@ package teamssavice.ssavice.book.service;
 
 
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,10 +43,10 @@ public class BookService {
     public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
 
         Page<Book> books = bookReadService.findAllByUserIdAndStatus(command.id(), command.status(),
-            command.pageable());
+                command.pageable());
         return books.map(book -> {
             String presignedUrl = s3Service.generateGetPresignedUrl(
-                book.getServiceItem().getObjectKey());
+                    book.getServiceItem().getObjectKey());
             return BookModel.Info.from(book, presignedUrl);
         });
     }
@@ -104,21 +105,17 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public Page<BookModel.Participant> getParticipants(Long companyId, Long serviceItemId,
-        Pageable pageable) {
+                                                       Pageable pageable) {
         ServiceItem serviceItem = serviceItemReadService.findById(serviceItemId);
         if (!serviceItem.isOwnedBy(companyId)) {
             throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);
         }
         Page<Book> books = bookReadService.findAllParticipantsByServiceItemId(serviceItemId,
-            pageable);
+                pageable);
 
         // S3 presigned URL 생성
         return books.map(book -> {
-            String thumbnailUrl = book.getUser().hasImageResource()
-                ? s3Service.generateGetPresignedUrl(
-                book.getUser().getImageResource().getObjectKey())
-                : s3Service.generateGetPresignedUrl(
-                    ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY);
+            String thumbnailUrl = s3Service.generateGetPresignedUrl(book.getUser().getObjectKey());
             return BookModel.Participant.of(book, thumbnailUrl);
         });
     }

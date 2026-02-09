@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,12 +53,17 @@ class BookServiceTest {
     @InjectMocks
     private BookService bookService;
 
-    @Mock private BookReadService bookReadService;
-    @Mock private ServiceItemReadService serviceItemReadService;
-    @Mock private UserReadService userReadService;
-    @Mock private BookWriteService bookWriteService;
+    @Mock
+    private BookReadService bookReadService;
+    @Mock
+    private ServiceItemReadService serviceItemReadService;
+    @Mock
+    private UserReadService userReadService;
+    @Mock
+    private BookWriteService bookWriteService;
 
-    @Mock private S3Service s3Service;
+    @Mock
+    private S3Service s3Service;
 
     private Users user;
     private Company company;
@@ -186,6 +192,8 @@ class BookServiceTest {
             String presignedUrl = "https://s3.amazonaws.com/bucket/profile/user1.png?presigned";
 
             ImageResource imageResource = ImageResourceFixture.imageResource();
+            imageResource.markAsDone();
+            imageResource.activate();
             ReflectionTestUtils.setField(user, "imageResource", imageResource);
 
             Book book = BookFixture.book(user, serviceItem, BookStatus.RESERVED);
@@ -193,8 +201,8 @@ class BookServiceTest {
 
             given(serviceItemReadService.findById(serviceItemId)).willReturn(serviceItem);
             given(bookReadService.findAllParticipantsByServiceItemId(serviceItemId, pageable))
-                .willReturn(new PageImpl<>(List.of(book), pageable, 1));
-            given(s3Service.generateGetPresignedUrl(imageResource.getObjectKey())).willReturn(presignedUrl);
+                    .willReturn(new PageImpl<>(List.of(book), pageable, 1));
+            given(s3Service.generateGetPresignedUrl(imageResource.getResolveKey())).willReturn(presignedUrl);
 
             // when
             Page<Participant> participants = bookService.getParticipants(companyId, serviceItemId, pageable);
@@ -219,7 +227,7 @@ class BookServiceTest {
 
             given(serviceItemReadService.findById(serviceItemId)).willReturn(serviceItem);
             given(bookReadService.findAllParticipantsByServiceItemId(serviceItemId, pageable))
-                .willReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
+                    .willReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
 
             // when
             Page<BookModel.Participant> participants = bookService.getParticipants(companyId, serviceItemId, pageable);
@@ -238,6 +246,8 @@ class BookServiceTest {
             String presignedUrl = "https://s3.amazonaws.com/bucket/profile/user1-thumbnail.png?presigned";
 
             ImageResource imageResource = ImageResourceFixture.imageResource();
+            imageResource.markAsDone();
+            imageResource.activate();
             ReflectionTestUtils.setField(user, "imageResource", imageResource);
 
             Book book = BookFixture.book(user, serviceItem, BookStatus.RESERVED);
@@ -245,8 +255,8 @@ class BookServiceTest {
 
             given(serviceItemReadService.findById(serviceItemId)).willReturn(serviceItem);
             given(bookReadService.findAllParticipantsByServiceItemId(serviceItemId, pageable))
-                .willReturn(new PageImpl<>(List.of(book), pageable, 1));
-            given(s3Service.generateGetPresignedUrl(imageResource.getObjectKey())).willReturn(presignedUrl);
+                    .willReturn(new PageImpl<>(List.of(book), pageable, 1));
+            given(s3Service.generateGetPresignedUrl(imageResource.getResolveKey())).willReturn(presignedUrl);
 
             // when
             Page<BookModel.Participant> participants = bookService.getParticipants(companyId, serviceItemId, pageable);
@@ -254,7 +264,7 @@ class BookServiceTest {
             // then
             Assertions.assertThat(participants.getContent()).hasSize(1);
             Assertions.assertThat(participants.getContent().get(0).thumbnailUrl()).isEqualTo(presignedUrl);
-            verify(s3Service).generateGetPresignedUrl(imageResource.getObjectKey());
+            verify(s3Service).generateGetPresignedUrl(imageResource.getResolveKey());
         }
 
         @Test
@@ -271,9 +281,9 @@ class BookServiceTest {
 
             given(serviceItemReadService.findById(serviceItemId)).willReturn(serviceItem);
             given(bookReadService.findAllParticipantsByServiceItemId(serviceItemId, pageable))
-                .willReturn(new PageImpl<>(List.of(book), pageable, 1));
+                    .willReturn(new PageImpl<>(List.of(book), pageable, 1));
             given(s3Service.generateGetPresignedUrl(ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY))
-                .willReturn(defaultPresignedUrl);
+                    .willReturn(defaultPresignedUrl);
 
             // when
             Page<BookModel.Participant> participants = bookService.getParticipants(companyId, serviceItemId, pageable);
@@ -295,12 +305,12 @@ class BookServiceTest {
 
             // when & then
             assertThatThrownBy(() -> bookService.getParticipants(differentCompanyId, serviceItemId, pageable))
-                .isInstanceOf(ForbiddenException.class)
-                .satisfies(exception -> {
-                    ForbiddenException forbiddenException = (ForbiddenException) exception;
-                    Assertions.assertThat(forbiddenException.getErrorCode()).isEqualTo(
-                        ErrorCode.NOT_SERVICE_OWNER);
-                });
+                    .isInstanceOf(ForbiddenException.class)
+                    .satisfies(exception -> {
+                        ForbiddenException forbiddenException = (ForbiddenException) exception;
+                        Assertions.assertThat(forbiddenException.getErrorCode()).isEqualTo(
+                                ErrorCode.NOT_SERVICE_OWNER);
+                    });
 
             verify(bookReadService, never()).findAllParticipantsByServiceItemId(serviceItemId, pageable);
         }
