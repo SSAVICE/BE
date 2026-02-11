@@ -18,6 +18,7 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
@@ -34,6 +35,7 @@ public class ServiceItemController {
 
     private final ServiceItemService serviceItemService;
     private final ImageService imageService;
+    private final S3Service s3Service;
 
     @PostMapping
     @RequireRole(Role.COMPANY)
@@ -41,6 +43,7 @@ public class ServiceItemController {
         @CurrentId Long companyId,
         @RequestBody @Valid ServiceItemRequest.Create request
     ) {
+        s3Service.validateAllTempImagesOrDeleteAll(request.toValidateCommand());
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }
