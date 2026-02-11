@@ -5,11 +5,9 @@ import java.util.List;
 
 public final class GeoHashUtil {
 
-    private static final String BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-    private static final int DEFAULT_PRECISION = 6;
-
     public static final int EARTH_RADIUS_METERS = 6_371_000;
-
+    private static final String BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+    public static final int DEFAULT_PRECISION = 6;
     private static final double MIN_LAT = -90.0;
     private static final double MAX_LAT = 90.0;
     private static final double MIN_LON = -180.0;
@@ -117,8 +115,8 @@ public final class GeoHashUtil {
     public static double[] decode(String geohash) {
         double[] bounds = decodeBounds(geohash);
         return new double[]{
-                (bounds[0] + bounds[1]) / 2,
-                (bounds[2] + bounds[3]) / 2
+            (bounds[0] + bounds[1]) / 2,
+            (bounds[2] + bounds[3]) / 2
         };
     }
 
@@ -149,15 +147,15 @@ public final class GeoHashUtil {
      */
     public static List<String> getNeighbors(String geohash) {
         return List.of(
-                geohash,
-                neighbor(geohash, 1, 0),   // N
-                neighbor(geohash, -1, 0),   // S
-                neighbor(geohash, 0, 1),    // E
-                neighbor(geohash, 0, -1),   // W
-                neighbor(geohash, 1, 1),    // NE
-                neighbor(geohash, 1, -1),   // NW
-                neighbor(geohash, -1, 1),   // SE
-                neighbor(geohash, -1, -1)   // SW
+            geohash,
+            neighbor(geohash, 1, 0),   // N
+            neighbor(geohash, -1, 0),   // S
+            neighbor(geohash, 0, 1),    // E
+            neighbor(geohash, 0, -1),   // W
+            neighbor(geohash, 1, 1),    // NE
+            neighbor(geohash, 1, -1),   // NW
+            neighbor(geohash, -1, 1),   // SE
+            neighbor(geohash, -1, -1)   // SW
         );
     }
 
@@ -168,8 +166,8 @@ public final class GeoHashUtil {
      * 시간복잡도: O(1)
      */
     public static double calculateDistance(
-            BigDecimal lat1, BigDecimal lon1,
-            BigDecimal lat2, BigDecimal lon2
+        BigDecimal lat1, BigDecimal lon1,
+        BigDecimal lat2, BigDecimal lon2
     ) {
         double earthRadius = EARTH_RADIUS_METERS;
 
@@ -177,9 +175,9 @@ public final class GeoHashUtil {
         double dLon = Math.toRadians(lon2.doubleValue() - lon1.doubleValue());
 
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1.doubleValue()))
-                * Math.cos(Math.toRadians(lat2.doubleValue()))
-                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            + Math.cos(Math.toRadians(lat1.doubleValue()))
+            * Math.cos(Math.toRadians(lat2.doubleValue()))
+            * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -190,8 +188,9 @@ public final class GeoHashUtil {
      * 검색 반경에 적합한 precision 반환
      */
     public static int getPrecisionForRadius(int radiusMeters) {
-        if (radiusMeters <= 500) return 7;
-        if (radiusMeters <= 3000) return 6;
-        return 5;
+        if (radiusMeters <= 1000) return 6;
+        if (radiusMeters <= 5000) return 5;
+        if (radiusMeters <= 20000) return 4;
+        return 3;
     }
 }
