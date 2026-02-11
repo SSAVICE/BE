@@ -174,4 +174,23 @@ public class ServiceItemResponse {
                 .build();
         }
     }
+
+    @Builder
+    public record Nearby(
+            Long serviceItemId,
+            String title,
+            String thumbnailUrl,
+            double distanceKm,
+            double rating
+    ) {
+        public static Nearby from(ServiceItemModel.Nearby model) {
+            return Nearby.builder()
+                    .serviceItemId(model.serviceItemId())
+                    .title(model.title())
+                    .thumbnailUrl(model.thumbnailUrl())
+                    .distanceKm(model.distanceKm())
+                    .rating(model.rating())
+                    .build();
+        }
+    }
 }

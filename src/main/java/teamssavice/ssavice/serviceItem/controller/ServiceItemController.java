@@ -18,6 +18,7 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.serviceItem.constants.NearbySortType;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
@@ -58,6 +59,18 @@ public class ServiceItemController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/nearby")
+    @RequireRole(Role.USER)
+    public ResponseEntity<PageResponse<ServiceItemResponse.Nearby>> searchNearby(
+        @ModelAttribute @Valid ServiceItemRequest.Nearby request,
+        @PageableDefault(page = 0, size = 10) Pageable pageable,
+        @RequestParam(defaultValue = "DISTANCE") NearbySortType sortBy
+    ) {
+        Page<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(pageable, sortBy));
+        Page<ServiceItemResponse.Nearby> responses = models.map(ServiceItemResponse.Nearby::from);
+        return ResponseEntity.ok(PageResponse.from(responses));
+    }
+
     @GetMapping("/{serviceId}")
     @RequireRole(Role.USER)
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
@@ -87,7 +100,7 @@ public class ServiceItemController {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
-                .map(ServiceItemResponse.Summary::from);
+            .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
@@ -102,7 +115,7 @@ public class ServiceItemController {
         ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
-                .map(ServiceItemResponse.Summary::from);
+            .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
@@ -111,7 +124,7 @@ public class ServiceItemController {
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Count> getCompanysServiceItemCount(
         @CurrentId Long companyId
-    ){
+    ) {
         ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(companyId);
         return ResponseEntity.ok(ServiceItemResponse.Count.from(model));
     }
