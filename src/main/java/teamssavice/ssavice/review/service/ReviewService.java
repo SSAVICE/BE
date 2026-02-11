@@ -22,15 +22,14 @@ public class ReviewService {
     private final UserReadService userReadService;
     private final ServiceItemReadService serviceItemReadService;
     private final ReviewReadService reviewReadService;
-    private final CompanyReadService companyReadService;
+    private final CompanyWriteService companyWriteService;
 
     @Transactional
     public void saveReview(ReviewCommand.Input command) {
         Users user = userReadService.findById(command.userId());
         ServiceItem item = serviceItemReadService.findById(command.serviceId());
-        Company company = companyReadService.findById(command.companyId());
 
-        company.addRating(command.rating());
+        companyWriteService.addRating(command.companyId(), command.rating());
         reviewWriteService.save(user.getName(), item.getTitle(), command);
     }
 

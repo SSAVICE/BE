@@ -8,6 +8,8 @@ import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.user.entity.Users;
 
 @Service
@@ -43,5 +45,12 @@ public class CompanyWriteService {
                 .build();
 
         return companyRepository.save(company);
+    }
+
+    public void addRating(Long companyId, Integer score) {
+        int updateCount = companyRepository.addRating(companyId, score);
+        if (updateCount == 0) {
+            throw new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND);
+        }
     }
 }

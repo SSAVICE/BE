@@ -109,11 +109,6 @@ public class Company extends BaseEntity {
         return this.getImageResource() != null;
     }
 
-    public void addRating(Integer score) {
-        this.ratingSum += score;
-        this.rateCount += 1;
-    }
-
     public Float getAverageRate() {
         if (this.rateCount == 0) return 0.0F;
         return (float) this.ratingSum / this.rateCount;
