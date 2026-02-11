@@ -11,7 +11,7 @@ import java.util.List;
 public class ServiceItemResponse {
 
     public record Register(
-            Long serviceId
+        Long serviceId
     ) {
         public static Register from(Long serviceId) {
             return new Register(serviceId);
@@ -20,143 +20,143 @@ public class ServiceItemResponse {
 
     @Builder
     public record Summary(
-            Long serviceId,
-            String thumbnailUrl,
-            String category,
-            String title,
-            Long currentMember,
-            Long minimumMember,
-            Long maximumMember,
-            String description,
-            Long basePrice,
-            Integer discountRate,
-            Long discountedPrice,
-            ServiceStatus status,
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            LocalDateTime deadline,
-            String tag,
-            AddressResponse.RegionSummary region
+        Long serviceId,
+        String thumbnailUrl,
+        String category,
+        String title,
+        Long currentMember,
+        Long minimumMember,
+        Long maximumMember,
+        String description,
+        Long basePrice,
+        Integer discountRate,
+        Long discountedPrice,
+        ServiceStatus status,
+        LocalDateTime startDate,
+        LocalDateTime endDate,
+        LocalDateTime deadline,
+        String tag,
+        AddressResponse.RegionSummary region
     ) {
         public static ServiceItemResponse.Summary from(ServiceItemModel.Summary model) {
             return Summary.builder()
-                    .serviceId(model.serviceId())
-                    .thumbnailUrl(model.thumbnailUrl())
-                    .category(model.category())
-                    .title(model.title())
-                    .currentMember(model.currentMember())
-                    .minimumMember(model.minimumMember())
-                    .maximumMember(model.maximumMember())
-                    .description(model.description())
-                    .basePrice(model.basePrice())
-                    .discountRate(model.discountRate())
-                    .discountedPrice(model.discountedPrice())
-                    .status(model.status())
-                    .startDate(model.startDate())
-                    .endDate(model.endDate())
-                    .deadline(model.deadline())
-                    .tag(model.tag())
-                    .region(AddressResponse.RegionSummary.from(model.region()))
-                    .build();
+                .serviceId(model.serviceId())
+                .thumbnailUrl(model.thumbnailUrl())
+                .category(model.category())
+                .title(model.title())
+                .currentMember(model.currentMember())
+                .minimumMember(model.minimumMember())
+                .maximumMember(model.maximumMember())
+                .description(model.description())
+                .basePrice(model.basePrice())
+                .discountRate(model.discountRate())
+                .discountedPrice(model.discountedPrice())
+                .status(model.status())
+                .startDate(model.startDate())
+                .endDate(model.endDate())
+                .deadline(model.deadline())
+                .tag(model.tag())
+                .region(AddressResponse.RegionSummary.from(model.region()))
+                .build();
         }
     }
 
     @Builder
     public record Search(
-            Long serviceId,
-            String serviceImageUrl,
-            String category,
-            String title,
-            String tag,
-            String status,
+        Long serviceId,
+        String serviceImageUrl,
+        String category,
+        String title,
+        String tag,
+        String status,
 
-            Long companyId,
-            String companyName,
+        Long companyId,
+        String companyName,
 
-            AddressResponse.RegionSummary region,
+        AddressResponse.RegionSummary region,
 
-            Long currentMember,
-            Long minimumMember,
-            Long maximumMember,
+        Long currentMember,
+        Long minimumMember,
+        Long maximumMember,
 
-            Long basePrice,
-            Integer discountRatio,
-            Long discountedPrice,
+        Long basePrice,
+        Integer discountRatio,
+        Long discountedPrice,
 
-            LocalDateTime deadline,
-            boolean isBooked
+        LocalDateTime deadline,
+        boolean isBooked
     ) {
         public static Search from(ServiceItemModel.Search model) {
             return Search.builder()
-                    .serviceId(model.serviceId())
-                    .serviceImageUrl(null) // 이미지는 28 이슈에서 해결해서 그거 기본 URL 쓰면서 지우면될듯
-                    .category(model.category())
-                    .title(model.title())
-                    .tag(model.tag())
-                    .status(model.status().name())
-                    .companyId(model.companyId())
-                    .companyName(model.companyName())
-                    .region(AddressResponse.RegionSummary.from(model.region()))
-                    .currentMember(model.currentMember())
-                    .minimumMember(model.minimumMember())
-                    .maximumMember(model.maximumMember())
-                    .basePrice(model.basePrice())
-                    .discountRatio(model.discountRatio())
-                    .discountedPrice(model.discountedPrice())
-                    .deadline(model.deadline())
-                    .isBooked(model.isBooked())
-                    .build();
+                .serviceId(model.serviceId())
+                .serviceImageUrl(model.serviceImageUrl()) // 이미지는 28 이슈에서 해결해서 그거 기본 URL 쓰면서 지우면될듯
+                .category(model.category())
+                .title(model.title())
+                .tag(model.tag())
+                .status(model.status().name())
+                .companyId(model.companyId())
+                .companyName(model.companyName())
+                .region(AddressResponse.RegionSummary.from(model.region()))
+                .currentMember(model.currentMember())
+                .minimumMember(model.minimumMember())
+                .maximumMember(model.maximumMember())
+                .basePrice(model.basePrice())
+                .discountRatio(model.discountRatio())
+                .discountedPrice(model.discountedPrice())
+                .deadline(model.deadline())
+                .isBooked(model.isBooked())
+                .build();
         }
     }
 
     @Builder
     public record Detail(
-            List<String> imageUrl,
-            Long serviceId,
-            String category,
-            Long companyId,
-            String title,
-            String description,
-            AddressResponse.RegionSummary region,
-            Long currentMember,
-            Long minimumMember,
-            Long maximumMember,
-            Long basePrice,
-            Integer discountRatio,
-            Long discountedPrice,
-            LocalDateTime deadline,
-            String tag, //  태그도 ES 도입하면서 수정 예정 - 지금은 그냥 String으로
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            Boolean isLiked,
-            Boolean isBooked,
-            String status,
-            LocalDateTime createdAt
+        List<String> imageUrl,
+        Long serviceId,
+        String category,
+        Long companyId,
+        String title,
+        String description,
+        AddressResponse.RegionSummary region,
+        Long currentMember,
+        Long minimumMember,
+        Long maximumMember,
+        Long basePrice,
+        Integer discountRatio,
+        Long discountedPrice,
+        LocalDateTime deadline,
+        String tag, //  태그도 ES 도입하면서 수정 예정 - 지금은 그냥 String으로
+        LocalDateTime startDate,
+        LocalDateTime endDate,
+        Boolean isLiked,
+        Boolean isBooked,
+        String status,
+        LocalDateTime createdAt
     ) {
         public static Detail from(ServiceItemModel.Detail model) {
             return Detail.builder()
-                    .imageUrl(model.imageUrl())
-                    .serviceId(model.serviceId())
-                    .category(model.category())
-                    .companyId(model.companyId())
-                    .title(model.title())
-                    .description(model.description())
-                    .region(AddressResponse.RegionSummary.from(model.region()))
-                    .currentMember(model.currentMember())
-                    .minimumMember(model.minimumMember())
-                    .maximumMember(model.maximumMember())
-                    .basePrice(model.basePrice())
-                    .discountRatio(model.discountRate())
-                    .discountedPrice(model.discountedPrice())
-                    .deadline(model.deadline())
-                    .tag(model.tag())
-                    .startDate(model.startDate())
-                    .endDate(model.endDate())
-                    .isLiked(model.liked())
-                    .isBooked(model.booked())
-                    .status(model.status().name())
-                    .createdAt(model.createdAt())
-                    .build();
+                .imageUrl(model.imageUrl())
+                .serviceId(model.serviceId())
+                .category(model.category())
+                .companyId(model.companyId())
+                .title(model.title())
+                .description(model.description())
+                .region(AddressResponse.RegionSummary.from(model.region()))
+                .currentMember(model.currentMember())
+                .minimumMember(model.minimumMember())
+                .maximumMember(model.maximumMember())
+                .basePrice(model.basePrice())
+                .discountRatio(model.discountRate())
+                .discountedPrice(model.discountedPrice())
+                .deadline(model.deadline())
+                .tag(model.tag())
+                .startDate(model.startDate())
+                .endDate(model.endDate())
+                .isLiked(model.liked())
+                .isBooked(model.booked())
+                .status(model.status().name())
+                .createdAt(model.createdAt())
+                .build();
         }
     }
 
@@ -177,18 +177,18 @@ public class ServiceItemResponse {
 
     @Builder
     public record Nearby(
-            Long serviceItemId,
-            String title,
-            String thumbnailUrl,
-            double distanceKm
+        Long serviceItemId,
+        String title,
+        String thumbnailUrl,
+        double distanceKm
     ) {
         public static Nearby from(ServiceItemModel.Nearby model) {
             return Nearby.builder()
-                    .serviceItemId(model.serviceItemId())
-                    .title(model.title())
-                    .thumbnailUrl(model.thumbnailUrl())
-                    .distanceKm(model.distanceKm())
-                    .build();
+                .serviceItemId(model.serviceItemId())
+                .title(model.title())
+                .thumbnailUrl(model.thumbnailUrl())
+                .distanceKm(model.distanceKm())
+                .build();
         }
     }
 }
