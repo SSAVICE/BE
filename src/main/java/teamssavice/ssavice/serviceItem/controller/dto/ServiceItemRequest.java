@@ -103,12 +103,16 @@ public class ServiceItemRequest {
 
     @Builder
     public record Nearby(
-        @NotNull BigDecimal latitude,
-        @NotNull BigDecimal longitude,
-        @NotNull @Positive Integer radiusMeters
+        @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude,
+        @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal latitude,
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
+        @NotNull @Positive @Max(100000) Integer radiusMeters
     ) {
         public ServiceItemCommand.Nearby toCommand(Pageable pageable) {
             return ServiceItemCommand.Nearby.of(
+                userLatitude,
+                userLongitude,
                 latitude,
                 longitude,
                 radiusMeters,

@@ -15,6 +15,7 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ForbiddenException;
+import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.refund.constants.RefundReason;
@@ -25,7 +26,6 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
@@ -156,15 +156,16 @@ public class ServiceItemService {
     @Transactional(readOnly = true)
     public Page<ServiceItemModel.Nearby> searchNearby(ServiceItemCommand.Nearby command) {
         Page<ServiceItem> page = serviceItemReadService.findNearbyByGeoHash(
-                command.latitude(), command.longitude(), command.radiusMeters(),
-                command.pageable());
+            command.latitude(), command.longitude(),
+            command.userLatitude(), command.userLongitude(),
+            command.radiusMeters(), command.pageable());
 
         return page.map(item -> {
             double distanceKm = Math.round(GeoHashUtil.calculateDistance(
-                    command.latitude(), command.longitude(),
-                    item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
+                command.userLatitude(), command.userLongitude(),
+                item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
             return ServiceItemModel.Nearby.from(item, distanceKm,
-                    s3Service.generateGetPresignedUrl(item.getObjectKey()));
+                s3Service.generateGetPresignedUrl(item.getObjectKey()));
         });
     }
 

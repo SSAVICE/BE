@@ -19,6 +19,8 @@ public interface ServiceItemRepositoryCustom {
     Page<ServiceItem> findNearbyByGeoHashes(
             BigDecimal latitude,
             BigDecimal longitude,
+            BigDecimal userLatitude,
+            BigDecimal userLongitude,
             int radiusMeters,
             List<String> geoHashes,
             Pageable pageable

@@ -141,16 +141,19 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     public Page<ServiceItem> findNearbyByGeoHashes(
         BigDecimal latitude,
         BigDecimal longitude,
+        BigDecimal userLatitude,
+        BigDecimal userLongitude,
         int radiusMeters,
         List<String> geoHashes,
         Pageable pageable
     ) {
         BooleanExpression geoCondition = buildGeoCondition(geoHashes);
-        NumberExpression<Double> distanceExpr = haversineDistance(latitude, longitude);
+        NumberExpression<Double> radiusDistanceExpr = haversineDistance(latitude, longitude);
+        NumberExpression<Double> userDistanceExpr = haversineDistance(userLatitude, userLongitude);
 
         BooleanExpression baseCondition = geoCondition
             .and(statusCondition(ServiceStatusFilter.RECRUITING, LocalDateTime.now()))
-            .and(distanceExpr.loe((double) radiusMeters));
+            .and(radiusDistanceExpr.loe((double) radiusMeters));
 
         Long total = queryFactory
             .select(serviceItem.count())
@@ -165,7 +168,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             .join(serviceItem.address, address1).fetchJoin()
             .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
             .where(baseCondition)
-            .orderBy(distanceExpr.asc())
+            .orderBy(userDistanceExpr.asc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();

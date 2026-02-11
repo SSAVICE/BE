@@ -120,25 +120,30 @@ public class ServiceItemCommand {
 
     @Builder
     public record Nearby(
+        BigDecimal userLatitude,
+        BigDecimal userLongitude,
         BigDecimal latitude,
         BigDecimal longitude,
         int radiusMeters,
         Pageable pageable
     ) {
         public static Nearby of(
+            BigDecimal userLatitude,
+            BigDecimal userLongitude,
             BigDecimal latitude,
             BigDecimal longitude,
             int radiusMeters,
             Pageable pageable
         ) {
             return Nearby.builder()
+                .userLatitude(userLatitude)
+                .userLongitude(userLongitude)
                 .latitude(latitude)
                 .longitude(longitude)
                 .radiusMeters(radiusMeters)
                 .pageable(PageRequest.of(
                     pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    Sort.by("createdAt").descending()
+                    pageable.getPageSize()
                 ))
                 .build();
         }

@@ -84,12 +84,16 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItem> findNearbyByGeoHash(BigDecimal latitude, BigDecimal longitude, int radiusMeters, Pageable pageable) {
+    public Page<ServiceItem> findNearbyByGeoHash(
+            BigDecimal latitude, BigDecimal longitude,
+            BigDecimal userLatitude, BigDecimal userLongitude,
+            int radiusMeters, Pageable pageable) {
         int queryPrecision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(latitude, longitude, queryPrecision);
         List<String> neighbors = GeoHashUtil.getNeighbors(centerHash);
 
         return serviceItemRepository.findNearbyByGeoHashes(
-            latitude, longitude, radiusMeters, neighbors, pageable);
+            latitude, longitude, userLatitude, userLongitude,
+            radiusMeters, neighbors, pageable);
     }
 }
