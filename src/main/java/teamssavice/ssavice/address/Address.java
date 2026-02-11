@@ -3,11 +3,13 @@ package teamssavice.ssavice.address;
 import jakarta.persistence.*;
 import lombok.*;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.global.util.GeoHashUtil;
 
 import java.math.BigDecimal;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(indexes = @Index(columnList = "geoHash"))
 @Builder
 @Getter
 @AllArgsConstructor
@@ -28,6 +30,8 @@ public class Address extends BaseEntity {
     private BigDecimal latitude;
     @Column(precision = 10, scale = 7)
     private BigDecimal longitude;
+    @Column(length = 6)
+    private String geoHash;
     @Column
     private String postCode;
     @Column
@@ -42,6 +46,7 @@ public class Address extends BaseEntity {
         this.regionCode = command.regionCode();
         this.latitude = command.latitude();
         this.longitude = command.longitude();
+        this.geoHash = GeoHashUtil.encode(command.latitude(), command.longitude());
         this.postCode = command.postCode();
         this.address = command.address();
         this.detailAddress = command.detailAddress();
