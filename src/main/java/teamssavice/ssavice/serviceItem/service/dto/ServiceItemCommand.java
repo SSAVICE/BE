@@ -4,7 +4,6 @@ import lombok.Builder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import teamssavice.ssavice.serviceItem.constants.NearbySortType;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 
 import java.math.BigDecimal;
@@ -124,15 +123,13 @@ public class ServiceItemCommand {
         BigDecimal latitude,
         BigDecimal longitude,
         int radiusMeters,
-        NearbySortType sortBy,
         Pageable pageable
     ) {
         public static Nearby of(
             BigDecimal latitude,
             BigDecimal longitude,
             int radiusMeters,
-            Pageable pageable,
-            NearbySortType sortBy
+            Pageable pageable
         ) {
             return Nearby.builder()
                 .latitude(latitude)
@@ -143,7 +140,6 @@ public class ServiceItemCommand {
                     pageable.getPageSize(),
                     Sort.by("createdAt").descending()
                 ))
-                .sortBy(sortBy)
                 .build();
         }
 

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.s3.dto.S3Command;
-import teamssavice.ssavice.serviceItem.constants.NearbySortType;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.math.BigDecimal;
@@ -108,13 +107,12 @@ public class ServiceItemRequest {
         @NotNull BigDecimal longitude,
         @NotNull @Positive Integer radiusMeters
     ) {
-        public ServiceItemCommand.Nearby toCommand(Pageable pageable, NearbySortType sortBy) {
+        public ServiceItemCommand.Nearby toCommand(Pageable pageable) {
             return ServiceItemCommand.Nearby.of(
                 latitude,
                 longitude,
                 radiusMeters,
-                pageable,
-                sortBy
+                pageable
             );
         }
     }

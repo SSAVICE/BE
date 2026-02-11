@@ -196,16 +196,14 @@ public class ServiceItemModel {
             Long serviceItemId,
             String title,
             String thumbnailUrl,
-            double distanceKm,
-            double rating
+            double distanceKm
     ) {
-        public static Nearby from(ServiceItem entity, double distanceKm, double rating, String thumbnailUrl) {
+        public static Nearby from(ServiceItem entity, double distanceKm, String thumbnailUrl) {
             return Nearby.builder()
                     .serviceItemId(entity.getId())
                     .title(entity.getTitle())
                     .thumbnailUrl(thumbnailUrl)
                     .distanceKm(distanceKm)
-                    .rating(rating)
                     .build();
         }
     }

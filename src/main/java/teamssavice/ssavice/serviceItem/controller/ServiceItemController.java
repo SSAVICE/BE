@@ -18,7 +18,6 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
-import teamssavice.ssavice.serviceItem.constants.NearbySortType;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
@@ -63,10 +62,9 @@ public class ServiceItemController {
     @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<ServiceItemResponse.Nearby>> searchNearby(
         @ModelAttribute @Valid ServiceItemRequest.Nearby request,
-        @PageableDefault(page = 0, size = 10) Pageable pageable,
-        @RequestParam(defaultValue = "DISTANCE") NearbySortType sortBy
+        @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(pageable, sortBy));
+        Page<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(pageable));
         Page<ServiceItemResponse.Nearby> responses = models.map(ServiceItemResponse.Nearby::from);
         return ResponseEntity.ok(PageResponse.from(responses));
     }

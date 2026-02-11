@@ -180,8 +180,7 @@ public class ServiceItemResponse {
             Long serviceItemId,
             String title,
             String thumbnailUrl,
-            double distanceKm,
-            double rating
+            double distanceKm
     ) {
         public static Nearby from(ServiceItemModel.Nearby model) {
             return Nearby.builder()
@@ -189,7 +188,6 @@ public class ServiceItemResponse {
                     .title(model.title())
                     .thumbnailUrl(model.thumbnailUrl())
                     .distanceKm(model.distanceKm())
-                    .rating(model.rating())
                     .build();
         }
     }
