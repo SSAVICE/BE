@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import teamssavice.ssavice.global.entity.BaseEntity;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.user.entity.Users;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -19,6 +21,14 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private Long companyId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_item_id", nullable = false)
+    private ServiceItem serviceItem;
+
     @NotNull
     @Column(nullable = false)
     private Integer rating;
@@ -26,19 +36,4 @@ public class Review extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private String comment;
-
-    @Embedded
-    private UserName userName;
-
-    @NotNull
-    @Column(nullable = false)
-    private String serviceName;
-
-    @NotNull
-    @Column(nullable = false)
-    private Long userId;
-
-    @NotNull
-    @Column(nullable = false)
-    private Long serviceId;
 }

@@ -24,12 +24,18 @@ public class ReviewService {
     public void saveReview(ReviewCommand.Input command) {
         Users user = userReadService.findById(command.userId());
         ServiceItem item = serviceItemReadService.findById(command.serviceId());
-        reviewWriteService.save(user.getName(), item.getTitle(), command);
+        reviewWriteService.save(command.companyId(), user, item, command.rating(), command.comment());
     }
 
     @Transactional(readOnly = true)
-    public Page<ReviewModel.Item> getReviewPaging(ReviewCommand.RetrieveByCompanyId command) {
+    public Page<ReviewModel.Item> getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId command) {
         return reviewReadService.findByCompanyIdPaging(command.companyId(), command.pageable())
+                .map(ReviewModel.Item::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReviewModel.Item> getReviewByUserIdPaging(ReviewCommand.RetrieveByUserId command) {
+        return reviewReadService.findByUserIdPaging(command.userId(), command.pageable())
                 .map(ReviewModel.Item::from);
     }
 }

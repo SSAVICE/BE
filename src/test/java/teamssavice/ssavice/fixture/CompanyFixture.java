@@ -20,4 +20,17 @@ public class CompanyFixture {
                 .user(user)
                 .build();
     }
+
+    public static Company company(Users user) {
+        return Company.builder()
+                .companyName("name")
+                .ownerName("owner")
+                .phoneNumber("010-8765-4321")
+                .businessNumber("company-business")
+                .depositor("depositor")
+                .accountNumber("account-number")
+                .address(AddressFixture.address())
+                .user(user)
+                .build();
+    }
 }
