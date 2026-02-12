@@ -30,7 +30,7 @@ public class ReviewService {
         ServiceItem item = serviceItemReadService.findById(command.serviceId());
 
         companyWriteService.addRating(command.companyId(), command.rating());
-        reviewWriteService.save(user.getName(), item.getTitle(), command);
+        reviewWriteService.save(command.companyId(), user, item, command.rating(), command.comment());
     }
 
     @Transactional(readOnly = true)
