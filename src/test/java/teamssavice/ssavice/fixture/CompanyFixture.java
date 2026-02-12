@@ -25,6 +25,8 @@ public class CompanyFixture {
         return Company.builder()
                 .companyName("name")
                 .ownerName("owner")
+                .businessName("business")
+                .startDate("2025-01-01")
                 .phoneNumber("010-8765-4321")
                 .businessNumber("company-business")
                 .depositor("depositor")
