@@ -16,6 +16,7 @@ import java.util.List;
 import static teamssavice.ssavice.company.entity.QCompany.company;
 import static teamssavice.ssavice.address.QAddress.address1;
 
+import static teamssavice.ssavice.imageresource.entity.QImageResource.imageResource;
 import static teamssavice.ssavice.serviceItem.entity.QServiceItem.serviceItem;
 
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
                 .join(serviceItem.company, company).fetchJoin()
                 .join(serviceItem.address, address1).fetchJoin()
+                .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
                 .where(
                         ltLastId(command.lastId()),
                         eqCategory(command.category()),

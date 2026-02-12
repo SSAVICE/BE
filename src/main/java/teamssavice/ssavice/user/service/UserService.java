@@ -11,7 +11,6 @@ import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.region.Region;
@@ -51,13 +50,8 @@ public class UserService {
     public UserModel.Info getProfile(Long userId) {
         // 사용자 정보 조회
         Users user = userReadService.findByIdFetchJoinAddressAndImageResource(userId);
-        if (user.hasImageResource()) {
-            String presignedUrl = s3Service.generateGetPresignedUrl(
-                user.getImageResource().getObjectKey());
-            return UserModel.Info.from(user, presignedUrl);
-        }
-
-        return UserModel.Info.from(user, ImageConstants.DEFAULT_PROFILE_IMAGE_OBJECT_KEY);
+        String presignedUrl = s3Service.generateGetPresignedUrl(user.getObjectKey());
+        return UserModel.Info.from(user, presignedUrl);
     }
 
     @Transactional
@@ -78,18 +72,12 @@ public class UserService {
     @Transactional
     public void updateProfileImage(Long userId, String objectKey) {
         Users user = userReadService.findByIdFetchJoinImageResource(userId);
-
-        // 1) temp 검증(용량 초과면 temp 삭제까지 S3Service가 책임)
-        s3Service.validateTempImageOrDelete(objectKey);
-
-        // 2) DB 연관관계 갱신
-        ImageResource imageResource = imageReadService.findByTempKey(objectKey);
+        ImageResource imageResource = imageReadService.findBySourceKey(objectKey);
+        imageResource.checkedConfirmed();
         if (user.hasImageResource()) {
             applicationEventPublisher.publishEvent(S3EventDto.Delete.from(user.getImageResource()));
         }
         user.updateImage(imageResource);
-
-        // 3) 커밋 후 move
         applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
@@ -106,4 +94,5 @@ public class UserService {
         userWriteService.updateAddress(user, region, command);
         return AddressModel.RegionDetail.from(user.getAddress());
     }
+
 }

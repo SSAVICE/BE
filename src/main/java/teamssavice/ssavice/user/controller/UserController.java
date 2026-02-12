@@ -3,7 +3,12 @@ package teamssavice.ssavice.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.address.AddressResponse;
@@ -16,6 +21,7 @@ import teamssavice.ssavice.imageresource.constants.ImageContentType;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.user.controller.dto.UserRequest;
 import teamssavice.ssavice.user.controller.dto.UserResponse;
 import teamssavice.ssavice.user.service.UserService;
@@ -28,6 +34,7 @@ public class UserController {
 
     private final UserService userService;
     private final ImageService imageService;
+    private final S3Service s3Service;
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse.Login> login(
@@ -74,6 +81,7 @@ public class UserController {
         @CurrentId Long userId,
         @RequestBody @Valid ImageRequest.Confirm request
     ) {
+        s3Service.validateTempImageOrDelete(request.objectKey());
         userService.updateProfileImage(userId, request.objectKey());
         return ResponseEntity.ok().build();
     }
@@ -81,7 +89,7 @@ public class UserController {
     @GetMapping("/address")
     @RequireRole(Role.USER)
     public ResponseEntity<AddressResponse.RegionDetail> getAddress(
-            @CurrentId Long userId
+        @CurrentId Long userId
     ) {
         AddressModel.RegionDetail model = userService.getUserAddress(userId);
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
@@ -90,8 +98,8 @@ public class UserController {
     @PatchMapping("/address")
     @RequireRole(Role.USER)
     public ResponseEntity<AddressResponse.RegionDetail> patchAddress(
-            @CurrentId Long userId,
-            @RequestBody @Valid AddressRequest.Region request
+        @CurrentId Long userId,
+        @RequestBody @Valid AddressRequest.Region request
     ) {
         AddressModel.RegionDetail model = userService.updateUserAddress(request.toCommand(userId));
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));

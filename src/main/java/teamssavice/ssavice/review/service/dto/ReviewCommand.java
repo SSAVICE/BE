@@ -33,4 +33,21 @@ public class ReviewCommand {
                 .build();
         }
     }
+
+    @Builder
+    public record RetrieveByUserId(
+            Long userId,
+            Pageable pageable
+    ) {
+        public static RetrieveByUserId of(Long userId, Pageable pageable) {
+            return RetrieveByUserId.builder()
+                    .userId(userId)
+                    .pageable(PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            Sort.by("createdAt").descending())
+                    )
+                    .build();
+        }
+    }
 }

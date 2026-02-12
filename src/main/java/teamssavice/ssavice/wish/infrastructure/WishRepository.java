@@ -17,6 +17,7 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
             "join fetch w.serviceItem s " +
             "join fetch s.company c " +
             "join fetch s.address a " +
+            "left join fetch s.thumbnailImageResource tir " +
             "where w.user.id = :userId " +
             "order by w.id desc",
             countQuery = "select count(w) from Wish w where w.user.id = :userId")

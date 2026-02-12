@@ -14,14 +14,19 @@ import java.util.Optional;
 public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>, ServiceItemRepositoryCustom {
 
     @Query("SELECT s FROM ServiceItem s " +
-            "JOIN FETCH s.address " +
-            "WHERE s.company.id = :companyId " +
-            "ORDER BY s.deadline DESC")
+        "JOIN FETCH s.address " +
+        "LEFT JOIN FETCH s.thumbnailImageResource " +
+        "WHERE s.company.id = :companyId " +
+        "ORDER BY s.deadline DESC")
     List<ServiceItem> findTop5ByCompanyIdOrderByDeadlineDesc(Long companyId, Pageable pageable);
 
+    @Query("SELECT s FROM ServiceItem s " +
+            "LEFT JOIN FETCH s.thumbnailImageResource " +
+            "WHERE s.company.id = :companyId")
     Page<ServiceItem> findAllByCompany_Id(Long companyId, Pageable pageable);
 
     @Query("SELECT s FROM ServiceItem s " +
+            "LEFT JOIN FETCH s.thumbnailImageResource " +
             "WHERE s.company.id = :companyId " +
             "AND s.status = :status " +
             "AND s.deadline > :now")
