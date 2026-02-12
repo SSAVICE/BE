@@ -18,8 +18,7 @@ class GeoHashUtilTest {
 
         String geohash = GeoHashUtil.encode(lat, lon, 6);
 
-        // http://geohash.org/wydm6v 로 검증 가능
-        System.out.println("서울시청 GeoHash(6): " + geohash);
+        //서울시청 geohash wydm9q
         assertThat(geohash).hasSize(6);
         assertThat(geohash).startsWith("wydm9q");
     }
