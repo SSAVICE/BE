@@ -1,14 +1,13 @@
 package teamssavice.ssavice.book.service.dto;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.book.constants.BookViewStatus;
-import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.entity.Book;
+import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-
-import java.time.LocalDateTime;
 
 public class BookModel {
 
@@ -19,17 +18,19 @@ public class BookModel {
         ServiceDetail serviceDetail
     ) {
 
-        public static Info from(Book book) {
+        public static Info from(Book book, String thumbnailUrl) {
             return new Info(
                 book.getId(),
                 resolve(book.getBookStatus(), book.getServiceItem().getStatus()),
                 book.isReviewed(),
-                ServiceDetail.from(book.getServiceItem())
+                ServiceDetail.from(book.getServiceItem(), thumbnailUrl)
             );
         }
 
         public static BookViewStatus resolve(BookStatus bookstatus, ServiceStatus serviceStatus) {
-            if(bookstatus == BookStatus.CANCELED) return BookViewStatus.USER_CANCELED;
+            if (bookstatus == BookStatus.CANCELED) {
+                return BookViewStatus.USER_CANCELED;
+            }
             return switch (serviceStatus) {
                 case RECRUITING -> BookViewStatus.RECRUITING;
                 case SUCCEEDED -> BookViewStatus.SUCCEEDED;
@@ -65,22 +66,22 @@ public class BookModel {
         String tags
     ) {
 
-        public static ServiceDetail from(ServiceItem item) {
+        public static ServiceDetail from(ServiceItem item, String thumbnailUrl) {
 
             return new ServiceDetail(
                 item.getId(),
                 item.getTitle(),
-                item.getThumbnailUrl(),
+                thumbnailUrl,
                 item.getCategory(),
 
                 item.getCompany().getCompanyName(),
                 item.getCompany().getId(),
                 AddressModel.RegionSummary.builder()
-                        .latitude(item.getAddress().getLatitude())
-                        .longitude(item.getAddress().getLongitude())
-                        .gugun(item.getAddress().getGugun())
-                        .region(item.getAddress().getRegion())
-                        .build(),
+                    .latitude(item.getAddress().getLatitude())
+                    .longitude(item.getAddress().getLongitude())
+                    .gugun(item.getAddress().getGugun())
+                    .region(item.getAddress().getRegion())
+                    .build(),
 
                 item.getCurrentMember(),
                 item.getMinimumMember(),
@@ -120,12 +121,29 @@ public class BookModel {
 
     @Builder
     public record Apply(
-            Long bookId
+        Long bookId
     ) {
+
         public static Apply of(Long bookId) {
             return Apply.builder()
-                    .bookId(bookId)
-                    .build();
+                .bookId(bookId)
+                .build();
+        }
+    }
+
+    public record Participant(
+            Long bookId,
+            Long userId,
+            String name,
+            String thumbnailUrl
+    ) {
+        public static Participant of(Book book, String thumbnailUrl) {
+            return new Participant(
+                    book.getId(),
+                    book.getUser().getId(),
+                    book.getUser().getName(),
+                    thumbnailUrl
+            );
         }
     }
 

@@ -34,8 +34,14 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReviewModel.Item> getReviewPaging(ReviewCommand.RetrieveByCompanyId command) {
+    public Page<ReviewModel.Item> getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId command) {
         return reviewReadService.findByCompanyIdPaging(command.companyId(), command.pageable())
+                .map(ReviewModel.Item::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReviewModel.Item> getReviewByUserIdPaging(ReviewCommand.RetrieveByUserId command) {
+        return reviewReadService.findByUserIdPaging(command.userId(), command.pageable())
                 .map(ReviewModel.Item::from);
     }
 }

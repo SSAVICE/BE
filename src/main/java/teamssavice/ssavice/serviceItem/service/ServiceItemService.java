@@ -50,17 +50,23 @@ public class ServiceItemService {
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
-
-        //S3 temp 전체 검증 (하나라도 실패하면 전부 삭제 + 예외)
-        s3Service.validateAllTempImagesOrDeleteAll(command.imageObjectKeys());
-
-        List<ImageResource> imageResourceList = imageReadService.findAllByTempKeyIn(
-            command.imageObjectKeys());
+        List<ImageResource> imageResourceList = imageReadService.findAllBySourceKeyIn(
+                command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
-            AddressCommand.RegionInfo.from(command, region));
+                AddressCommand.RegionInfo.from(command, region));
+
+        if (!imageResourceList.isEmpty()) {
+            ImageResource thumbnailImage = imageResourceList.getFirst();
+            thumbnailImage.checkedConfirmed();
+            thumbnailImage.changeTargetKeyAsThumbnail();
+            savedServiceItem.updateThumbNailImage(thumbnailImage);
+            applicationEventPublisher.publishEvent(S3EventDto.Move.from(thumbnailImage));
+            imageResourceList.removeFirst();
+        }
 
         for (ImageResource imageResource : imageResourceList) {
+            imageResource.checkedConfirmed();
             imageResource.activate();
             savedServiceItem.addImageId(imageResource.getId());
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
@@ -76,7 +82,8 @@ public class ServiceItemService {
         Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId())))
+                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
+                        s3Service.generateGetPresignedUrl(entity.getObjectKey())))
                 .toList();
 
         Long nextCursor = null;
@@ -93,7 +100,7 @@ public class ServiceItemService {
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
         for (ImageResource imageResource : imageList) {
-            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getObjectKey()));
+            imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
 
         boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
@@ -104,16 +111,20 @@ public class ServiceItemService {
 
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
-        return serviceItems.map(ServiceItemModel.Summary::from);
+        return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndOnSale(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(command.companyId(), ServiceStatus.RECRUITING, command.pageable());
-            return serviceItems.map(ServiceItemModel.Summary::from);
+            return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                    s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
-        return serviceItems.map(ServiceItemModel.Summary::from);
+        return serviceItems.map(
+                serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                        s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
     @Transactional
@@ -146,4 +157,5 @@ public class ServiceItemService {
             throw new ForbiddenException(ErrorCode.NOT_SERVICE_OWNER);
         }
     }
+
 }

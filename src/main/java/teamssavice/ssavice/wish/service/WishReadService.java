@@ -1,6 +1,7 @@
 package teamssavice.ssavice.wish.service;
 
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -8,9 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.wish.entity.Wish;
 import teamssavice.ssavice.wish.infrastructure.WishRepository;
 import teamssavice.ssavice.wish.service.dto.WishCommand;
-import teamssavice.ssavice.wish.service.dto.WishModel;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +24,9 @@ public class WishReadService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WishModel.Summary> getWishList(WishCommand.Retrieve command) {
+    public Page<Wish> getWishList(WishCommand.Retrieve command) {
 
-        Page<Wish> wishPage = wishRepository.findAllByUserId(command.userId(), command.pageable());
-        return wishPage.map(WishModel.Summary::from);
+        return wishRepository.findAllByUserId(command.userId(), command.pageable());
     }
 
     @Transactional(readOnly = true)

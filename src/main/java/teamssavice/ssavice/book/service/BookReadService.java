@@ -74,4 +74,8 @@ public class BookReadService {
     public Long countAllBooksByUserId(Long userId) {
         return bookRepository.countByUserId(userId);
     }
+
+    public Page<Book> findAllParticipantsByServiceItemId(Long serviceItemId, Pageable pageable) {
+        return bookRepository.findAllByServiceItemIdWithUserAndImageResource(serviceItemId, BookStatus.RESERVED, pageable);
+    }
 }

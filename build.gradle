@@ -61,12 +61,16 @@ dependencies {
     implementation platform("software.amazon.awssdk:bom:2.25.60")
     implementation "software.amazon.awssdk:s3"
     implementation "software.amazon.awssdk:sts"
+    implementation "software.amazon.awssdk:apache-client"
 
     // OpenFeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.1'
 
     //sqs
     implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs:3.2.0")
+
+    // spring-retry
+    implementation 'org.springframework.retry:spring-retry'
 }
 
 tasks.named('test') {
