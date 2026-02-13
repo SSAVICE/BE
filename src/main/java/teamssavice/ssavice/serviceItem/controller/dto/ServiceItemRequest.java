@@ -2,7 +2,7 @@ package teamssavice.ssavice.serviceItem.controller.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.s3.dto.S3Command;
@@ -83,7 +83,7 @@ public class ServiceItemRequest {
         Long lastId,
         Boolean onSale
     ) {
-        public ServiceItemCommand.Search toCommand(Long userId, Pageable pageable) {
+        public ServiceItemCommand.Search toCommand(int size) {
             return ServiceItemCommand.Search.builder()
                 .category(category)
                 .query(query)
@@ -94,9 +94,8 @@ public class ServiceItemRequest {
                 .maxPrice(maxPrice)
                 .sortBy(sortBy)
                 .lastId(lastId)
-                .pageable(pageable)
+                .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
-                .userId(userId)
                 .build();
         }
     }

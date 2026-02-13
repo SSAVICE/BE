@@ -4,6 +4,7 @@ package teamssavice.ssavice.wish.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.wish.entity.Wish;
@@ -30,8 +31,8 @@ public class WishReadService {
     }
 
     @Transactional(readOnly = true)
-    public boolean existsByUserIdAndServiceItemId(Long userId, Long serviceId) {
-
+    public boolean existsByUserIdAndServiceItemId(@Nullable Long userId, Long serviceId) {
+        if(userId == null) return false;
         return wishRepository.existsByUserIdAndServiceItemId(userId, serviceId);
     }
 

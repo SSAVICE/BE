@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
@@ -77,10 +78,10 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public CursorResult<ServiceItemModel.Search> search(ServiceItemCommand.Search command) {
+    public CursorResult<ServiceItemModel.Search> search(@Nullable Long userId, ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
-        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
+        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(userId, items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
@@ -96,7 +97,7 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItemModel.Detail getServiceDetail(Long serviceId, Long userId) {
+    public ServiceItemModel.Detail getServiceDetail(Long serviceId, @Nullable Long userId) {
         ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndImageList(serviceId);
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();

@@ -4,6 +4,7 @@ package teamssavice.ssavice.book.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
@@ -16,8 +17,7 @@ import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -46,7 +46,8 @@ public class BookReadService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
     }
 
-    public boolean isBookedByUserIdAndServiceId(Long userId, Long serviceItemId) {
+    public boolean isBookedByUserIdAndServiceId(@Nullable Long userId, Long serviceItemId) {
+        if(userId == null) return false;
         return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
                 .map(book -> book.getBookStatus() == BookStatus.RESERVED)
                 .orElse(false);
@@ -60,15 +61,17 @@ public class BookReadService {
         return bookRepository.countSucceededBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
 
-    public Set<Long> findReservedServiceItemIdsFromLatestBooks(Long userId, List<ServiceItem> serviceItems) {
+    public Set<Long> findReservedServiceItemIdsFromLatestBooks(@Nullable Long userId, List<ServiceItem> serviceItems) {
+        if(userId == null) return Collections.emptySet();
+
         List<Long> serviceIds = serviceItems.stream()
-            .map(ServiceItem::getId)
-            .toList();
+                .map(ServiceItem::getId)
+                .toList();
 
         return bookRepository.findLatestBooksByUserIdAndServiceItemId(userId, serviceIds).stream()
-            .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
-            .map(book -> book.getServiceItem().getId())
-            .collect(Collectors.toSet());
+                .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
+                .map(book -> book.getServiceItem().getId())
+                .collect(Collectors.toSet());
     }
   
     public Long countAllBooksByUserId(Long userId) {

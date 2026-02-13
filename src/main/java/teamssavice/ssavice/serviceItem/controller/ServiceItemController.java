@@ -3,7 +3,6 @@ package teamssavice.ssavice.serviceItem.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -55,10 +54,10 @@ public class ServiceItemController {
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
         @ModelAttribute @Valid ServiceItemRequest.Search request,
         @RequestParam(defaultValue = "10") int size,
-        @CurrentAuth Auth authUser
+        @CurrentAuth(required = false) Auth authUser
     ) {
-        Pageable pageable = PageRequest.of(0, size);
-        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(authUser.id(), pageable));
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(
+                authUser.getIdIfCanAccess(Role.USER), request.toCommand(size));
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
         return ResponseEntity.ok(response);
     }
@@ -78,9 +77,9 @@ public class ServiceItemController {
     @GetMapping("/{serviceId}")
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
         @PathVariable Long serviceId,
-        @CurrentAuth Auth authUser
+        @CurrentAuth(required = false) Auth authUser
     ) {
-        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, authUser.id());
+        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, authUser.getIdIfCanAccess(Role.USER));
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
