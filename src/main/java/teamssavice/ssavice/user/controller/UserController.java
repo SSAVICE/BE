@@ -14,6 +14,7 @@ import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
@@ -36,6 +37,7 @@ public class UserController {
     private final ImageService imageService;
     private final S3Service s3Service;
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<UserResponse.Login> login(
         @RequestBody @Valid UserRequest.Login request

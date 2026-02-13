@@ -5,7 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import teamssavice.ssavice.global.interceptor.RequireRoleInterceptor;
+import teamssavice.ssavice.global.interceptor.AuthenticationInterceptor;
+import teamssavice.ssavice.global.interceptor.AuthorizationInterceptor;
 import teamssavice.ssavice.global.resolver.CurrentIdArgumentResolver;
 import teamssavice.ssavice.global.resolver.RefreshTokenArgumentResolver;
 
@@ -15,8 +16,13 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean
-    public RequireRoleInterceptor requireRoleInterceptor() {
-        return new RequireRoleInterceptor();
+    public AuthenticationInterceptor authenticationInterceptor() {
+        return new AuthenticationInterceptor();
+    }
+
+    @Bean
+    public AuthorizationInterceptor authorizationInterceptor() {
+        return new AuthorizationInterceptor();
     }
 
     @Bean
@@ -31,8 +37,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(requireRoleInterceptor())
-                .addPathPatterns("/api/**");
+        registry.addInterceptor(authenticationInterceptor())
+                .addPathPatterns("/api/**")
+                .order(1);
+
+        registry.addInterceptor(authorizationInterceptor())
+                .addPathPatterns("/api/**")
+                .order(2);
     }
 
     @Override

@@ -21,6 +21,7 @@ import teamssavice.ssavice.company.service.CompanyService;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
 import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
@@ -40,6 +41,7 @@ public class CompanyController {
     private final ImageService imageService;
     private final S3Service s3Service;
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<CompanyResponse.Login> login(
         @RequestBody @Valid CompanyRequest.Login request

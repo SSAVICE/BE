@@ -5,13 +5,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.ForbiddenException;
+import teamssavice.ssavice.global.exception.AuthenticationException;
 
-import java.util.Optional;
-
-public class RequireRoleInterceptor implements HandlerInterceptor {
+public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request,
@@ -22,14 +20,12 @@ public class RequireRoleInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        RequireRole requireRole = Optional.ofNullable(handlerMethod.getMethodAnnotation(RequireRole.class))
-                .orElse(handlerMethod.getBeanType().getAnnotation(RequireRole.class));
-        if(requireRole == null) return true;
+        PermitAll permitAll = handlerMethod.getMethodAnnotation(PermitAll.class);
 
-        Role required = requireRole.value();
         Role role = (Role) request.getAttribute("role");
-        if (!role.canAccess(required)) {
-            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+
+        if (permitAll == null && role == null) {
+            throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
         }
         return true;
     }
