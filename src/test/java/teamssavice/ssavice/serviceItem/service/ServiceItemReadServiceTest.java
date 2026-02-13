@@ -7,10 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
@@ -46,23 +45,23 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(pageable)))
-                    .willReturn(mockPage);
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    .willReturn(mockSlice);
 
             // when
-            Page<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 6),
-                    eq(pageable)
+                    eq(size)
             );
         }
 
@@ -75,23 +74,23 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(pageable)))
-                    .willReturn(mockPage);
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    .willReturn(mockSlice);
 
             // when
-            Page<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 5),
-                    eq(pageable)
+                    eq(size)
             );
         }
 
@@ -104,23 +103,23 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 10000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(pageable)))
-                    .willReturn(mockPage);
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    .willReturn(mockSlice);
 
             // when
-            Page<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 4),
-                    eq(pageable)
+                    eq(size)
             );
         }
 
@@ -133,18 +132,18 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             String expectedCenterHash = GeoHashUtil.encode(latitude, longitude, 6);
             List<String> expectedNeighbors = GeoHashUtil.getNeighbors(expectedCenterHash);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), any()))
-                    .willReturn(mockPage);
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    .willReturn(mockSlice);
 
             // when
-            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             then(serviceItemRepository).should().findNearbyByGeoHashes(
@@ -153,12 +152,12 @@ class ServiceItemReadServiceTest {
                             geoHashes.size() == 9 &&
                             geoHashes.containsAll(expectedNeighbors)
                     ),
-                    eq(pageable)
+                    eq(size)
             );
         }
 
         @Test
-        @DisplayName("성공: repository에서 반환한 페이지를 그대로 반환한다")
+        @DisplayName("성공: repository에서 반환한 Slice를 그대로 반환한다")
         void success_returns_page_from_repository() {
             // given
             BigDecimal latitude = new BigDecimal("37.5665");
@@ -166,21 +165,21 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             List<ServiceItem> mockItems = List.of(); // 실제 테스트에서는 mock ServiceItem 생성
-            Page<ServiceItem> mockPage = new PageImpl<>(mockItems, pageable, 0);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(mockItems, PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), any()))
-                    .willReturn(mockPage);
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    .willReturn(mockSlice);
 
             // when
-            Page<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
-            assertThat(result).isEqualTo(mockPage);
-            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result).isEqualTo(mockSlice);
+            assertThat(result.getContent()).isEmpty();
         }
 
         @Test
@@ -192,19 +191,19 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("37.5665");
             BigDecimal userLongitude = new BigDecimal("126.9780");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), any()))
-                    .willReturn(mockPage);
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    .willReturn(mockSlice);
 
             // when
-            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             then(serviceItemRepository).should(times(1))
-                    .findNearbyByGeoHashes(any(), any(), any(), any(), anyInt(), anyList(), any());
+                    .findNearbyByGeoHashes(any(), any(), any(), any(), anyInt(), anyList(), anyInt());
         }
 
         @Test
@@ -216,23 +215,23 @@ class ServiceItemReadServiceTest {
             BigDecimal userLatitude = new BigDecimal("89.9999");
             BigDecimal userLongitude = new BigDecimal("0.0");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of());
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), any()))
-                    .willReturn(mockPage);
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    .willReturn(mockSlice);
 
             // when
-            Page<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, pageable);
+            Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9),
-                    eq(pageable)
+                    eq(size)
             );
         }
     }

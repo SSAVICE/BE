@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.DirtiesContext;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
@@ -246,16 +247,16 @@ class ServiceItemRepositoryTest {
         int precision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(centerLat, centerLon, precision);
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
-        Pageable pageable = PageRequest.of(0, 10);
+        int size = 10;
 
         // when
-        Page<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, pageable);
+        Slice<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, size);
 
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("같은 위치 서비스");
-        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.hasNext()).isFalse();
     }
 
     @Test
@@ -291,11 +292,11 @@ class ServiceItemRepositoryTest {
         int precision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(centerLat, centerLon, precision);
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
-        Pageable pageable = PageRequest.of(0, 10);
+        int size = 10;
 
         // when
-        Page<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, pageable);
+        Slice<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, size);
 
         // then
         assertThat(result.getContent()).hasSize(3);
@@ -362,11 +363,11 @@ class ServiceItemRepositoryTest {
         int precision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(centerLat, centerLon, precision);
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
-        Pageable pageable = PageRequest.of(0, 10);
+        int size = 10;
 
         // when
-        Page<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, pageable);
+        Slice<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, size);
 
         // then
         assertThat(result.getContent()).hasSize(1);
@@ -375,7 +376,7 @@ class ServiceItemRepositoryTest {
     }
 
     @Test
-    @DisplayName("GeoHash 기반 근처 서비스 검색 - 페이징 동작 확인")
+    @DisplayName("GeoHash 기반 근처 서비스 검색 - cursor 기반 페이징 동작 확인")
     void findNearbyByGeoHashes_pagination_works() {
         // given
         tem.persist(this.user);
@@ -399,22 +400,23 @@ class ServiceItemRepositoryTest {
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
 
         // when
-        Page<ServiceItem> page1 = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, PageRequest.of(0, 3));
-        Page<ServiceItem> page2 = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, PageRequest.of(1, 3));
+        Slice<ServiceItem> slice1 = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, 3);
+        Slice<ServiceItem> slice2 = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, 10);
 
         // then
-        assertThat(page1.getContent()).hasSize(3);
-        assertThat(page1.getTotalElements()).isEqualTo(5);
-        assertThat(page1.getTotalPages()).isEqualTo(2);
+        // 첫 번째 요청: size=3이면 최대 3개 반환, hasNext는 true (5개 중 3개만 가져감)
+        assertThat(slice1.getContent()).hasSize(3);
+        assertThat(slice1.hasNext()).isTrue();
 
-        assertThat(page2.getContent()).hasSize(2);
-        assertThat(page2.getTotalElements()).isEqualTo(5);
+        // 두 번째 요청: size=10이면 5개 모두 반환, hasNext는 false
+        assertThat(slice2.getContent()).hasSize(5);
+        assertThat(slice2.hasNext()).isFalse();
     }
 
     @Test
-    @DisplayName("GeoHash 기반 근처 서비스 검색 - 결과가 없을 때 빈 페이지 반환")
+    @DisplayName("GeoHash 기반 근처 서비스 검색 - 결과가 없을 때 빈 Slice 반환")
     void findNearbyByGeoHashes_returns_empty_when_no_results() {
         // given
         tem.persist(this.user);
@@ -435,15 +437,15 @@ class ServiceItemRepositoryTest {
         int precision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(centerLat, centerLon, precision);
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
-        Pageable pageable = PageRequest.of(0, 10);
+        int size = 10;
 
         // when
-        Page<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, pageable);
+        Slice<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, size);
 
         // then
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.hasNext()).isFalse();
     }
 
     @Test
@@ -466,11 +468,11 @@ class ServiceItemRepositoryTest {
         int precision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(centerLat, centerLon, precision);
         List<String> geoHashes = GeoHashUtil.getNeighbors(centerHash);
-        Pageable pageable = PageRequest.of(0, 10);
+        int size = 10;
 
         // when
-        Page<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
-                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, pageable);
+        Slice<ServiceItem> result = serviceItemRepository.findNearbyByGeoHashes(
+                centerLat, centerLon, centerLat, centerLon, radiusMeters, geoHashes, size);
 
         // then
         assertThat(result.getContent()).hasSize(1);

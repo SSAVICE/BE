@@ -7,13 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -43,34 +43,34 @@ class ServiceItemServiceTest {
 
     private ServiceItem createServiceItem(Long id, String title, BigDecimal lat, BigDecimal lon) {
         Address address = Address.builder()
-                .latitude(lat)
-                .longitude(lon)
-                .geoHash("wydm6v")
-                .postCode("12345")
-                .address("서울시 중구")
-                .detailAddress("세종대로 110")
-                .gugun("중구")
-                .region("서울")
-                .build();
+            .latitude(lat)
+            .longitude(lon)
+            .geoHash("wydm6v")
+            .postCode("12345")
+            .address("서울시 중구")
+            .detailAddress("세종대로 110")
+            .gugun("중구")
+            .region("서울")
+            .build();
 
         Company company = Company.builder()
-                .companyName("테스트 회사")
-                .build();
+            .companyName("테스트 회사")
+            .build();
         ReflectionTestUtils.setField(company, "id", 1L);
 
         ServiceItem serviceItem = ServiceItem.builder()
-                .title(title)
-                .description("설명")
-                .price(Price.of(10000L, 10))
-                .minimumMember(10L)
-                .maximumMember(20L)
-                .startDate(LocalDateTime.now().plusDays(10))
-                .endDate(LocalDateTime.now().plusDays(30))
-                .deadline(LocalDateTime.now().plusDays(5))
-                .category("카테고리")
-                .company(company)
-                .address(address)
-                .build();
+            .title(title)
+            .description("설명")
+            .price(Price.of(10000L, 10))
+            .minimumMember(10L)
+            .maximumMember(20L)
+            .startDate(LocalDateTime.now().plusDays(10))
+            .endDate(LocalDateTime.now().plusDays(30))
+            .deadline(LocalDateTime.now().plusDays(5))
+            .category("카테고리")
+            .company(company)
+            .address(address)
+            .build();
 
         ReflectionTestUtils.setField(serviceItem, "id", id);
         return serviceItem;
@@ -89,29 +89,29 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             // 서비스 아이템 위치: 약 850m 떨어진 곳
             BigDecimal itemLat = new BigDecimal("37.5741");
             BigDecimal itemLon = new BigDecimal("126.9780");
             ServiceItem item = createServiceItem(1L, "근처 서비스", itemLat, itemLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                    eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), any(Pageable.class)))
-                    .willReturn(mockPage);
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
             // 실제 거리 계산: 약 850m → 0.85km
             // Math.round(850 / 10.0) / 100.0 = Math.round(85) / 100.0 = 0.85
@@ -127,28 +127,28 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             // 약 1.2km 떨어진 위치
             BigDecimal itemLat = new BigDecimal("37.5773");
             BigDecimal itemLon = new BigDecimal("126.9780");
             ServiceItem item = createServiceItem(1L, "근처 서비스", itemLat, itemLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
             // 거리는 소수점 2자리로 반올림
             assertThat(nearbyItem.distanceKm()).isBetween(1.1, 1.3);
@@ -163,27 +163,27 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             ServiceItem item = createServiceItem(1L, "근처 서비스", userLat, userLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
 
             String expectedUrl = "https://s3.example.com/image.jpg";
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn(expectedUrl);
+                .willReturn(expectedUrl);
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            assertThat(result.getContent().get(0).thumbnailUrl()).isEqualTo(expectedUrl);
+            assertThat(result.content()).hasSize(1);
+            assertThat(result.content().get(0).serviceImageUrl()).isEqualTo(expectedUrl);
             then(s3Service).should().generateGetPresignedUrl(anyString());
         }
 
@@ -196,43 +196,44 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 5000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             ServiceItem item1 = createServiceItem(1L, "가까운 서비스", userLat, userLon);
             ServiceItem item2 = createServiceItem(2L, "중간 거리 서비스",
-                    new BigDecimal("37.5741"), new BigDecimal("126.9780"));
+                new BigDecimal("37.5741"), new BigDecimal("126.9780"));
             ServiceItem item3 = createServiceItem(3L, "먼 서비스",
-                    new BigDecimal("37.5900"), new BigDecimal("126.9780"));
+                new BigDecimal("37.5900"), new BigDecimal("126.9780"));
 
-            Page<ServiceItem> mockPage = new PageImpl<>(
-                    List.of(item1, item2, item3), pageable, 3);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(
+                List.of(item1, item2, item3), PageRequest.of(0, size), false);
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(3);
-            assertThat(result.getTotalElements()).isEqualTo(3);
+            assertThat(result.content()).hasSize(3);
+            assertThat(result.hasNext()).isFalse();
+            assertThat(result.nextCursor()).isEqualTo(3L); // 마지막 아이템의 ID
 
             // 첫 번째 아이템은 거의 같은 위치 (0km)
-            assertThat(result.getContent().get(0).distanceKm()).isLessThan(0.01);
+            assertThat(result.content().get(0).distanceKm()).isLessThan(0.01);
 
             // 두 번째 아이템은 약 0.8km
-            assertThat(result.getContent().get(1).distanceKm()).isBetween(0.7, 0.9);
+            assertThat(result.content().get(1).distanceKm()).isBetween(0.7, 0.9);
 
             // 세 번째 아이템은 약 2.6km
-            assertThat(result.getContent().get(2).distanceKm()).isBetween(2.5, 2.7);
+            assertThat(result.content().get(2).distanceKm()).isBetween(2.5, 2.7);
         }
 
         @Test
-        @DisplayName("성공: 결과가 없을 때 빈 페이지를 반환한다")
+        @DisplayName("성공: 결과가 없을 때 빈 CursorResult를 반환한다")
         void success_returns_empty_page_when_no_results() {
             // given
             BigDecimal userLat = new BigDecimal("37.5665");
@@ -240,21 +241,22 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 1000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(), pageable, 0);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).isEmpty();
-            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.content()).isEmpty();
+            assertThat(result.hasNext()).isFalse();
+            assertThat(result.nextCursor()).isNull();
         }
 
         @Test
@@ -266,36 +268,36 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             ServiceItem item = createServiceItem(1L, "테스트 서비스", userLat, userLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
 
             String expectedUrl = "https://s3.example.com/thumbnail.jpg";
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn(expectedUrl);
+                .willReturn(expectedUrl);
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
-            assertThat(nearbyItem.serviceItemId()).isEqualTo(1L);
+            assertThat(nearbyItem.serviceId()).isEqualTo(1L);
             assertThat(nearbyItem.title()).isEqualTo("테스트 서비스");
-            assertThat(nearbyItem.thumbnailUrl()).isEqualTo(expectedUrl);
+            assertThat(nearbyItem.serviceImageUrl()).isEqualTo(expectedUrl);
             assertThat(nearbyItem.distanceKm()).isNotNull();
         }
 
         @Test
-        @DisplayName("성공: 페이징 정보를 올바르게 유지한다")
+        @DisplayName("성공: hasNext가 true일 때 다음 페이지가 있음을 표시한다")
         void success_maintains_pagination_info() {
             // given
             BigDecimal userLat = new BigDecimal("37.5665");
@@ -303,31 +305,32 @@ class ServiceItemServiceTest {
             BigDecimal searchLat = new BigDecimal("37.5665");
             BigDecimal searchLon = new BigDecimal("126.9780");
             int radiusMeters = 5000;
-            Pageable pageable = PageRequest.of(1, 5); // 2번째 페이지, 5개씩
+            int size = 5;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             List<ServiceItem> items = List.of(
-                    createServiceItem(6L, "서비스 6", userLat, userLon),
-                    createServiceItem(7L, "서비스 7", userLat, userLon)
+                createServiceItem(1L, "서비스 1", userLat, userLon),
+                createServiceItem(2L, "서비스 2", userLat, userLon),
+                createServiceItem(3L, "서비스 3", userLat, userLon),
+                createServiceItem(4L, "서비스 4", userLat, userLon),
+                createServiceItem(5L, "서비스 5", userLat, userLon)
             );
 
-            Page<ServiceItem> mockPage = new PageImpl<>(items, pageable, 12); // 전체 12개
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), any()))
-                    .willReturn(mockPage);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(items, PageRequest.of(0, size), true); // hasNext = true
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getNumber()).isEqualTo(1); // 페이지 번호
-            assertThat(result.getSize()).isEqualTo(5); // 페이지 크기
-            assertThat(result.getTotalElements()).isEqualTo(12); // 전체 개수
-            assertThat(result.getTotalPages()).isEqualTo(3); // 전체 페이지 수
-            assertThat(result.getContent()).hasSize(2); // 현재 페이지 아이템 수
+            assertThat(result.content()).hasSize(5);
+            assertThat(result.hasNext()).isTrue(); // 다음 페이지 존재
+            assertThat(result.nextCursor()).isEqualTo(5L); // 마지막 아이템의 ID
         }
 
         @Test
@@ -343,10 +346,10 @@ class ServiceItemServiceTest {
             BigDecimal searchLon = new BigDecimal("126.9780");
 
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             // 서비스 아이템은 검색 중심(37.5575) 근처에 위치
             // 사용자(37.5665)로부터는 약 1km 떨어져 있음
@@ -354,20 +357,20 @@ class ServiceItemServiceTest {
             BigDecimal itemLon = new BigDecimal("126.9780");
             ServiceItem item = createServiceItem(1L, "검색 중심 근처 서비스", itemLat, itemLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             // GeoHash 검색은 검색 중심 좌표로 수행됨
             given(serviceItemReadService.findNearbyByGeoHash(
-                    eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), any(Pageable.class)))
-                    .willReturn(mockPage);
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
             // 거리는 사용자 위치(37.5665)로부터 계산되어야 함
             // 사용자(37.5665) - 아이템(37.5575) ≈ 1.0km
@@ -375,7 +378,7 @@ class ServiceItemServiceTest {
 
             // GeoHash 검색은 검색 중심으로 호출되었는지 검증
             then(serviceItemReadService).should().findNearbyByGeoHash(
-                    eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), any(Pageable.class));
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size));
         }
 
         @Test
@@ -391,29 +394,29 @@ class ServiceItemServiceTest {
             BigDecimal searchLon = new BigDecimal("126.9780"); // 서쪽
 
             int radiusMeters = 3000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             // 서비스 아이템은 검색 중심 근처 (사용자로부터는 약 0.8km 떨어짐)
             BigDecimal itemLat = new BigDecimal("37.5665");
             BigDecimal itemLon = new BigDecimal("126.9800");
             ServiceItem item = createServiceItem(1L, "서비스", itemLat, itemLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                    eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), any(Pageable.class)))
-                    .willReturn(mockPage);
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
             // 거리는 사용자 위치로부터 계산됨
             // 사용자(126.9900) - 아이템(126.9800) ≈ 0.01 degrees ≈ 0.9km
@@ -430,28 +433,28 @@ class ServiceItemServiceTest {
             BigDecimal searchLon = new BigDecimal("126.9780");
 
             int radiusMeters = 2000;
-            Pageable pageable = PageRequest.of(0, 10);
+            int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                    userLat, userLon, searchLat, searchLon, radiusMeters, pageable);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size);
 
             BigDecimal itemLat = new BigDecimal("37.5741");
             BigDecimal itemLon = new BigDecimal("126.9780");
             ServiceItem item = createServiceItem(1L, "근처 서비스", itemLat, itemLon);
 
-            Page<ServiceItem> mockPage = new PageImpl<>(List.of(item), pageable, 1);
+            Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                    eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), any(Pageable.class)))
-                    .willReturn(mockPage);
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
-                    .willReturn("https://s3.example.com/image.jpg");
+                .willReturn("https://s3.example.com/image.jpg");
 
             // when
-            Page<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
+            CursorResult<ServiceItemModel.Nearby> result = serviceItemService.searchNearby(command);
 
             // then
-            assertThat(result.getContent()).hasSize(1);
-            ServiceItemModel.Nearby nearbyItem = result.getContent().get(0);
+            assertThat(result.content()).hasSize(1);
+            ServiceItemModel.Nearby nearbyItem = result.content().get(0);
 
             // 사용자와 검색 중심이 같으므로, 어느 좌표로 계산해도 결과는 동일
             assertThat(nearbyItem.distanceKm()).isBetween(0.8, 0.9);
