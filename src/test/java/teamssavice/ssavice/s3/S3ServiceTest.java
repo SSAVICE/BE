@@ -265,5 +265,63 @@ class S3ServiceTest {
             // 전체 삭제 검증 (key1, key2 모두 삭제)
             verify(s3Client, atLeast(1)).deleteObject(any(DeleteObjectRequest.class));
         }
+
+        @Test
+        @DisplayName("빈 키 리스트인 경우 정상 통과한다")
+        void 빈_키_리스트_통과() {
+            // given
+            List<String> keys = List.of();
+            S3Command.ValidateKeys command = S3Command.ValidateKeys.builder().objectKeys(keys).build();
+
+            // when & then (예외 없이 정상 종료)
+            s3Service.validateAllTempImagesOrDeleteAll(command);
+
+            // headObject 호출 없음
+            verify(s3Client, never()).headObject(any(HeadObjectRequest.class));
+        }
+
+        @Test
+        @DisplayName("두 번째 키에서 실패하는 경우 전체 삭제 후 예외를 던진다")
+        void 두_번째_키_실패_시_전체_삭제() {
+            // given
+            List<String> keys = List.of("key1", "key2", "key3");
+            S3Command.ValidateKeys command = S3Command.ValidateKeys.builder().objectKeys(keys).build();
+
+            HeadObjectResponse validHead = HeadObjectResponse.builder().contentLength(1024L).build();
+            given(properties.bucket()).willReturn("test-bucket");
+            given(s3Client.headObject(any(HeadObjectRequest.class)))
+                    .willReturn(validHead) // 첫 번째 키: 성공
+                    .willThrow(NoSuchKeyException.builder().message("Not found").build()); // 두 번째 키: 실패
+            org.springframework.test.util.ReflectionTestUtils.setField(s3Service, "maxUploadBytes", 5242880L);
+
+            // when & then
+            assertThatThrownBy(() -> s3Service.validateAllTempImagesOrDeleteAll(command))
+                    .isInstanceOf(EntityNotFoundException.class);
+
+            // 전체 삭제 검증 (key1, key2, key3 모두 삭제)
+            verify(s3Client, times(3)).deleteObject(any(DeleteObjectRequest.class));
+        }
+
+        @Test
+        @DisplayName("이미지 사이즈 초과로 실패하는 경우 전체 삭제 후 ImageSizeException을 던진다")
+        void 사이즈_초과_시_전체_삭제() {
+            // given
+            List<String> keys = List.of("key1", "key2");
+            S3Command.ValidateKeys command = S3Command.ValidateKeys.builder().objectKeys(keys).build();
+
+            HeadObjectResponse oversizedHead = HeadObjectResponse.builder().contentLength(10_000_000L).build();
+            given(properties.bucket()).willReturn("test-bucket");
+            given(s3Client.headObject(any(HeadObjectRequest.class))).willReturn(oversizedHead);
+            given(s3Client.deleteObject(any(DeleteObjectRequest.class)))
+                    .willReturn(DeleteObjectResponse.builder().build());
+            org.springframework.test.util.ReflectionTestUtils.setField(s3Service, "maxUploadBytes", 5242880L);
+
+            // when & then
+            assertThatThrownBy(() -> s3Service.validateAllTempImagesOrDeleteAll(command))
+                    .isInstanceOf(ImageSizeException.class);
+
+            // 전체 삭제 검증 (초과한 key1 삭제 + 전체 key1, key2 삭제 = 총 3회)
+            verify(s3Client, times(3)).deleteObject(any(DeleteObjectRequest.class));
+        }
     }
 }

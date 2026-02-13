@@ -190,4 +190,57 @@ public class ServiceItemModel {
                     .build();
         }
     }
+
+    @Builder
+    public record Nearby(
+            Long serviceId,
+            String serviceImageUrl,
+            String category,
+            String title,
+            String tag,
+            ServiceStatus status,
+
+            Long companyId,
+            String companyName,
+
+            AddressModel.RegionSummary region,
+
+            Long currentMember,
+            Long minimumMember,
+            Long maximumMember,
+
+            Long basePrice,
+            Integer discountRatio,
+            Long discountedPrice,
+
+            LocalDateTime deadline,
+            double distanceKm
+    ) {
+        public static Nearby from(ServiceItem entity, double distanceKm, String thumbnailUrl) {
+            return Nearby.builder()
+                    .serviceId(entity.getId())
+                    .companyId(entity.getCompany().getId())
+                    .companyName(entity.getCompany().getCompanyName())
+                    .serviceImageUrl(thumbnailUrl)
+                    .title(entity.getTitle())
+                    .basePrice(entity.getPrice().getBasePrice())
+                    .discountRatio(entity.getPrice().getDiscountRate())
+                    .discountedPrice(entity.getPrice().getDiscountedPrice())
+                    .status(entity.getStatus())
+                    .deadline(entity.getDeadline())
+                    .category(entity.getCategory())
+                    .tag(entity.getTag())
+                    .currentMember(entity.getCurrentMember())
+                    .minimumMember(entity.getMinimumMember())
+                    .maximumMember(entity.getMaximumMember())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(entity.getAddress().getGugun())
+                            .region(entity.getAddress().getRegion())
+                            .latitude(entity.getAddress().getLatitude())
+                            .longitude(entity.getAddress().getLongitude())
+                            .build())
+                    .distanceKm(distanceKm)
+                    .build();
+        }
+    }
 }

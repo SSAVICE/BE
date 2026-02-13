@@ -18,6 +18,7 @@ import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
@@ -34,6 +35,7 @@ public class ServiceItemController {
 
     private final ServiceItemService serviceItemService;
     private final ImageService imageService;
+    private final S3Service s3Service;
 
     @PostMapping
     @RequireRole(Role.COMPANY)
@@ -41,6 +43,7 @@ public class ServiceItemController {
         @CurrentId Long companyId,
         @RequestBody @Valid ServiceItemRequest.Create request
     ) {
+        s3Service.validateAllTempImagesOrDeleteAll(request.toValidateCommand());
         Long serviceId = serviceItemService.register(request.toCommand(companyId));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }
@@ -55,6 +58,17 @@ public class ServiceItemController {
         Pageable pageable = PageRequest.of(0, size);
         CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(userId, pageable));
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/nearby")
+    @RequireRole(Role.USER)
+    public ResponseEntity<CursorResult<ServiceItemResponse.Nearby>> searchNearby(
+        @ModelAttribute @Valid ServiceItemRequest.Nearby request,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        CursorResult<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(size));
+        CursorResult<ServiceItemResponse.Nearby> response = models.map(ServiceItemResponse.Nearby::from);
         return ResponseEntity.ok(response);
     }
 
@@ -87,7 +101,7 @@ public class ServiceItemController {
         ServiceItemCommand.RetrieveByCompanyAndOnSale command = ServiceItemCommand.RetrieveByCompanyAndOnSale.of(companyId, pageable, onSale);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndOnSale(command)
-                .map(ServiceItemResponse.Summary::from);
+            .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
@@ -102,7 +116,7 @@ public class ServiceItemController {
         ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
-                .map(ServiceItemResponse.Summary::from);
+            .map(ServiceItemResponse.Summary::from);
 
         return ResponseEntity.ok(PageResponse.from(responses));
     }
@@ -111,7 +125,7 @@ public class ServiceItemController {
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Count> getCompanysServiceItemCount(
         @CurrentId Long companyId
-    ){
+    ) {
         ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(companyId);
         return ResponseEntity.ok(ServiceItemResponse.Count.from(model));
     }

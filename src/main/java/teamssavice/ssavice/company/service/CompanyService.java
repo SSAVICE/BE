@@ -73,6 +73,7 @@ public class CompanyService {
         return CompanyModel.Login.from(token, true);
     }
 
+    @Transactional
     public CompanyModel.Login register(CompanyCommand.Create command) {
         companySignupVerifyTokenService.validate(
             command.userId(), command.businessNumber(), command.verifyToken());
