@@ -69,6 +69,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
 
         List<ServiceItem> content = queryFactory
             .selectFrom(serviceItem)
+            .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
             .where(
                 companyIdCondition,
                 statusCondition

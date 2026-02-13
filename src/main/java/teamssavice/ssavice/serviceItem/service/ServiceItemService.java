@@ -110,12 +110,14 @@ public class ServiceItemService {
         return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }
 
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
         return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
             s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndOnSale(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(command.companyId(), ServiceStatus.RECRUITING, command.pageable());
@@ -144,7 +146,7 @@ public class ServiceItemService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ServiceItemModel.Count getCompanysServiceItemCount(Long companyId) {
         Long applying = serviceItemReadService.countRecruitingServiceItemsByCompanyId(companyId);
         Long completedCount = serviceItemReadService.countSucceededServiceItemsByCompanyId(companyId);
