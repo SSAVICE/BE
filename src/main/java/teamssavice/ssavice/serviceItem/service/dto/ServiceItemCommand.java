@@ -125,7 +125,7 @@ public class ServiceItemCommand {
         BigDecimal latitude,
         BigDecimal longitude,
         int radiusMeters,
-        Pageable pageable
+        int size
     ) {
         public static Nearby of(
             BigDecimal userLatitude,
@@ -133,7 +133,7 @@ public class ServiceItemCommand {
             BigDecimal latitude,
             BigDecimal longitude,
             int radiusMeters,
-            Pageable pageable
+            int size
         ) {
             return Nearby.builder()
                 .userLatitude(userLatitude)
@@ -141,10 +141,7 @@ public class ServiceItemCommand {
                 .latitude(latitude)
                 .longitude(longitude)
                 .radiusMeters(radiusMeters)
-                .pageable(PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize()
-                ))
+                .size(size)
                 .build();
         }
 

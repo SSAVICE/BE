@@ -138,42 +138,40 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     }
 
     @Override
-    public Page<ServiceItem> findNearbyByGeoHashes(
+    public Slice<ServiceItem> findNearbyByGeoHashes(
         BigDecimal latitude,
         BigDecimal longitude,
         BigDecimal userLatitude,
         BigDecimal userLongitude,
         int radiusMeters,
         List<String> geoHashes,
-        Pageable pageable
+        int size
     ) {
         BooleanExpression geoCondition = buildGeoCondition(geoHashes);
         NumberExpression<Double> radiusDistanceExpr = haversineDistance(latitude, longitude);
         NumberExpression<Double> userDistanceExpr = haversineDistance(userLatitude, userLongitude);
 
         BooleanExpression baseCondition = geoCondition
-            .and(statusCondition(ServiceStatusFilter.RECRUITING, LocalDateTime.now()))
+            .and(applyOnSaleCondition(LocalDateTime.now(), true))
             .and(radiusDistanceExpr.loe((double) radiusMeters));
 
-        Long total = queryFactory
-            .select(serviceItem.count())
-            .from(serviceItem)
-            .join(serviceItem.address, address1)
-            .where(baseCondition)
-            .fetchOne();
-
-        List<ServiceItem> items = queryFactory
+        List<ServiceItem> content = queryFactory
             .selectFrom(serviceItem)
             .join(serviceItem.company, company).fetchJoin()
             .join(serviceItem.address, address1).fetchJoin()
             .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
             .where(baseCondition)
             .orderBy(userDistanceExpr.asc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
+            .limit(size + 1)
             .fetch();
 
-        return new PageImpl<>(items, pageable, total == null ? 0 : total);
+        boolean hasNext = false;
+        if (content.size() > size) {
+            content.remove(size);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, PageRequest.of(0, size), hasNext);
     }
 
     private NumberExpression<Double> haversineDistance(BigDecimal latitude, BigDecimal longitude) {

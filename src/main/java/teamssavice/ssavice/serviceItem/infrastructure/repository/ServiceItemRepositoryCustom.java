@@ -16,13 +16,13 @@ public interface ServiceItemRepositoryCustom {
 
     Page<ServiceItem> findByCompanyAndStatus(Long companyId, ServiceStatusFilter status, Pageable pageable);
 
-    Page<ServiceItem> findNearbyByGeoHashes(
+    Slice<ServiceItem> findNearbyByGeoHashes(
             BigDecimal latitude,
             BigDecimal longitude,
             BigDecimal userLatitude,
             BigDecimal userLongitude,
             int radiusMeters,
             List<String> geoHashes,
-            Pageable pageable
+            int size
     );
 }

@@ -109,14 +109,14 @@ public class ServiceItemRequest {
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
         @NotNull @Positive @Max(100000) Integer radiusMeters
     ) {
-        public ServiceItemCommand.Nearby toCommand(Pageable pageable) {
+        public ServiceItemCommand.Nearby toCommand(int size) {
             return ServiceItemCommand.Nearby.of(
                 userLatitude,
                 userLongitude,
                 latitude,
                 longitude,
                 radiusMeters,
-                pageable
+                size
             );
         }
     }

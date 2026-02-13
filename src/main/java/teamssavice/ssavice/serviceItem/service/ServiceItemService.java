@@ -154,19 +154,28 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ServiceItemModel.Nearby> searchNearby(ServiceItemCommand.Nearby command) {
-        Page<ServiceItem> page = serviceItemReadService.findNearbyByGeoHash(
+    public CursorResult<ServiceItemModel.Nearby> searchNearby(ServiceItemCommand.Nearby command) {
+        Slice<ServiceItem> slice = serviceItemReadService.findNearbyByGeoHash(
             command.latitude(), command.longitude(),
             command.userLatitude(), command.userLongitude(),
-            command.radiusMeters(), command.pageable());
+            command.radiusMeters(), command.size());
 
-        return page.map(item -> {
-            double distanceKm = Math.round(GeoHashUtil.calculateDistance(
-                command.userLatitude(), command.userLongitude(),
-                item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
-            return ServiceItemModel.Nearby.from(item, distanceKm,
-                s3Service.generateGetPresignedUrl(item.getObjectKey()));
-        });
+        List<ServiceItemModel.Nearby> content = slice.getContent().stream()
+            .map(item -> {
+                double distanceKm = Math.round(GeoHashUtil.calculateDistance(
+                    command.userLatitude(), command.userLongitude(),
+                    item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
+                return ServiceItemModel.Nearby.from(item, distanceKm,
+                    s3Service.generateGetPresignedUrl(item.getObjectKey()));
+            })
+            .toList();
+
+        Long nextCursor = null;
+        if (!content.isEmpty()) {
+            nextCursor = content.getLast().serviceId();
+        }
+
+        return new CursorResult<>(content, nextCursor, slice.hasNext());
     }
 
     private void validateOwner(Long companyId, ServiceItem serviceItem) {

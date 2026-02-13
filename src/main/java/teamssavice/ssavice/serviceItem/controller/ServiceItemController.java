@@ -63,13 +63,13 @@ public class ServiceItemController {
 
     @GetMapping("/nearby")
     @RequireRole(Role.USER)
-    public ResponseEntity<PageResponse<ServiceItemResponse.Nearby>> searchNearby(
+    public ResponseEntity<CursorResult<ServiceItemResponse.Nearby>> searchNearby(
         @ModelAttribute @Valid ServiceItemRequest.Nearby request,
-        @PageableDefault(page = 0, size = 10) Pageable pageable
+        @RequestParam(defaultValue = "10") int size
     ) {
-        Page<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(pageable));
-        Page<ServiceItemResponse.Nearby> responses = models.map(ServiceItemResponse.Nearby::from);
-        return ResponseEntity.ok(PageResponse.from(responses));
+        CursorResult<ServiceItemModel.Nearby> models = serviceItemService.searchNearby(request.toCommand(size));
+        CursorResult<ServiceItemResponse.Nearby> response = models.map(ServiceItemResponse.Nearby::from);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{serviceId}")

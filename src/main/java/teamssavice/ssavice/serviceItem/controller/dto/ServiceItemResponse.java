@@ -177,16 +177,47 @@ public class ServiceItemResponse {
 
     @Builder
     public record Nearby(
-        Long serviceItemId,
+        Long serviceId,
+        String serviceImageUrl,
+        String category,
         String title,
-        String thumbnailUrl,
+        String tag,
+        String status,
+
+        Long companyId,
+        String companyName,
+
+        AddressResponse.RegionSummary region,
+
+        Long currentMember,
+        Long minimumMember,
+        Long maximumMember,
+
+        Long basePrice,
+        Integer discountRatio,
+        Long discountedPrice,
+
+        LocalDateTime deadline,
         double distanceKm
     ) {
         public static Nearby from(ServiceItemModel.Nearby model) {
             return Nearby.builder()
-                .serviceItemId(model.serviceItemId())
+                .serviceId(model.serviceId())
+                .serviceImageUrl(model.serviceImageUrl())
+                .category(model.category())
                 .title(model.title())
-                .thumbnailUrl(model.thumbnailUrl())
+                .tag(model.tag())
+                .status(model.status().name())
+                .companyId(model.companyId())
+                .companyName(model.companyName())
+                .region(AddressResponse.RegionSummary.from(model.region()))
+                .currentMember(model.currentMember())
+                .minimumMember(model.minimumMember())
+                .maximumMember(model.maximumMember())
+                .basePrice(model.basePrice())
+                .discountRatio(model.discountRatio())
+                .discountedPrice(model.discountedPrice())
+                .deadline(model.deadline())
                 .distanceKm(model.distanceKm())
                 .build();
         }
