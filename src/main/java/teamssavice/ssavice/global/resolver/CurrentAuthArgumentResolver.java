@@ -16,7 +16,7 @@ public class CurrentAuthArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentAuth.class)
-                && parameter.getParameterType().equals(Long.class);
+                && parameter.getParameterType().equals(Auth.class);
     }
 
     @Override
@@ -27,11 +27,16 @@ public class CurrentAuthArgumentResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+
+        boolean required = parameter.getParameterAnnotation(CurrentAuth.class).required();
         String sub = (String) request.getAttribute("sub");
         String role = (String) request.getAttribute("role");
 
         if(sub == null) {
-            throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
+            if (required) {
+                throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
+            }
+            return new Auth(null, null);
         }
 
         return new Auth(Long.parseLong(sub), Role.valueOf(role));

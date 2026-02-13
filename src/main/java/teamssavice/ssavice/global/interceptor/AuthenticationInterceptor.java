@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
@@ -22,7 +21,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         PermitAll permitAll = handlerMethod.getMethodAnnotation(PermitAll.class);
 
-        Role role = (Role) request.getAttribute("role");
+        String role = (String) request.getAttribute("role");
 
         if (permitAll == null && role == null) {
             throw new AuthenticationException(ErrorCode.MISSING_TOKEN);

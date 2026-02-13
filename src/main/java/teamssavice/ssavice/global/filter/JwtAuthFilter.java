@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.filter.OncePerRequestFilter;
 import teamssavice.ssavice.auth.TokenProvider;
-import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.exception.CustomException;
 
 import java.io.IOException;
@@ -33,8 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if(accessToken != null) {
                 Claims claims = tokenProvider.getClaim(accessToken);
                 request.setAttribute("sub", claims.getSubject());
-                Role role = Role.valueOf(claims.get("role", String.class));
-                request.setAttribute("role", role);
+                request.setAttribute("role", claims.get("role", String.class));
             }
 
             filterChain.doFilter(request, response);
