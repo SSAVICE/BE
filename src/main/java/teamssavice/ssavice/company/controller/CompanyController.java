@@ -48,8 +48,8 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @RequireRole(Role.USER)
     @PostMapping
+    @RequireRole(Role.USER)
     public ResponseEntity<CompanyResponse.Login> register(
         @CurrentId Long userId,
         @RequestBody @Valid CompanyRequest.Create request
@@ -59,8 +59,8 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @RequireRole(Role.COMPANY)
     @PutMapping
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<CompanyResponse> putCompany(
         @CurrentId Long companyId,
         @RequestBody @Valid CompanyRequest.Update request
@@ -69,8 +69,8 @@ public class CompanyController {
         return ResponseEntity.ok().build();
     }
 
-    @RequireRole(Role.COMPANY)
     @GetMapping
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<CompanyResponse.MyCompany> getCompany(
         @CurrentId Long companyId
     ) {

@@ -26,8 +26,8 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @RequireRole(Role.USER)
     @PostMapping
+    @RequireRole(Role.USER)
     public ResponseEntity<Void> postReview(
             @CurrentId Long userId,
             @RequestBody @Valid ReviewRequest.Input request
@@ -47,8 +47,8 @@ public class ReviewController {
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.COMPANY)
     @GetMapping("/company")
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getMyCompanyReview(
             @CurrentId Long companyId,
             @PageableDefault(page = 0, size = 10) Pageable pageable
@@ -59,8 +59,8 @@ public class ReviewController {
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.USER)
     @GetMapping("/user")
+    @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getMyReview(
             @CurrentId Long userId,
             @PageableDefault(page = 0, size = 10) Pageable pageable
@@ -71,8 +71,8 @@ public class ReviewController {
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.USER)
     @GetMapping("/user/{user-id}")
+    @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getUserReview(
             @PathVariable("user-id") @Positive Long userId,
             @PageableDefault(page = 0, size = 10) Pageable pageable

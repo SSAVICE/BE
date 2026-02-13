@@ -46,6 +46,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
+    @RequireRole(Role.USER)
     public ResponseEntity<UserResponse.Info> profile(
         @CurrentId Long userId
     ) {
@@ -55,6 +56,7 @@ public class UserController {
     }
 
     @PostMapping("/profile")
+    @RequireRole(Role.USER)
     public ResponseEntity<UserResponse.Summary> Modify(
         @CurrentId Long userId,
         @RequestBody @Valid UserRequest.Modify request
