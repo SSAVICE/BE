@@ -8,8 +8,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.wish.controller.dto.WishRequest;
 import teamssavice.ssavice.wish.controller.dto.WishResponse;
@@ -27,23 +28,23 @@ public class WishController {
     @PostMapping("/{serviceId}")
     @RequireRole(Role.USER)
     public ResponseEntity<Void> updateWishStatus(
-            @CurrentId Long userId,
+            @CurrentAuth Auth authUser,
             @PathVariable Long serviceId,
             @RequestBody @Valid WishRequest.Update request
     ) {
 
-        wishService.updateWishStatus(request.toCommand(userId, serviceId));
+        wishService.updateWishStatus(request.toCommand(authUser.id(), serviceId));
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<WishResponse.Summary>> getMyWishList(
-            @CurrentId Long userId,
+            @CurrentAuth Auth authUser,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
 
-        WishCommand.Retrieve command = WishCommand.Retrieve.of(userId, pageable);
+        WishCommand.Retrieve command = WishCommand.Retrieve.of(authUser.id(), pageable);
 
         Page<WishModel.Summary> modelPage = wishService.getWishList(command);
         Page<WishResponse.Summary> responses = modelPage.map(WishResponse.Summary::from);

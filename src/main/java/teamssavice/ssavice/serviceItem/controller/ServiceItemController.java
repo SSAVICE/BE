@@ -9,8 +9,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.imageresource.ImageRequest;
@@ -40,23 +42,23 @@ public class ServiceItemController {
     @PostMapping
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Register> createServiceItem(
-        @CurrentId Long companyId,
-        @RequestBody @Valid ServiceItemRequest.Create request
+            @CurrentAuth Auth authCompany,
+            @RequestBody @Valid ServiceItemRequest.Create request
     ) {
         s3Service.validateAllTempImagesOrDeleteAll(request.toValidateCommand());
-        Long serviceId = serviceItemService.register(request.toCommand(companyId));
+        Long serviceId = serviceItemService.register(request.toCommand(authCompany.id()));
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }
 
+    @PermitAll
     @GetMapping("/search")
-    @RequireRole(Role.USER)
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
         @ModelAttribute @Valid ServiceItemRequest.Search request,
         @RequestParam(defaultValue = "10") int size,
-        @CurrentId Long userId
+        @CurrentAuth Auth authUser
     ) {
         Pageable pageable = PageRequest.of(0, size);
-        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(userId, pageable));
+        CursorResult<ServiceItemModel.Search> models = serviceItemService.search(request.toCommand(authUser.id(), pageable));
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
         return ResponseEntity.ok(response);
     }
@@ -72,26 +74,27 @@ public class ServiceItemController {
         return ResponseEntity.ok(response);
     }
 
+    @PermitAll
     @GetMapping("/{serviceId}")
-    @RequireRole(Role.USER)
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
         @PathVariable Long serviceId,
-        @CurrentId Long userId
+        @CurrentAuth Auth authUser
     ) {
-        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, userId);
+        ServiceItemModel.Detail model = serviceItemService.getServiceDetail(serviceId, authUser.id());
         return ResponseEntity.ok(ServiceItemResponse.Detail.from(model));
     }
 
     @PostMapping("/image")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ImageResponse.PresignedUrls> createServiceItemPresignedUrls(
-        @CurrentId Long companyId,
+        @CurrentAuth Auth authCompany,
         @RequestBody @Valid ImageRequest.ServiceImages request
     ) {
-        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(request.toCommand(companyId, ImagePath.serviceItem));
+        List<ImageModel.PutPresignedUrl> models = imageService.updateImages(request.toCommand(authCompany.id(), ImagePath.serviceItem));
         return ResponseEntity.ok(ImageResponse.PresignedUrls.from(models));
     }
 
+    @PermitAll
     @GetMapping("/company/{company-id}")
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getCompanysServiceItems(
         @PathVariable("company-id") Long companyId,
@@ -109,11 +112,11 @@ public class ServiceItemController {
     @GetMapping("/company/my")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<PageResponse<ServiceItemResponse.Summary>> getMyCompanysServiceItems(
-        @CurrentId Long companyId,
+        @CurrentAuth Auth authCompany,
         @PageableDefault(page = 0, size = 10) Pageable pageable,
         @RequestParam("status") ServiceStatusFilter status
     ) {
-        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(companyId, pageable, status);
+        ServiceItemCommand.RetrieveByCompanyAndStatus command = ServiceItemCommand.RetrieveByCompanyAndStatus.of(authCompany.id(), pageable, status);
 
         Page<ServiceItemResponse.Summary> responses = serviceItemService.getServiceItemByCompanyAndStatus(command)
             .map(ServiceItemResponse.Summary::from);
@@ -124,19 +127,19 @@ public class ServiceItemController {
     @GetMapping("/company/summary")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ServiceItemResponse.Count> getCompanysServiceItemCount(
-        @CurrentId Long companyId
+        @CurrentAuth Auth authCompany
     ) {
-        ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(companyId);
+        ServiceItemModel.Count model = serviceItemService.getCompanysServiceItemCount(authCompany.id());
         return ResponseEntity.ok(ServiceItemResponse.Count.from(model));
     }
 
     @DeleteMapping("/{serviceId}")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<Void> deleteServiceItem(
-        @CurrentId Long companyId,
+        @CurrentAuth Auth authCompany,
         @PathVariable Long serviceId
     ) {
-        serviceItemService.delete(ServiceItemCommand.Delete.of(companyId, serviceId));
+        serviceItemService.delete(ServiceItemCommand.Delete.of(authCompany.id(), serviceId));
         return ResponseEntity.noContent().build();
     }
 }

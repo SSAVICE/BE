@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import teamssavice.ssavice.global.interceptor.AuthenticationInterceptor;
 import teamssavice.ssavice.global.interceptor.AuthorizationInterceptor;
-import teamssavice.ssavice.global.resolver.CurrentIdArgumentResolver;
+import teamssavice.ssavice.global.resolver.CurrentAuthArgumentResolver;
 import teamssavice.ssavice.global.resolver.RefreshTokenArgumentResolver;
 
 import java.util.List;
@@ -26,8 +26,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public CurrentIdArgumentResolver currentIdArgumentResolver() {
-        return new CurrentIdArgumentResolver();
+    public CurrentAuthArgumentResolver currentAuthArgumentResolver() {
+        return new CurrentAuthArgumentResolver();
     }
 
     @Bean
@@ -48,7 +48,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(currentIdArgumentResolver());
+        resolvers.add(currentAuthArgumentResolver());
         resolvers.add(refreshTokenArgumentResolver());
     }
 }

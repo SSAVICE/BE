@@ -1,6 +1,5 @@
 package teamssavice.ssavice.serviceItem.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import teamssavice.ssavice.address.AddressRequest;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.global.exception.ImageSizeException;
 import teamssavice.ssavice.imageresource.ImageRequest;
@@ -54,13 +55,14 @@ class ServiceItemControllerTest {
             // given
             Long companyId = 1L;
             Long serviceId = 100L;
+            Auth authCompany = new Auth(companyId, Role.COMPANY);
 
             ServiceItemRequest.Create request = createValidRequest();
             willDoNothing().given(s3Service).validateAllTempImagesOrDeleteAll(any(S3Command.ValidateKeys.class));
             given(serviceItemService.register(any())).willReturn(serviceId);
 
             // when
-            ServiceItemResponse.Register response = serviceItemController.createServiceItem(companyId, request).getBody();
+            ServiceItemResponse.Register response = serviceItemController.createServiceItem(authCompany, request).getBody();
 
             // then
             assertThat(response).isNotNull();
@@ -74,13 +76,14 @@ class ServiceItemControllerTest {
         void 이미지_검증_실패_EntityNotFoundException() {
             // given
             Long companyId = 1L;
+            Auth authCompany = new Auth(companyId, Role.COMPANY);
             ServiceItemRequest.Create request = createValidRequest();
 
             willThrow(new EntityNotFoundException(ErrorCode.IMAGE_NOT_FOUND))
                     .given(s3Service).validateAllTempImagesOrDeleteAll(any(S3Command.ValidateKeys.class));
 
             // when & then
-            assertThatThrownBy(() -> serviceItemController.createServiceItem(companyId, request))
+            assertThatThrownBy(() -> serviceItemController.createServiceItem(authCompany, request))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.IMAGE_NOT_FOUND);
 
@@ -94,13 +97,14 @@ class ServiceItemControllerTest {
         void 이미지_검증_실패_ImageSizeException() {
             // given
             Long companyId = 1L;
+            Auth authCompany = new Auth(companyId, Role.COMPANY);
             ServiceItemRequest.Create request = createValidRequest();
 
             willThrow(new ImageSizeException(ErrorCode.IMAGE_TOO_LARGE, 10_000_000L, 5_242_880L))
                     .given(s3Service).validateAllTempImagesOrDeleteAll(any(S3Command.ValidateKeys.class));
 
             // when & then
-            assertThatThrownBy(() -> serviceItemController.createServiceItem(companyId, request))
+            assertThatThrownBy(() -> serviceItemController.createServiceItem(authCompany, request))
                     .isInstanceOf(ImageSizeException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.IMAGE_TOO_LARGE);
 
