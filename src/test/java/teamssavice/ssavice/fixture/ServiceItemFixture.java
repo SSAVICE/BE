@@ -2,6 +2,7 @@ package teamssavice.ssavice.fixture;
 
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -46,6 +47,7 @@ public class ServiceItemFixture {
                         .regionCode("regionCode")
                         .latitude(BigDecimal.valueOf(33.333))
                         .longitude(BigDecimal.valueOf(33.333))
+                        .geoHash(GeoHashUtil.encode(BigDecimal.valueOf(33.333), BigDecimal.valueOf(33.333)))
                         .postCode("postCode")
                         .address("address")
                         .detailAddress("detail")
@@ -73,6 +75,7 @@ public class ServiceItemFixture {
                         .regionCode("regionCode")
                         .latitude(BigDecimal.valueOf(33.333))
                         .longitude(BigDecimal.valueOf(33.333))
+                        .geoHash(GeoHashUtil.encode(BigDecimal.valueOf(33.333), BigDecimal.valueOf(33.333)))
                         .postCode("postCode")
                         .address("address")
                         .detailAddress("detail")

@@ -98,8 +98,7 @@ public class CompanyModel {
         List<ReviewModel.Item> review
     ) {
 
-        public static CompanyModel.Summary from(Company company, String presignedUrl,
-            Float companyRate, Long rateCount, List<Review> review) {
+        public static CompanyModel.Summary from(Company company, String presignedUrl, List<Review> review) {
             List<ReviewModel.Item> models = review.stream().map(ReviewModel.Item::from).toList();
             return Summary.builder()
                 .companyId(company.getId())
@@ -108,8 +107,8 @@ public class CompanyModel {
                 .description(company.getDescription())
                 .phoneNumber(company.getPhoneNumber())
                 .companyImageUrl(presignedUrl)
-                .companyRate(companyRate)
-                .rateCount(rateCount)
+                .companyRate(company.getAverageRate())
+                .rateCount(company.getRateCount())
                 .review(models)
                 .build();
         }

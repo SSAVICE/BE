@@ -73,6 +73,7 @@ public class CompanyService {
         return CompanyModel.Login.from(token, true);
     }
 
+    @Transactional
     public CompanyModel.Login register(CompanyCommand.Create command) {
         companySignupVerifyTokenService.validate(
             command.userId(), command.businessNumber(), command.verifyToken());
@@ -132,10 +133,9 @@ public class CompanyService {
         Company company = companyReadService.findByIdFetchJoinAddressAndImageResource(id);
         List<Review> reviews = reviewReadService.findTop3ByCompanyIdOrderByCreatedAt(
             company.getId());
-        Float companyRate = 10F;
-        Long rateCount = 100L;
+
         String presignedUrl = s3Service.generateGetPresignedUrl(company.getObjectKey());
-        return CompanyModel.Summary.from(company, presignedUrl, companyRate, rateCount, reviews);
+        return CompanyModel.Summary.from(company, presignedUrl, reviews);
     }
 
     @Transactional
@@ -161,7 +161,7 @@ public class CompanyService {
 
         return CompanyModel.Validate.from(verifyToken);
     }
-  
+
     @Transactional(readOnly = true)
     public AddressModel.RegionDetail getCompanyAddress(Long companyId) {
         Company company = companyReadService.findByCompanyIdFetchJoinAddress(companyId);

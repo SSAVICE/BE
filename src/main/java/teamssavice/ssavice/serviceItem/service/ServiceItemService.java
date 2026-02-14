@@ -15,6 +15,7 @@ import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.exception.ForbiddenException;
+import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.refund.constants.RefundReason;
@@ -51,10 +52,10 @@ public class ServiceItemService {
     public Long register(ServiceItemCommand.Create command) {
         Company company = companyReadService.findById(command.companyId());
         List<ImageResource> imageResourceList = imageReadService.findAllBySourceKeyIn(
-                command.imageObjectKeys());
+            command.imageObjectKeys());
         Region region = regionReadService.findByRegionCode(command.regionCode());
         ServiceItem savedServiceItem = serviceItemWriteService.save(command, company,
-                AddressCommand.RegionInfo.from(command, region));
+            AddressCommand.RegionInfo.from(command, region));
 
         if (!imageResourceList.isEmpty()) {
             ImageResource thumbnailImage = imageResourceList.getFirst();
@@ -82,9 +83,9 @@ public class ServiceItemService {
         Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-                .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
-                        s3Service.generateGetPresignedUrl(entity.getObjectKey())))
-                .toList();
+            .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
+                s3Service.generateGetPresignedUrl(entity.getObjectKey())))
+            .toList();
 
         Long nextCursor = null;
         if (!content.isEmpty()) {
@@ -109,22 +110,24 @@ public class ServiceItemService {
         return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }
 
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
         return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
+            s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndOnSale(ServiceItemCommand.RetrieveByCompanyAndOnSale command) {
         if (command.onSale()) {
             Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_IdAndStatus(command.companyId(), ServiceStatus.RECRUITING, command.pageable());
             return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                    s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
         }
         Page<ServiceItem> serviceItems = serviceItemReadService.findAllByCompany_Id(command.companyId(), command.pageable());
         return serviceItems.map(
-                serviceItem -> ServiceItemModel.Summary.from(serviceItem,
-                        s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
+            serviceItem -> ServiceItemModel.Summary.from(serviceItem,
+                s3Service.generateGetPresignedUrl(serviceItem.getObjectKey())));
     }
 
     @Transactional
@@ -143,13 +146,38 @@ public class ServiceItemService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ServiceItemModel.Count getCompanysServiceItemCount(Long companyId) {
         Long applying = serviceItemReadService.countRecruitingServiceItemsByCompanyId(companyId);
         Long completedCount = serviceItemReadService.countSucceededServiceItemsByCompanyId(companyId);
         Long totalCount = serviceItemReadService.countAllServiceItemsByCompanyId(companyId);
 
         return ServiceItemModel.Count.from(applying, completedCount, totalCount);
+    }
+
+    @Transactional(readOnly = true)
+    public CursorResult<ServiceItemModel.Nearby> searchNearby(ServiceItemCommand.Nearby command) {
+        Slice<ServiceItem> slice = serviceItemReadService.findNearbyByGeoHash(
+            command.latitude(), command.longitude(),
+            command.userLatitude(), command.userLongitude(),
+            command.radiusMeters(), command.size());
+
+        List<ServiceItemModel.Nearby> content = slice.getContent().stream()
+            .map(item -> {
+                double distanceKm = Math.round(GeoHashUtil.calculateDistance(
+                    command.userLatitude(), command.userLongitude(),
+                    item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
+                return ServiceItemModel.Nearby.from(item, distanceKm,
+                    s3Service.generateGetPresignedUrl(item.getObjectKey()));
+            })
+            .toList();
+
+        Long nextCursor = null;
+        if (!content.isEmpty()) {
+            nextCursor = content.getLast().serviceId();
+        }
+
+        return new CursorResult<>(content, nextCursor, slice.hasNext());
     }
 
     private void validateOwner(Long companyId, ServiceItem serviceItem) {
