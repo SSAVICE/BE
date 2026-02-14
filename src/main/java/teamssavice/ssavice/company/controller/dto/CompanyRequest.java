@@ -63,7 +63,8 @@ public class CompanyRequest {
     public record Validate(
         String name,
         String startDate,
-        String businessNumber
+        String businessNumber,
+        String businessName
     ) {
 
         public CompanyCommand.Validate toCommand() {
@@ -71,6 +72,7 @@ public class CompanyRequest {
                 .businessNumber(businessNumber)
                 .startDate(startDate)
                 .name(name)
+                .businessName(businessName)
                 .build();
         }
     }

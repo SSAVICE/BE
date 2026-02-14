@@ -28,7 +28,7 @@ public class NtsVerificationAdapter implements BusinessVerificationClient {
     public void validate(CompanyInfraCommand.Validate command) {
 
         NtsValidationRequest request = NtsValidationRequest.of(command.businessNumber(),
-            command.startDate(), command.name());
+            command.startDate(), command.name(), command.businessName());
 
         try {
             NtsValidationResponse response = ntsApiClient.validateBusiness(serviceKey, request);

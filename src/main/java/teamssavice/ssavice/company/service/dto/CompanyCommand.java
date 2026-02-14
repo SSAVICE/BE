@@ -93,7 +93,8 @@ public class CompanyCommand {
     public record Validate(
         String businessNumber,
         String startDate,
-        String name
+        String name,
+        String businessName
     ) {
 
         public CompanyInfraCommand.Validate toInfraCommand() {
@@ -101,6 +102,7 @@ public class CompanyCommand {
                 .businessNumber(this.businessNumber)
                 .startDate(this.startDate)
                 .name(this.name)
+                .businessName(this.businessName)
                 .build();
         }
 
