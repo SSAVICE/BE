@@ -50,7 +50,9 @@ public class ServiceItemCommand {
         Long lastId,      // 커서 ID
         Pageable pageable,
         boolean onSale,
-        Long userId
+        Long userId,
+        BigDecimal userLatitude,
+        BigDecimal userLongitude
     ) {
     }
 

@@ -83,8 +83,13 @@ public class ServiceItemService {
         Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
-            .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
-                s3Service.generateGetPresignedUrl(entity.getObjectKey())))
+            .map(entity -> {
+                double distanceKm = GeoHashUtil.calculateDistanceInKm(
+                    command.userLatitude(), command.userLongitude(),
+                    entity.getAddress().getLatitude(), entity.getAddress().getLongitude());
+                return ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
+                    s3Service.generateGetPresignedUrl(entity.getObjectKey()), distanceKm);
+            })
             .toList();
 
         Long nextCursor = null;

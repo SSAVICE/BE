@@ -81,7 +81,10 @@ public class ServiceItemRequest {
         // 커서 방식 (안드로이드 무한 스크롤과)
         @PositiveOrZero
         Long lastId,
-        Boolean onSale
+        Boolean onSale,
+
+        @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude
     ) {
         public ServiceItemCommand.Search toCommand(Long userId, Pageable pageable) {
             return ServiceItemCommand.Search.builder()
@@ -97,6 +100,8 @@ public class ServiceItemRequest {
                 .pageable(pageable)
                 .onSale(Boolean.TRUE.equals(onSale))
                 .userId(userId)
+                .userLatitude(userLatitude)
+                .userLongitude(userLongitude)
                 .build();
         }
     }
