@@ -92,7 +92,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             // 서비스 아이템 위치: 약 850m 떨어진 곳
             BigDecimal itemLat = new BigDecimal("37.5741");
@@ -101,7 +101,7 @@ class ServiceItemServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size), isNull()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -130,7 +130,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             // 약 1.2km 떨어진 위치
             BigDecimal itemLat = new BigDecimal("37.5773");
@@ -138,7 +138,7 @@ class ServiceItemServiceTest {
             ServiceItem item = createServiceItem(1L, "근처 서비스", itemLat, itemLon);
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -166,12 +166,12 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             ServiceItem item = createServiceItem(1L, "근처 서비스", userLat, userLon);
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
 
             String expectedUrl = "https://s3.example.com/image.jpg";
@@ -199,7 +199,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             ServiceItem item1 = createServiceItem(1L, "가까운 서비스", userLat, userLon);
             ServiceItem item2 = createServiceItem(2L, "중간 거리 서비스",
@@ -209,7 +209,7 @@ class ServiceItemServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(
                 List.of(item1, item2, item3), PageRequest.of(0, size), false);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -244,10 +244,10 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
 
             // when
@@ -271,12 +271,12 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             ServiceItem item = createServiceItem(1L, "테스트 서비스", userLat, userLon);
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
 
             String expectedUrl = "https://s3.example.com/thumbnail.jpg";
@@ -308,7 +308,7 @@ class ServiceItemServiceTest {
             int size = 5;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             List<ServiceItem> items = List.of(
                 createServiceItem(1L, "서비스 1", userLat, userLon),
@@ -319,7 +319,7 @@ class ServiceItemServiceTest {
             );
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(items, PageRequest.of(0, size), true); // hasNext = true
-            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt()))
+            given(serviceItemReadService.findNearbyByGeoHash(any(), any(), any(), any(), anyInt(), anyInt(), any()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -349,7 +349,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             // 서비스 아이템은 검색 중심(37.5575) 근처에 위치
             // 사용자(37.5665)로부터는 약 1km 떨어져 있음
@@ -360,7 +360,7 @@ class ServiceItemServiceTest {
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             // GeoHash 검색은 검색 중심 좌표로 수행됨
             given(serviceItemReadService.findNearbyByGeoHash(
-                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size), isNull()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -378,7 +378,7 @@ class ServiceItemServiceTest {
 
             // GeoHash 검색은 검색 중심으로 호출되었는지 검증
             then(serviceItemReadService).should().findNearbyByGeoHash(
-                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size));
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size), isNull());
         }
 
         @Test
@@ -397,7 +397,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             // 서비스 아이템은 검색 중심 근처 (사용자로부터는 약 0.8km 떨어짐)
             BigDecimal itemLat = new BigDecimal("37.5665");
@@ -406,7 +406,7 @@ class ServiceItemServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size), isNull()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
@@ -436,7 +436,7 @@ class ServiceItemServiceTest {
             int size = 10;
 
             ServiceItemCommand.Nearby command = ServiceItemCommand.Nearby.of(
-                userLat, userLon, searchLat, searchLon, radiusMeters, size);
+                userLat, userLon, searchLat, searchLon, radiusMeters, size, null);
 
             BigDecimal itemLat = new BigDecimal("37.5741");
             BigDecimal itemLon = new BigDecimal("126.9780");
@@ -444,7 +444,7 @@ class ServiceItemServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(item), PageRequest.of(0, size), false);
             given(serviceItemReadService.findNearbyByGeoHash(
-                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size)))
+                eq(searchLat), eq(searchLon), eq(userLat), eq(userLon), eq(radiusMeters), eq(size), isNull()))
                 .willReturn(mockSlice);
             given(s3Service.generateGetPresignedUrl(anyString()))
                 .willReturn("https://s3.example.com/image.jpg");
