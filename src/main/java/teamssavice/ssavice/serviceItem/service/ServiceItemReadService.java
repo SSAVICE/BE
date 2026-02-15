@@ -39,7 +39,7 @@ public class ServiceItemReadService {
     @Transactional(readOnly = true)
     public ServiceItem findById(Long serviceId) {
         return serviceItemRepository.findById(serviceId)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +65,7 @@ public class ServiceItemReadService {
     @Transactional(readOnly = true)
     public ServiceItem findByIdWithAddressAndImageList(Long id) {
         return serviceItemRepository.findByIdWithAddressAndImageList(id)
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
