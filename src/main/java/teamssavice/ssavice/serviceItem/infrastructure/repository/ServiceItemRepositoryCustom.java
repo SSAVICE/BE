@@ -23,6 +23,7 @@ public interface ServiceItemRepositoryCustom {
             BigDecimal userLongitude,
             int radiusMeters,
             List<String> geoHashes,
-            int size
+            int size,
+            Long lastId
     );
 }

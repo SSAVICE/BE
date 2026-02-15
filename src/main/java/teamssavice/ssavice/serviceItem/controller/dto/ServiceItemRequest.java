@@ -107,7 +107,8 @@ public class ServiceItemRequest {
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude,
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal latitude,
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
-        @NotNull @Positive @Max(100000) Integer radiusMeters
+        @NotNull @Positive @Max(100000) Integer radiusMeters,
+        @PositiveOrZero Long lastId
     ) {
         public ServiceItemCommand.Nearby toCommand(int size) {
             return ServiceItemCommand.Nearby.of(
@@ -116,7 +117,8 @@ public class ServiceItemRequest {
                 latitude,
                 longitude,
                 radiusMeters,
-                size
+                size,
+                lastId
             );
         }
     }

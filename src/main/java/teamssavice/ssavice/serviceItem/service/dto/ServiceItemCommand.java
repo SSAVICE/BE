@@ -125,7 +125,8 @@ public class ServiceItemCommand {
         BigDecimal latitude,
         BigDecimal longitude,
         int radiusMeters,
-        int size
+        int size,
+        Long lastId
     ) {
         public static Nearby of(
             BigDecimal userLatitude,
@@ -133,7 +134,8 @@ public class ServiceItemCommand {
             BigDecimal latitude,
             BigDecimal longitude,
             int radiusMeters,
-            int size
+            int size,
+            Long lastId
         ) {
             return Nearby.builder()
                 .userLatitude(userLatitude)
@@ -142,6 +144,7 @@ public class ServiceItemCommand {
                 .longitude(longitude)
                 .radiusMeters(radiusMeters)
                 .size(size)
+                .lastId(lastId)
                 .build();
         }
 

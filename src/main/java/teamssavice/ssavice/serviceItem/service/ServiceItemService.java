@@ -160,13 +160,13 @@ public class ServiceItemService {
         Slice<ServiceItem> slice = serviceItemReadService.findNearbyByGeoHash(
             command.latitude(), command.longitude(),
             command.userLatitude(), command.userLongitude(),
-            command.radiusMeters(), command.size());
+            command.radiusMeters(), command.size(), command.lastId());
 
         List<ServiceItemModel.Nearby> content = slice.getContent().stream()
             .map(item -> {
-                double distanceKm = Math.round(GeoHashUtil.calculateDistance(
+                double distanceKm = GeoHashUtil.calculateDistanceInKm(
                     command.userLatitude(), command.userLongitude(),
-                    item.getAddress().getLatitude(), item.getAddress().getLongitude()) / 10.0) / 100.0;
+                    item.getAddress().getLatitude(), item.getAddress().getLongitude());
                 return ServiceItemModel.Nearby.from(item, distanceKm,
                     s3Service.generateGetPresignedUrl(item.getObjectKey()));
             })

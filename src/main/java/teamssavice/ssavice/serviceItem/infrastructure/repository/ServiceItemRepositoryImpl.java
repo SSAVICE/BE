@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
@@ -16,6 +17,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static teamssavice.ssavice.address.QAddress.address1;
 import static teamssavice.ssavice.company.entity.QCompany.company;
@@ -146,7 +148,8 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         BigDecimal userLongitude,
         int radiusMeters,
         List<String> geoHashes,
-        int size
+        int size,
+        Long lastId
     ) {
         BooleanExpression geoCondition = buildGeoCondition(geoHashes);
         NumberExpression<Double> radiusDistanceExpr = haversineDistance(latitude, longitude);
@@ -156,13 +159,18 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             .and(applyOnSaleCondition(LocalDateTime.now(), true))
             .and(radiusDistanceExpr.loe((double) radiusMeters));
 
+        BooleanExpression cursorCondition = buildCursorCondition(lastId, userLatitude, userLongitude, userDistanceExpr);
+        if (cursorCondition != null) {
+            baseCondition = baseCondition.and(cursorCondition);
+        }
+
         List<ServiceItem> content = queryFactory
             .selectFrom(serviceItem)
             .join(serviceItem.company, company).fetchJoin()
             .join(serviceItem.address, address1).fetchJoin()
             .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
             .where(baseCondition)
-            .orderBy(userDistanceExpr.asc())
+            .orderBy(userDistanceExpr.asc(), serviceItem.id.asc())
             .limit(size + 1)
             .fetch();
 
@@ -173,6 +181,35 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         }
 
         return new SliceImpl<>(content, PageRequest.of(0, size), hasNext);
+    }
+
+    private BooleanExpression buildCursorCondition(
+        Long lastId, BigDecimal userLatitude, BigDecimal userLongitude,
+        NumberExpression<Double> userDistanceExpr
+    ) {
+        if (lastId == null) {
+            return null;
+        }
+        Address lastAddress = findAddressByServiceItemId(lastId).orElse(null);
+        if (lastAddress == null) {
+            return null;
+        }
+        double lastDistance = GeoHashUtil.calculateDistance(
+            userLatitude, userLongitude,
+            lastAddress.getLatitude(), lastAddress.getLongitude()
+        );
+        return userDistanceExpr.gt(lastDistance)
+            .or(userDistanceExpr.eq(lastDistance).and(serviceItem.id.gt(lastId)));
+    }
+
+    private Optional<Address> findAddressByServiceItemId(Long serviceItemId) {
+        return Optional.ofNullable(
+            queryFactory
+                .select(serviceItem.address)
+                .from(serviceItem)
+                .where(serviceItem.id.eq(serviceItemId))
+                .fetchOne()
+        );
     }
 
     private NumberExpression<Double> haversineDistance(BigDecimal latitude, BigDecimal longitude) {

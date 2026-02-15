@@ -87,13 +87,13 @@ public class ServiceItemReadService {
     public Slice<ServiceItem> findNearbyByGeoHash(
             BigDecimal latitude, BigDecimal longitude,
             BigDecimal userLatitude, BigDecimal userLongitude,
-            int radiusMeters, int size) {
+            int radiusMeters, int size, Long lastId) {
         int queryPrecision = GeoHashUtil.getPrecisionForRadius(radiusMeters);
         String centerHash = GeoHashUtil.encode(latitude, longitude, queryPrecision);
         List<String> neighbors = GeoHashUtil.getNeighbors(centerHash);
 
         return serviceItemRepository.findNearbyByGeoHashes(
             latitude, longitude, userLatitude, userLongitude,
-            radiusMeters, neighbors, size);
+            radiusMeters, neighbors, size, lastId);
     }
 }
