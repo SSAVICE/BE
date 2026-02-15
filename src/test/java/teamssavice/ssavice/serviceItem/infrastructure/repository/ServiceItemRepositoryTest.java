@@ -28,6 +28,7 @@ import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
 
@@ -949,5 +950,295 @@ class ServiceItemRepositoryTest {
         assertThat(page2.getContent()).hasSize(1);
         assertThat(page2.hasNext()).isFalse();
         assertThat(page2.getContent().get(0).getId()).isNotEqualTo(page1.getContent().get(0).getId());
+    }
+
+    @Test
+    @DisplayName("search_sortBy4_거리순정렬_가까운순서로반환")
+    void search_sortBy4_returns_items_in_distance_order() {
+        // given
+        tem.persist(this.user);
+        tem.persist(this.company);
+
+        BigDecimal userLat = new BigDecimal("37.5665");
+        BigDecimal userLon = new BigDecimal("126.9780");
+
+        // 가장 가까운 아이템 (~0m)
+        Address nearestAddress = createAddressWithCoordinates(userLat, userLon);
+        ServiceItem nearestItem = createRecruitingServiceItem("가장 가까운", nearestAddress);
+        tem.persist(nearestItem);
+
+        // 중간 거리 아이템 (~100m)
+        Address middleAddress = createAddressWithCoordinates(
+            new BigDecimal("37.5675"), new BigDecimal("126.9785"));
+        ServiceItem middleItem = createRecruitingServiceItem("중간 거리", middleAddress);
+        tem.persist(middleItem);
+
+        // 먼 아이템 (~200m)
+        Address farAddress = createAddressWithCoordinates(
+            new BigDecimal("37.5685"), new BigDecimal("126.9790"));
+        ServiceItem farItem = createRecruitingServiceItem("먼 거리", farAddress);
+        tem.persist(farItem);
+
+        tem.flush();
+
+        ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .sortBy(4)
+            .lastId(null)
+            .pageable(PageRequest.of(0, 10))
+            .onSale(true)
+            .build();
+
+        // when
+        Slice<ServiceItem> result = serviceItemRepository.search(command);
+
+        // then - 거리순 정렬 확인
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("가장 가까운");
+        assertThat(result.getContent().get(1).getTitle()).isEqualTo("중간 거리");
+        assertThat(result.getContent().get(2).getTitle()).isEqualTo("먼 거리");
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("search_sortBy4_2km반경필터")
+    void search_sortBy4_filters_by_2km_radius() {
+        // given
+        tem.persist(this.user);
+        tem.persist(this.company);
+
+        BigDecimal userLat = new BigDecimal("37.5665");
+        BigDecimal userLon = new BigDecimal("126.9780");
+
+        // 2km 반경 내 아이템 (~100m)
+        Address insideAddress = createAddressWithCoordinates(
+            new BigDecimal("37.5675"), new BigDecimal("126.9785"));
+        ServiceItem insideItem = createRecruitingServiceItem("반경 내", insideAddress);
+        tem.persist(insideItem);
+
+        // 2km 반경 밖 아이템 (~2.6km)
+        Address outsideAddress = createAddressWithCoordinates(
+            new BigDecimal("37.5900"), new BigDecimal("126.9780"));
+        ServiceItem outsideItem = createRecruitingServiceItem("반경 밖", outsideAddress);
+        tem.persist(outsideItem);
+
+        tem.flush();
+
+        ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .sortBy(4)
+            .lastId(null)
+            .pageable(PageRequest.of(0, 10))
+            .onSale(true)
+            .build();
+
+        // when
+        Slice<ServiceItem> result = serviceItemRepository.search(command);
+
+        // then - 2km 반경 내 아이템만 반환
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("반경 내");
+    }
+
+    @Test
+    @DisplayName("search_sortBy4_커서페이지네이션")
+    void search_sortBy4_cursor_pagination_with_lastId() {
+        // given
+        tem.persist(this.user);
+        tem.persist(this.company);
+
+        BigDecimal userLat = new BigDecimal("37.5665");
+        BigDecimal userLon = new BigDecimal("126.9780");
+
+        // 5개의 서로 다른 거리의 아이템 생성
+        for (int i = 0; i < 5; i++) {
+            BigDecimal lat = new BigDecimal("37.5665").add(new BigDecimal("0.001").multiply(new BigDecimal(i)));
+            BigDecimal lon = new BigDecimal("126.9780").add(new BigDecimal("0.001").multiply(new BigDecimal(i)));
+            Address address = createAddressWithCoordinates(lat, lon);
+            ServiceItem item = createRecruitingServiceItem("서비스 " + i, address);
+            tem.persist(item);
+        }
+
+        tem.flush();
+        tem.clear();
+
+        // Hibernate Statistics 활성화
+        SessionFactory sessionFactory = emf.unwrap(SessionFactory.class);
+        Statistics statistics = sessionFactory.getStatistics();
+        statistics.setStatisticsEnabled(true);
+        statistics.clear();
+
+        ServiceItemCommand.Search command1 = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .sortBy(4)
+            .lastId(null)
+            .pageable(PageRequest.of(0, 3))
+            .onSale(true)
+            .build();
+
+        // when - 첫 페이지
+        Slice<ServiceItem> firstPage = serviceItemRepository.search(command1);
+
+        // then - lastId가 null일 때 쿼리 1개 (메인 쿼리만)
+        long queryCount1 = statistics.getPrepareStatementCount();
+        assertThat(queryCount1).isEqualTo(1L);
+        assertThat(firstPage.getContent()).hasSize(3);
+        assertThat(firstPage.hasNext()).isTrue();
+
+        // Hibernate Statistics 초기화
+        statistics.clear();
+
+        ServiceItemCommand.Search command2 = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .sortBy(4)
+            .lastId(firstPage.getContent().get(2).getId())
+            .pageable(PageRequest.of(0, 3))
+            .onSale(true)
+            .build();
+
+        // when - 두 번째 페이지
+        Slice<ServiceItem> secondPage = serviceItemRepository.search(command2);
+
+        // then - lastId가 있을 때 쿼리 2개 (address 조회 + 메인 쿼리)
+        long queryCount2 = statistics.getPrepareStatementCount();
+        assertThat(queryCount2).isEqualTo(2L);
+        assertThat(secondPage.getContent()).hasSize(2);
+        assertThat(secondPage.hasNext()).isFalse();
+
+        // 첫 페이지의 아이템들이 두 번째 페이지에 없어야 함
+        List<Long> firstPageIds = firstPage.getContent().stream().map(ServiceItem::getId).toList();
+        secondPage.getContent().forEach(item ->
+            assertThat(firstPageIds).doesNotContain(item.getId()));
+    }
+
+    @Test
+    @DisplayName("search_sortBy4_같은거리_ID순정렬")
+    void search_sortBy4_sorts_same_distance_items_by_id_asc() {
+        // given
+        tem.persist(this.user);
+        tem.persist(this.company);
+
+        BigDecimal userLat = new BigDecimal("37.5665");
+        BigDecimal userLon = new BigDecimal("126.9780");
+
+        // 같은 위치에 3개의 아이템 생성
+        for (int i = 0; i < 3; i++) {
+            Address address = createAddressWithCoordinates(userLat, userLon);
+            ServiceItem item = createRecruitingServiceItem("서비스 " + i, address);
+            tem.persist(item);
+        }
+
+        tem.flush();
+
+        ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .sortBy(4)
+            .lastId(null)
+            .pageable(PageRequest.of(0, 10))
+            .onSale(true)
+            .build();
+
+        // when
+        Slice<ServiceItem> result = serviceItemRepository.search(command);
+
+        // then - id 오름차순 정렬 확인
+        assertThat(result.getContent()).hasSize(3);
+        for (int i = 0; i < 2; i++) {
+            assertThat(result.getContent().get(i).getId())
+                .isLessThan(result.getContent().get(i + 1).getId());
+        }
+    }
+
+    @Test
+    @DisplayName("search_sortBy4_검색필터와함께")
+    void search_sortBy4_works_with_other_filters() {
+        // given
+        tem.persist(this.user);
+        tem.persist(this.company);
+
+        BigDecimal userLat = new BigDecimal("37.5665");
+        BigDecimal userLon = new BigDecimal("126.9780");
+
+        // 카테고리가 일치하는 아이템
+        Address address1 = createAddressWithCoordinates(userLat, userLon);
+        ServiceItem matchingItem = ServiceItem.builder()
+            .title("검색어포함 서비스")
+            .description("설명")
+            .price(Price.of(15000L, 10))
+            .minimumMember(10L)
+            .maximumMember(20L)
+            .startDate(LocalDateTime.now().plusDays(10))
+            .endDate(LocalDateTime.now().plusDays(30))
+            .deadline(LocalDateTime.now().plusDays(5))
+            .category("카테고리A")
+            .company(company)
+            .address(address1)
+            .status(ServiceStatus.RECRUITING)
+            .build();
+        tem.persist(matchingItem);
+
+        // 카테고리가 다른 아이템
+        Address address2 = createAddressWithCoordinates(userLat, userLon);
+        ServiceItem differentCategoryItem = ServiceItem.builder()
+            .title("다른 카테고리")
+            .description("설명")
+            .price(Price.of(10000L, 10))
+            .minimumMember(10L)
+            .maximumMember(20L)
+            .startDate(LocalDateTime.now().plusDays(10))
+            .endDate(LocalDateTime.now().plusDays(30))
+            .deadline(LocalDateTime.now().plusDays(5))
+            .category("카테고리B")
+            .company(company)
+            .address(address2)
+            .status(ServiceStatus.RECRUITING)
+            .build();
+        tem.persist(differentCategoryItem);
+
+        // 가격 범위 밖 아이템
+        Address address3 = createAddressWithCoordinates(userLat, userLon);
+        ServiceItem expensiveItem = ServiceItem.builder()
+            .title("비싼 서비스")
+            .description("설명")
+            .price(Price.of(50000L, 10))
+            .minimumMember(10L)
+            .maximumMember(20L)
+            .startDate(LocalDateTime.now().plusDays(10))
+            .endDate(LocalDateTime.now().plusDays(30))
+            .deadline(LocalDateTime.now().plusDays(5))
+            .category("카테고리A")
+            .company(company)
+            .address(address3)
+            .status(ServiceStatus.RECRUITING)
+            .build();
+        tem.persist(expensiveItem);
+
+        tem.flush();
+
+        ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
+            .userLatitude(userLat)
+            .userLongitude(userLon)
+            .category("카테고리A")
+            .query("검색어포함")
+            .minPrice(10000L)
+            .maxPrice(20000L)
+            .sortBy(4)
+            .lastId(null)
+            .pageable(PageRequest.of(0, 10))
+            .onSale(true)
+            .build();
+
+        // when
+        Slice<ServiceItem> result = serviceItemRepository.search(command);
+
+        // then - 모든 필터 조건을 만족하는 아이템만 반환
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("검색어포함 서비스");
+        assertThat(result.getContent().get(0).getCategory()).isEqualTo("카테고리A");
     }
 }
