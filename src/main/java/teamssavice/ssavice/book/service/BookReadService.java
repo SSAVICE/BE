@@ -17,7 +17,9 @@ import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -46,8 +48,7 @@ public class BookReadService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOOKING_NOT_FOUND));
     }
 
-    public boolean isBookedByUserIdAndServiceId(@Nullable Long userId, Long serviceItemId) {
-        if(userId == null) return false;
+    public boolean isBookedByUserIdAndServiceId(Long userId, Long serviceItemId) {
         return bookRepository.findFirstByUserIdAndServiceItemIdOrderByCreatedAtDesc(userId, serviceItemId)
                 .map(book -> book.getBookStatus() == BookStatus.RESERVED)
                 .orElse(false);

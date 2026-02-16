@@ -32,6 +32,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -81,7 +82,9 @@ public class ServiceItemService {
     public CursorResult<ServiceItemModel.Search> search(@Nullable Long userId, ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
-        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(userId, items.getContent());
+        Set<Long> set = (userId != null)
+                ? bookReadService.findReservedServiceItemIdsFromLatestBooks(userId, items.getContent())
+                : Collections.emptySet();
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(entity -> ServiceItemModel.Search.from(entity, set.contains(entity.getId()),
@@ -105,8 +108,8 @@ public class ServiceItemService {
             imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
 
-        boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
-        boolean isBooked = bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
+        boolean isLiked = (userId != null) && wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
+        boolean isBooked = (userId != null) && bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
 
         return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }
