@@ -9,6 +9,7 @@ import teamssavice.ssavice.auth.controller.dto.AuthResponse;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.auth.service.dto.AuthModel;
 import teamssavice.ssavice.global.annotation.CurrentRefreshToken;
+import teamssavice.ssavice.global.annotation.PermitAll;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ import teamssavice.ssavice.global.annotation.CurrentRefreshToken;
 public class AuthController {
     private final TokenService tokenService;
 
+    @PermitAll
     @GetMapping("token/refresh")
     public ResponseEntity<AuthResponse.Refresh> refresh(
             @CurrentRefreshToken String refreshToken
@@ -24,6 +26,7 @@ public class AuthController {
         return ResponseEntity.ok(AuthResponse.Refresh.from(model));
     }
 
+    @PermitAll
     @GetMapping("/logout")
     public ResponseEntity<Void> logout(
             @CurrentRefreshToken String refreshToken

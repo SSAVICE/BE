@@ -1,7 +1,6 @@
 package teamssavice.ssavice.wish.service;
 
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -9,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.wish.entity.Wish;
 import teamssavice.ssavice.wish.infrastructure.WishRepository;
 import teamssavice.ssavice.wish.service.dto.WishCommand;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,6 @@ public class WishReadService {
 
     @Transactional(readOnly = true)
     public boolean existsByUserIdAndServiceItemId(Long userId, Long serviceId) {
-
         return wishRepository.existsByUserIdAndServiceItemId(userId, serviceId);
     }
 

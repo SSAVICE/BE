@@ -13,8 +13,10 @@ import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
@@ -36,6 +38,7 @@ public class UserController {
     private final ImageService imageService;
     private final S3Service s3Service;
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<UserResponse.Login> login(
         @RequestBody @Valid UserRequest.Login request
@@ -46,20 +49,22 @@ public class UserController {
     }
 
     @GetMapping("/profile")
+    @RequireRole(Role.USER)
     public ResponseEntity<UserResponse.Info> profile(
-        @CurrentId Long userId
+        @CurrentAuth Auth authUser
     ) {
-        UserModel.Info model = userService.getProfile(userId);
+        UserModel.Info model = userService.getProfile(authUser.id());
 
         return ResponseEntity.ok(UserResponse.Info.from(model));
     }
 
     @PostMapping("/profile")
+    @RequireRole(Role.USER)
     public ResponseEntity<UserResponse.Summary> Modify(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid UserRequest.Modify request
     ) {
-        UserModel.Modify model = userService.modifyProfile(request.toCommand(userId));
+        UserModel.Modify model = userService.modifyProfile(request.toCommand(authUser.id()));
 
         return ResponseEntity.ok(UserResponse.Summary.from(model));
     }
@@ -67,10 +72,10 @@ public class UserController {
     @PostMapping("/profile/image")
     @RequireRole(Role.USER)
     public ResponseEntity<ImageResponse.PresignedUrl> createProfilePresignedUrl(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.PutPresignedUrl model = imageService.updateImage(userId, ImagePath.profile,
+        ImageModel.PutPresignedUrl model = imageService.updateImage(authUser.id(), ImagePath.profile,
             ImageContentType.from(request.contentType()));
         return ResponseEntity.ok(ImageResponse.PresignedUrl.from(model));
     }
@@ -78,30 +83,30 @@ public class UserController {
     @PostMapping("/profile/image/confirm")
     @RequireRole(Role.USER)
     public ResponseEntity<Void> confirmProfileImageUpload(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid ImageRequest.Confirm request
     ) {
         s3Service.validateTempImageOrDelete(request.objectKey());
-        userService.updateProfileImage(userId, request.objectKey());
+        userService.updateProfileImage(authUser.id(), request.objectKey());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/address")
     @RequireRole(Role.USER)
     public ResponseEntity<AddressResponse.RegionDetail> getAddress(
-        @CurrentId Long userId
+        @CurrentAuth Auth authUser
     ) {
-        AddressModel.RegionDetail model = userService.getUserAddress(userId);
+        AddressModel.RegionDetail model = userService.getUserAddress(authUser.id());
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
     }
 
     @PatchMapping("/address")
     @RequireRole(Role.USER)
     public ResponseEntity<AddressResponse.RegionDetail> patchAddress(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid AddressRequest.Region request
     ) {
-        AddressModel.RegionDetail model = userService.updateUserAddress(request.toCommand(userId));
+        AddressModel.RegionDetail model = userService.updateUserAddress(request.toCommand(authUser.id()));
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
     }
 }

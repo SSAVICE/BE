@@ -20,8 +20,10 @@ import teamssavice.ssavice.company.controller.dto.CompanyResponse;
 import teamssavice.ssavice.company.service.CompanyService;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.company.service.dto.CompanyModel;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
+import teamssavice.ssavice.global.annotation.PermitAll;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImageContentType;
@@ -40,6 +42,7 @@ public class CompanyController {
     private final ImageService imageService;
     private final S3Service s3Service;
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<CompanyResponse.Login> login(
         @RequestBody @Valid CompanyRequest.Login request
@@ -48,36 +51,37 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @RequireRole(Role.USER)
     @PostMapping
+    @RequireRole(Role.USER)
     public ResponseEntity<CompanyResponse.Login> register(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid CompanyRequest.Create request
     ) {
         CompanyModel.Login model = companyService.register(
-            CompanyCommand.Create.from(userId, request));
+            CompanyCommand.Create.from(authUser.id(), request));
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
-    @RequireRole(Role.COMPANY)
     @PutMapping
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<CompanyResponse> putCompany(
-        @CurrentId Long companyId,
+        @CurrentAuth Auth authCompany,
         @RequestBody @Valid CompanyRequest.Update request
     ) {
-        companyService.updateCompany(CompanyCommand.Update.from(companyId, request));
+        companyService.updateCompany(CompanyCommand.Update.from(authCompany.id(), request));
         return ResponseEntity.ok().build();
     }
 
-    @RequireRole(Role.COMPANY)
     @GetMapping
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<CompanyResponse.MyCompany> getCompany(
-        @CurrentId Long companyId
+        @CurrentAuth Auth authCompany
     ) {
-        CompanyModel.MyCompany model = companyService.getMyCompany(companyId);
+        CompanyModel.MyCompany model = companyService.getMyCompany(authCompany.id());
         return ResponseEntity.ok(CompanyResponse.MyCompany.from(model));
     }
 
+    @PermitAll
     @GetMapping("/{company-id}")
     public ResponseEntity<CompanyResponse.Info> getCompanyById(
         @PathVariable("company-id") @Positive Long companyId
@@ -86,6 +90,7 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponse.Info.from(model));
     }
 
+    @PermitAll
     @GetMapping("/{company-id}/summary")
     public ResponseEntity<CompanyResponse.Summary> getCompanySummary(
         @PathVariable("company-id") @Positive Long companyId
@@ -97,10 +102,10 @@ public class CompanyController {
     @PostMapping("/image")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<ImageResponse.PresignedUrl> createCompanyPresignedUrl(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authCompany,
         @RequestBody @Valid ImageRequest.ContentType request
     ) {
-        ImageModel.PutPresignedUrl model = imageService.updateImage(userId, ImagePath.company,
+        ImageModel.PutPresignedUrl model = imageService.updateImage(authCompany.id(), ImagePath.company,
             ImageContentType.from(request.contentType()));
         return ResponseEntity.ok(ImageResponse.PresignedUrl.from(model));
     }
@@ -108,11 +113,11 @@ public class CompanyController {
     @PostMapping("/image/confirm")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<Void> confirmCompanyImageUpload(
-        @CurrentId Long companyId,
+        @CurrentAuth Auth authCompany,
         @RequestBody @Valid ImageRequest.Confirm request
     ) {
         s3Service.validateTempImageOrDelete(request.objectKey());
-        companyService.updateCompanyImage(companyId, request.objectKey());
+        companyService.updateCompanyImage(authCompany.id(), request.objectKey());
         return ResponseEntity.ok().build();
     }
 
@@ -120,10 +125,10 @@ public class CompanyController {
     @PostMapping("/validate")
     @RequireRole(Role.USER)
     public ResponseEntity<CompanyResponse.Validate> validateBusiness(
-        @CurrentId Long userId,
+        @CurrentAuth Auth authUser,
         @RequestBody @Valid CompanyRequest.Validate request
     ) {
-        CompanyModel.Validate model = companyService.validateBusinessNumber(userId,
+        CompanyModel.Validate model = companyService.validateBusinessNumber(authUser.id(),
             request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
     }
@@ -131,9 +136,9 @@ public class CompanyController {
     @GetMapping("/address")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<AddressResponse.RegionDetail> getAddress(
-            @CurrentId Long companyId
+            @CurrentAuth Auth authCompany
     ) {
-        AddressModel.RegionDetail model = companyService.getCompanyAddress(companyId);
+        AddressModel.RegionDetail model = companyService.getCompanyAddress(authCompany.id());
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
     }
 }
