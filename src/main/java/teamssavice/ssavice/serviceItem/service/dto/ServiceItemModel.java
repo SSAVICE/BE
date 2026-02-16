@@ -83,33 +83,35 @@ public class ServiceItemModel {
 
             LocalDateTime deadline,
 
-            boolean isBooked
+        boolean isBooked,
+        double distanceKm
     ) {
-        public static Search from (ServiceItem entity, boolean isBooked, String imageUrl) {
+        public static Search from(ServiceItem entity, boolean isBooked, String imageUrl, double distanceKm) {
             return Search.builder()
-                    .serviceId(entity.getId())
-                    .companyId(entity.getCompany().getId())
-                    .companyName(entity.getCompany().getCompanyName())
-                    .serviceImageUrl(imageUrl)
-                    .title(entity.getTitle())
-                    .basePrice(entity.getPrice().getBasePrice())
-                    .discountRatio(entity.getPrice().getDiscountRate())
-                    .discountedPrice(entity.getPrice().getDiscountedPrice())
-                    .status(entity.getStatus())
-                    .deadline(entity.getDeadline())
-                    .category(entity.getCategory())
-                    .tag(entity.getTag())
-                    .currentMember(entity.getCurrentMember())
-                    .minimumMember(entity.getMinimumMember())
-                    .maximumMember(entity.getMaximumMember())
-                    .region(AddressModel.RegionSummary.builder()
-                            .gugun(entity.getAddress().getGugun())
-                            .region(entity.getAddress().getRegion())
-                            .latitude(entity.getAddress().getLatitude())
-                            .longitude(entity.getAddress().getLongitude())
-                            .build())
-                    .isBooked(isBooked)
-                    .build();
+                .serviceId(entity.getId())
+                .companyId(entity.getCompany().getId())
+                .companyName(entity.getCompany().getCompanyName())
+                .serviceImageUrl(imageUrl)
+                .title(entity.getTitle())
+                .basePrice(entity.getPrice().getBasePrice())
+                .discountRatio(entity.getPrice().getDiscountRate())
+                .discountedPrice(entity.getPrice().getDiscountedPrice())
+                .status(entity.getStatus())
+                .deadline(entity.getDeadline())
+                .category(entity.getCategory())
+                .tag(entity.getTag())
+                .currentMember(entity.getCurrentMember())
+                .minimumMember(entity.getMinimumMember())
+                .maximumMember(entity.getMaximumMember())
+                .region(AddressModel.RegionSummary.builder()
+                    .gugun(entity.getAddress().getGugun())
+                    .region(entity.getAddress().getRegion())
+                    .latitude(entity.getAddress().getLatitude())
+                    .longitude(entity.getAddress().getLongitude())
+                    .build())
+                .isBooked(isBooked)
+                .distanceKm(distanceKm)
+                .build();
         }
     }
 

@@ -81,7 +81,10 @@ public class ServiceItemRequest {
         // 커서 방식 (안드로이드 무한 스크롤과)
         @PositiveOrZero
         Long lastId,
-        Boolean onSale
+        Boolean onSale,
+
+        @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude
     ) {
         public ServiceItemCommand.Search toCommand(int size) {
             return ServiceItemCommand.Search.builder()
@@ -96,6 +99,8 @@ public class ServiceItemRequest {
                 .lastId(lastId)
                 .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
+                .userLatitude(userLatitude)
+                .userLongitude(userLongitude)
                 .build();
         }
     }
@@ -106,7 +111,8 @@ public class ServiceItemRequest {
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude,
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal latitude,
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
-        @NotNull @Positive @Max(100000) Integer radiusMeters
+        @NotNull @Positive @Max(100000) Integer radiusMeters,
+        @PositiveOrZero Long lastId
     ) {
         public ServiceItemCommand.Nearby toCommand(int size) {
             return ServiceItemCommand.Nearby.of(
@@ -115,7 +121,8 @@ public class ServiceItemRequest {
                 latitude,
                 longitude,
                 radiusMeters,
-                size
+                size,
+                lastId
             );
         }
     }

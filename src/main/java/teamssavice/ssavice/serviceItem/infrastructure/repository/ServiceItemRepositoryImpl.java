@@ -1,5 +1,6 @@
 package teamssavice.ssavice.serviceItem.infrastructure.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -7,6 +8,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
@@ -16,6 +18,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static teamssavice.ssavice.address.QAddress.address1;
 import static teamssavice.ssavice.company.entity.QCompany.company;
@@ -30,24 +33,41 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     @Override
     public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
         LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = command.pageable();
-        int pageSize = pageable.getPageSize();
+        int pageSize = command.pageable().getPageSize();
+        boolean isDistanceSort = Integer.valueOf(4).equals(command.sortBy());
+
+        BooleanBuilder baseCondition = new BooleanBuilder();
+        NumberExpression<Double> distanceExpr = null;
+
+        OrderSpecifier<?>[] orderSpecifiers;
+
+        if (isDistanceSort) {
+            String geoHash = GeoHashUtil.encode(command.userLatitude(), command.userLongitude(), 5);
+            baseCondition.and(buildGeoCondition(GeoHashUtil.getNeighbors(geoHash)));
+            distanceExpr = haversineDistance(command.userLatitude(), command.userLongitude());
+            baseCondition.and(distanceExpr.loe(2000.0));
+            baseCondition.and(distanceCursorCondition(
+                command.lastId(), command.userLatitude(), command.userLongitude(), distanceExpr));
+            orderSpecifiers = new OrderSpecifier[]{distanceExpr.asc(), serviceItem.id.asc()};
+        } else {
+            baseCondition.and(ltLastId(command.lastId()));
+            orderSpecifiers = getOrderSpecifier(command.sortBy());
+        }
+
+        baseCondition
+            .and(eqCategory(command.category()))
+            .and(containsQuery(command.query()))
+            .and(goeMinPrice(command.minPrice()))
+            .and(loeMaxPrice(command.maxPrice()))
+            .and(applyOnSaleCondition(now, command.onSale()));
 
         List<ServiceItem> content = queryFactory
             .selectFrom(serviceItem)
-
             .join(serviceItem.company, company).fetchJoin()
             .join(serviceItem.address, address1).fetchJoin()
             .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
-            .where(
-                ltLastId(command.lastId()),
-                eqCategory(command.category()),
-                containsQuery(command.query()),
-                goeMinPrice(command.minPrice()),
-                loeMaxPrice(command.maxPrice()),
-                applyOnSaleCondition(now, command.onSale())
-            )
-            .orderBy(getOrderSpecifier(command.sortBy()))
+            .where(baseCondition)
+            .orderBy(orderSpecifiers)
             .limit(pageSize + 1)
             .fetch();
 
@@ -89,6 +109,48 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
+    @Override
+    public Slice<ServiceItem> findNearbyByGeoHashes(
+        BigDecimal latitude,
+        BigDecimal longitude,
+        BigDecimal userLatitude,
+        BigDecimal userLongitude,
+        int radiusMeters,
+        List<String> geoHashes,
+        int size,
+        Long lastId
+    ) {
+        BooleanExpression geoCondition = buildGeoCondition(geoHashes);
+        NumberExpression<Double> radiusDistanceExpr = haversineDistance(latitude, longitude);
+        NumberExpression<Double> userDistanceExpr = haversineDistance(userLatitude, userLongitude);
+
+        BooleanExpression baseCondition = geoCondition
+            .and(applyOnSaleCondition(LocalDateTime.now(), true))
+            .and(radiusDistanceExpr.loe((double) radiusMeters));
+
+        BooleanExpression cursorCondition = distanceCursorCondition(lastId, userLatitude, userLongitude, userDistanceExpr);
+        if (cursorCondition != null) {
+            baseCondition = baseCondition.and(cursorCondition);
+        }
+
+        List<ServiceItem> content = queryFactory
+            .selectFrom(serviceItem)
+            .join(serviceItem.company, company).fetchJoin()
+            .join(serviceItem.address, address1).fetchJoin()
+            .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
+            .where(baseCondition)
+            .orderBy(userDistanceExpr.asc(), serviceItem.id.asc())
+            .limit(size + 1)
+            .fetch();
+
+        boolean hasNext = false;
+        if (content.size() > size) {
+            content.remove(size);
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(content, PageRequest.of(0, size), hasNext);
+    }
 
     private BooleanExpression ltLastId(Long lastId) {
         return lastId == null ? null : serviceItem.id.lt(lastId);
@@ -138,41 +200,34 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             .and(serviceItem.deadline.gt(now));
     }
 
-    @Override
-    public Slice<ServiceItem> findNearbyByGeoHashes(
-        BigDecimal latitude,
-        BigDecimal longitude,
-        BigDecimal userLatitude,
-        BigDecimal userLongitude,
-        int radiusMeters,
-        List<String> geoHashes,
-        int size
+
+    private BooleanExpression distanceCursorCondition(
+        Long lastId, BigDecimal userLatitude, BigDecimal userLongitude,
+        NumberExpression<Double> userDistanceExpr
     ) {
-        BooleanExpression geoCondition = buildGeoCondition(geoHashes);
-        NumberExpression<Double> radiusDistanceExpr = haversineDistance(latitude, longitude);
-        NumberExpression<Double> userDistanceExpr = haversineDistance(userLatitude, userLongitude);
-
-        BooleanExpression baseCondition = geoCondition
-            .and(applyOnSaleCondition(LocalDateTime.now(), true))
-            .and(radiusDistanceExpr.loe((double) radiusMeters));
-
-        List<ServiceItem> content = queryFactory
-            .selectFrom(serviceItem)
-            .join(serviceItem.company, company).fetchJoin()
-            .join(serviceItem.address, address1).fetchJoin()
-            .leftJoin(serviceItem.thumbnailImageResource, imageResource).fetchJoin()
-            .where(baseCondition)
-            .orderBy(userDistanceExpr.asc())
-            .limit(size + 1)
-            .fetch();
-
-        boolean hasNext = false;
-        if (content.size() > size) {
-            content.remove(size);
-            hasNext = true;
+        if (lastId == null) {
+            return null;
         }
+        Address lastAddress = findAddressByServiceItemId(lastId).orElse(null);
+        if (lastAddress == null) {
+            return null;
+        }
+        double lastDistance = GeoHashUtil.calculateDistance(
+            userLatitude, userLongitude,
+            lastAddress.getLatitude(), lastAddress.getLongitude()
+        );
+        return userDistanceExpr.gt(lastDistance)
+            .or(userDistanceExpr.eq(lastDistance).and(serviceItem.id.gt(lastId)));
+    }
 
-        return new SliceImpl<>(content, PageRequest.of(0, size), hasNext);
+    private Optional<Address> findAddressByServiceItemId(Long serviceItemId) {
+        return Optional.ofNullable(
+            queryFactory
+                .select(serviceItem.address)
+                .from(serviceItem)
+                .where(serviceItem.id.eq(serviceItemId))
+                .fetchOne()
+        );
     }
 
     private NumberExpression<Double> haversineDistance(BigDecimal latitude, BigDecimal longitude) {

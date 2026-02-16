@@ -49,19 +49,19 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size), isNull()))
                     .willReturn(mockSlice);
 
             // when
             Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 6),
-                    eq(size)
+                    eq(size), isNull()
             );
         }
 
@@ -78,19 +78,19 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size), isNull()))
                     .willReturn(mockSlice);
 
             // when
             Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 5),
-                    eq(size)
+                    eq(size), isNull()
             );
         }
 
@@ -107,19 +107,19 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size)))
+                    eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters), anyList(), eq(size), isNull()))
                     .willReturn(mockSlice);
 
             // when
             Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9 && geoHashes.get(0).length() == 4),
-                    eq(size)
+                    eq(size), isNull()
             );
         }
 
@@ -139,11 +139,11 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt(), any()))
                     .willReturn(mockSlice);
 
             // when
-            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             then(serviceItemRepository).should().findNearbyByGeoHashes(
@@ -152,7 +152,7 @@ class ServiceItemReadServiceTest {
                             geoHashes.size() == 9 &&
                             geoHashes.containsAll(expectedNeighbors)
                     ),
-                    eq(size)
+                    eq(size), isNull()
             );
         }
 
@@ -170,12 +170,12 @@ class ServiceItemReadServiceTest {
             List<ServiceItem> mockItems = List.of(); // 실제 테스트에서는 mock ServiceItem 생성
             Slice<ServiceItem> mockSlice = new SliceImpl<>(mockItems, PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt(), any()))
                     .willReturn(mockSlice);
 
             // when
             Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             assertThat(result).isEqualTo(mockSlice);
@@ -195,15 +195,15 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt(), any()))
                     .willReturn(mockSlice);
 
             // when
-            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+            serviceItemReadService.findNearbyByGeoHash(latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             then(serviceItemRepository).should(times(1))
-                    .findNearbyByGeoHashes(any(), any(), any(), any(), anyInt(), anyList(), anyInt());
+                    .findNearbyByGeoHashes(any(), any(), any(), any(), anyInt(), anyList(), anyInt(), any());
         }
 
         @Test
@@ -219,19 +219,19 @@ class ServiceItemReadServiceTest {
 
             Slice<ServiceItem> mockSlice = new SliceImpl<>(List.of(), PageRequest.of(0, size), false);
             given(serviceItemRepository.findNearbyByGeoHashes(
-                    any(), any(), any(), any(), anyInt(), anyList(), anyInt()))
+                    any(), any(), any(), any(), anyInt(), anyList(), anyInt(), any()))
                     .willReturn(mockSlice);
 
             // when
             Slice<ServiceItem> result = serviceItemReadService.findNearbyByGeoHash(
-                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size);
+                    latitude, longitude, userLatitude, userLongitude, radiusMeters, size, null);
 
             // then
             assertThat(result).isNotNull();
             then(serviceItemRepository).should().findNearbyByGeoHashes(
                     eq(latitude), eq(longitude), eq(userLatitude), eq(userLongitude), eq(radiusMeters),
                     argThat(geoHashes -> geoHashes.size() == 9),
-                    eq(size)
+                    eq(size), isNull()
             );
         }
     }

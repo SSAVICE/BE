@@ -185,6 +185,16 @@ public final class GeoHashUtil {
     }
 
     /**
+     * 두 좌표 간 거리를 km 단위로 반환 (소수점 둘째자리)
+     */
+    public static double calculateDistanceInKm(
+        BigDecimal lat1, BigDecimal lon1,
+        BigDecimal lat2, BigDecimal lon2
+    ) {
+        return Math.round(calculateDistance(lat1, lon1, lat2, lon2) / 10.0) / 100.0;
+    }
+
+    /**
      * 검색 반경에 적합한 precision 반환
      */
     public static int getPrecisionForRadius(int radiusMeters) {
