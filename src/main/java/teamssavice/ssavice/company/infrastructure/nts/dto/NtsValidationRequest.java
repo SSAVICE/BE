@@ -15,12 +15,13 @@ public class NtsValidationRequest {
 
     private List<BusinessData> businesses;
 
-    public static NtsValidationRequest of(String bNo, String startDt, String pNm) {
+    public static NtsValidationRequest of(String bNo, String startDt, String pNm, String bNm) {
         return NtsValidationRequest.builder()
                 .businesses(Collections.singletonList(BusinessData.builder()
                         .businessNumber(bNo)
                         .startDate(startDt)
                         .ownerName(pNm)
+                        .businessName(bNm)
                         .build()))
                 .build();
     }
@@ -39,13 +40,13 @@ public class NtsValidationRequest {
         @JsonProperty("p_nm")
         private String ownerName;
 
+        @JsonProperty("b_nm")
+        private String businessName;
+
         // 아래는 선택값인데 혹시 더 받을건지 해서 우선 남겨둠
 
         @JsonProperty("p_nm2")
         private String ownerName2;
-
-        @JsonProperty("b_nm")
-        private String businessName;
 
         @JsonProperty("corp_no")
         private String corporationNumber;
