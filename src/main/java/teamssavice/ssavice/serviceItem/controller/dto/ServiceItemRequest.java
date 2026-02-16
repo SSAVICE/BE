@@ -99,7 +99,6 @@ public class ServiceItemRequest {
                 .lastId(lastId)
                 .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
-                .userId(userId)
                 .userLatitude(userLatitude)
                 .userLongitude(userLongitude)
                 .build();
