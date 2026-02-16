@@ -8,7 +8,8 @@ public class CompanyInfraCommand {
     public record Validate(
         String businessNumber,
         String startDate,
-        String name
+        String name,
+        String businessName
     ) {
 
     }

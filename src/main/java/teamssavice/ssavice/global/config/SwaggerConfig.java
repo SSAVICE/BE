@@ -8,13 +8,13 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
 
 @Configuration
 public class SwaggerConfig {
 
     static {
-        SpringDocUtils.getConfig().addAnnotationsToIgnore(CurrentId.class);
+        SpringDocUtils.getConfig().addAnnotationsToIgnore(CurrentAuth.class);
     }
 
     @Bean

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.AddressCommand;
@@ -31,6 +32,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -77,10 +79,12 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public CursorResult<ServiceItemModel.Search> search(ServiceItemCommand.Search command) {
+    public CursorResult<ServiceItemModel.Search> search(@Nullable Long userId, ServiceItemCommand.Search command) {
 
         Slice<ServiceItem> items = serviceItemReadService.search(command);
-        Set<Long> set = bookReadService.findReservedServiceItemIdsFromLatestBooks(command.userId(), items.getContent());
+        Set<Long> set = (userId != null)
+                ? bookReadService.findReservedServiceItemIdsFromLatestBooks(userId, items.getContent())
+                : Collections.emptySet();
 
         List<ServiceItemModel.Search> content = items.getContent().stream()
             .map(entity -> {
@@ -101,7 +105,7 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
-    public ServiceItemModel.Detail getServiceDetail(Long serviceId, Long userId) {
+    public ServiceItemModel.Detail getServiceDetail(Long serviceId, @Nullable Long userId) {
         ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndImageList(serviceId);
         List<ImageResource> imageList = imageReadService.findAllById(serviceItem.getImageIds());
         List<String> imageUrls = new ArrayList<>();
@@ -109,8 +113,8 @@ public class ServiceItemService {
             imageUrls.add(s3Service.generateGetPresignedUrl(imageResource.getResolveKey()));
         }
 
-        boolean isLiked = wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
-        boolean isBooked = bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
+        boolean isLiked = (userId != null) && wishReadService.existsByUserIdAndServiceItemId(userId, serviceId);
+        boolean isBooked = (userId != null) && bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
 
         return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
     }

@@ -11,7 +11,7 @@ import teamssavice.ssavice.global.exception.ForbiddenException;
 
 import java.util.Optional;
 
-public class RequireRoleInterceptor implements HandlerInterceptor {
+public class AuthorizationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request,
@@ -27,8 +27,9 @@ public class RequireRoleInterceptor implements HandlerInterceptor {
         if(requireRole == null) return true;
 
         Role required = requireRole.value();
-        Role role = (Role) request.getAttribute("role");
-        if (!role.canAccess(required)) {
+        String role = (String) request.getAttribute("role");
+
+        if (!required.canAccess(Role.valueOf(role))) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         }
         return true;

@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CompanySignupVerifyToken(
-    String token,
-    Long expiresIn
+    String token
 ) {
 
 }
