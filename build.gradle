@@ -71,6 +71,10 @@ dependencies {
 
     // spring-retry
     implementation 'org.springframework.retry:spring-retry'
+
+    // OpenSearch
+    implementation 'org.opensearch.client:opensearch-java:2.10.0'
+    implementation 'org.opensearch.client:opensearch-rest-client:2.10.0'
 }
 
 tasks.named('test') {
