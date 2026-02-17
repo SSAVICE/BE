@@ -2,7 +2,7 @@ package teamssavice.ssavice.serviceItem.controller.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.s3.dto.S3Command;
@@ -81,9 +81,12 @@ public class ServiceItemRequest {
         // 커서 방식 (안드로이드 무한 스크롤과)
         @PositiveOrZero
         Long lastId,
-        Boolean onSale
+        Boolean onSale,
+
+        @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude
     ) {
-        public ServiceItemCommand.Search toCommand(Long userId, Pageable pageable) {
+        public ServiceItemCommand.Search toCommand(int size) {
             return ServiceItemCommand.Search.builder()
                 .category(category)
                 .query(query)
@@ -94,9 +97,10 @@ public class ServiceItemRequest {
                 .maxPrice(maxPrice)
                 .sortBy(sortBy)
                 .lastId(lastId)
-                .pageable(pageable)
+                .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
-                .userId(userId)
+                .userLatitude(userLatitude)
+                .userLongitude(userLongitude)
                 .build();
         }
     }
@@ -107,7 +111,8 @@ public class ServiceItemRequest {
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude,
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal latitude,
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
-        @NotNull @Positive @Max(100000) Integer radiusMeters
+        @NotNull @Positive @Max(100000) Integer radiusMeters,
+        @PositiveOrZero Long lastId
     ) {
         public ServiceItemCommand.Nearby toCommand(int size) {
             return ServiceItemCommand.Nearby.of(
@@ -116,7 +121,8 @@ public class ServiceItemRequest {
                 latitude,
                 longitude,
                 radiusMeters,
-                size
+                size,
+                lastId
             );
         }
     }

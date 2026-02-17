@@ -13,6 +13,8 @@ public class CompanyCommand {
             Long userId,
             String verifyToken,
             String companyName,
+            String businessName,
+            String startDate,
             String ownerName,
             String phoneNumber,
             String businessNumber,
@@ -32,6 +34,8 @@ public class CompanyCommand {
                     .userId(userId)
                     .verifyToken(request.verifyToken())
                     .companyName(request.companyName())
+                    .businessName(request.businessName())
+                    .startDate(request.startDate())
                     .ownerName(request.ownerName())
                     .phoneNumber(request.phoneNumber())
                     .businessNumber(request.businessNumber())
@@ -89,7 +93,8 @@ public class CompanyCommand {
     public record Validate(
         String businessNumber,
         String startDate,
-        String name
+        String name,
+        String businessName
     ) {
 
         public CompanyInfraCommand.Validate toInfraCommand() {
@@ -97,6 +102,7 @@ public class CompanyCommand {
                 .businessNumber(this.businessNumber)
                 .startDate(this.startDate)
                 .name(this.name)
+                .businessName(this.businessName)
                 .build();
         }
 

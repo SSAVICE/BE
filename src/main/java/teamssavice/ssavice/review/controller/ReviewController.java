@@ -10,8 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.annotation.CurrentId;
+import teamssavice.ssavice.global.annotation.CurrentAuth;
 import teamssavice.ssavice.global.annotation.RequireRole;
+import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.global.dto.PageResponse;
 import teamssavice.ssavice.review.controller.dto.ReviewRequest;
 import teamssavice.ssavice.review.controller.dto.ReviewResponse;
@@ -26,13 +27,13 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @RequireRole(Role.USER)
     @PostMapping
+    @RequireRole(Role.USER)
     public ResponseEntity<Void> postReview(
-            @CurrentId Long userId,
+            @CurrentAuth Auth authUser,
             @RequestBody @Valid ReviewRequest.Input request
     ) {
-        reviewService.saveReview(request.toCommand(userId));
+        reviewService.saveReview(request.toCommand(authUser.id()));
         return ResponseEntity.ok().build();
     }
 
@@ -47,31 +48,30 @@ public class ReviewController {
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.COMPANY)
     @GetMapping("/company")
+    @RequireRole(Role.COMPANY)
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getMyCompanyReview(
-            @CurrentId Long companyId,
+            @CurrentAuth Auth authCompany,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<ReviewResponse.Item> response = reviewService.getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId.of(companyId, pageable))
+        Page<ReviewResponse.Item> response = reviewService.getReviewByCompanyIdPaging(ReviewCommand.RetrieveByCompanyId.of(authCompany.id(), pageable))
                 .map(ReviewResponse.Item::from);
 
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.USER)
     @GetMapping("/user")
+    @RequireRole(Role.USER)
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getMyReview(
-            @CurrentId Long userId,
+            @CurrentAuth Auth authUser,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<ReviewResponse.Item> response = reviewService.getReviewByUserIdPaging(ReviewCommand.RetrieveByUserId.of(userId, pageable))
+        Page<ReviewResponse.Item> response = reviewService.getReviewByUserIdPaging(ReviewCommand.RetrieveByUserId.of(authUser.id(), pageable))
                 .map(ReviewResponse.Item::from);
 
         return ResponseEntity.ok(PageResponse.from(response));
     }
 
-    @RequireRole(Role.USER)
     @GetMapping("/user/{user-id}")
     public ResponseEntity<PageResponse<ReviewResponse.Item>> getUserReview(
             @PathVariable("user-id") @Positive Long userId,

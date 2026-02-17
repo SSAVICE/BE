@@ -22,6 +22,10 @@ public class CompanyRequest {
         @NotNull
         String companyName,
         @NotNull
+        String businessName,
+        @NotNull
+        String startDate,
+        @NotNull
         String ownerName,
         @NotNull
         String phoneNumber,
@@ -59,7 +63,8 @@ public class CompanyRequest {
     public record Validate(
         String name,
         String startDate,
-        String businessNumber
+        String businessNumber,
+        String businessName
     ) {
 
         public CompanyCommand.Validate toCommand() {
@@ -67,6 +72,7 @@ public class CompanyRequest {
                 .businessNumber(businessNumber)
                 .startDate(startDate)
                 .name(name)
+                .businessName(businessName)
                 .build();
         }
     }

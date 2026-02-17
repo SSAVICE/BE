@@ -76,7 +76,7 @@ public class CompanyService {
     @Transactional
     public CompanyModel.Login register(CompanyCommand.Create command) {
         companySignupVerifyTokenService.validate(
-            command.userId(), command.businessNumber(), command.verifyToken());
+            command.userId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
 
         Users user = userReadService.findById(command.userId());
         companyReadService.checkUserExists(user);
@@ -157,7 +157,7 @@ public class CompanyService {
         CompanyInfraCommand.Validate infraCommand = command.toInfraCommand();
         businessVerificationClient.validate(infraCommand);
         CompanySignupVerifyToken verifyToken = companySignupVerifyTokenService.issueToken(
-            userId, command.businessNumber());
+            userId, command.businessNumber(), command.startDate(), command.name(), command.businessName());
 
         return CompanyModel.Validate.from(verifyToken);
     }

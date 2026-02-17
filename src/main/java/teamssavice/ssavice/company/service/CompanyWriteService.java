@@ -34,17 +34,19 @@ public class CompanyWriteService {
             .build();
 
         Company company = Company.builder()
-            .companyName(command.companyName())
-            .ownerName(command.ownerName())
-            .phoneNumber(command.phoneNumber())
-            .businessNumber(command.businessNumber())
-            .description(command.description())
-            .depositor(command.depositor())
-            .accountNumber(command.accountNumber())
-            .detail(command.detail())
-            .address(address)
-            .user(user)
-            .build();
+                .companyName(command.companyName())
+                .businessName(command.businessName())
+                .startDate(command.startDate())
+                .ownerName(command.ownerName())
+                .phoneNumber(command.phoneNumber())
+                .businessNumber(command.businessNumber())
+                .description(command.description())
+                .depositor(command.depositor())
+                .accountNumber(command.accountNumber())
+                .detail(command.detail())
+                .address(address)
+                .user(user)
+                .build();
 
         return companyRepository.save(company);
     }

@@ -84,7 +84,8 @@ public class ServiceItemResponse {
         Long discountedPrice,
 
         LocalDateTime deadline,
-        boolean isBooked
+        boolean isBooked,
+        Double distanceKm
     ) {
         public static Search from(ServiceItemModel.Search model) {
             return Search.builder()
@@ -105,6 +106,7 @@ public class ServiceItemResponse {
                 .discountedPrice(model.discountedPrice())
                 .deadline(model.deadline())
                 .isBooked(model.isBooked())
+                .distanceKm(model.distanceKm())
                 .build();
         }
     }

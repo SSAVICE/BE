@@ -24,10 +24,8 @@ public class CompanySignupVerifyTokenProvider {
 
     private final CompanySignupVerifyTokenProperties properties;
 
-    public CompanySignupVerifyToken createToken(Long userId, String businessNumber) {
+    public CompanySignupVerifyToken createToken(Long userId, String businessNumber, String startDate, String name, String businessName) {
         Date now = new Date();
-        long expiresIn = properties.validityInMilliseconds();
-        Date exp = new Date(now.getTime() + expiresIn);
 
         SecretKey key = Keys.hmacShaKeyFor(properties.secretKey().getBytes(StandardCharsets.UTF_8));
 
@@ -35,14 +33,15 @@ public class CompanySignupVerifyTokenProvider {
             .setSubject(String.valueOf(userId))
             .claim("purpose", PURPOSE)
             .claim("businessNumber", businessNumber)
+            .claim("startDate", startDate)
+            .claim("name", name)
+            .claim("businessName", businessName)
             .setIssuedAt(now)
-            .setExpiration(exp)
             .signWith(key, SignatureAlgorithm.HS256)
             .compact();
 
         return CompanySignupVerifyToken.builder()
             .token(jwt)
-            .expiresIn(expiresIn)
             .build();
     }
 
@@ -57,8 +56,6 @@ public class CompanySignupVerifyTokenProvider {
                 .getBody();
         } catch (SecurityException | MalformedJwtException e) {
             throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
-        } catch (ExpiredJwtException e) {
-            throw new BusinessAuthenticationException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
             throw new BusinessAuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (IllegalArgumentException e) {
@@ -68,7 +65,8 @@ public class CompanySignupVerifyTokenProvider {
         }
     }
 
-    public void validateToken(Claims claims, Long userId, String businessNumber) {
+    public void validateToken(Claims claims, Long userId, String businessNumber, String startDate, String name, String businessName) {
+
         String purpose = claims.get("purpose", String.class);
         if (!PURPOSE.equals(purpose)) {
             throw new BusinessAuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
@@ -77,6 +75,15 @@ public class CompanySignupVerifyTokenProvider {
             throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
         }
         if (!claims.get("businessNumber", String.class).equals(businessNumber)) {
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
+        }
+        if (!claims.get("startDate", String.class).equals(startDate)) {
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
+        }
+        if (!claims.get("name", String.class).equals(name)) {
+            throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
+        }
+        if (!claims.get("businessName", String.class).equals(businessName)) {
             throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
         }
     }

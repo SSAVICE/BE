@@ -11,25 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.filter.OncePerRequestFilter;
 import teamssavice.ssavice.auth.TokenProvider;
-import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.global.exception.CustomException;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
-    private static final List<String> EXCLUDE_URLS = List.of(
-            "/api/user/login",
-            "/api/company/login",
-            "/api/auth/token/refresh",
-            "/api/auth/logout",
-            "/api/health"
-    );
     private final TokenProvider tokenProvider;
 
     @Override
@@ -38,13 +27,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        String accessToken = resolveToken(request);
         try {
-            String accessToken = resolveToken(request);
-
-            Claims claims = tokenProvider.getClaim(accessToken);
-            request.setAttribute("sub", claims.getSubject());
-            Role role = Role.valueOf(claims.get("role", String.class));
-            request.setAttribute("role", role);
+            if(accessToken != null) {
+                Claims claims = tokenProvider.getClaim(accessToken);
+                request.setAttribute("sub", claims.getSubject());
+                request.setAttribute("role", claims.get("role", String.class));
+            }
 
             filterChain.doFilter(request, response);
         } catch (CustomException e) {
@@ -52,19 +41,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String url = request.getRequestURI();
-
-        return EXCLUDE_URLS.stream()
-                .anyMatch(url::startsWith);
-    }
-
     private String resolveToken(HttpServletRequest request) {
         String authHeader = request.getHeader(HEADER_AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith(TOKEN_PREFIX)) {
-            throw new AuthenticationException(ErrorCode.MISSING_TOKEN);
+            return null;
         }
 
         return authHeader.substring(TOKEN_PREFIX.length());

@@ -41,6 +41,12 @@ public class Company extends BaseEntity {
     private String ownerName;
     @NotNull
     @Column(nullable = false)
+    private String businessName; // 상호명
+    @NotNull
+    @Column(nullable = false)
+    private String startDate;
+    @NotNull
+    @Column(nullable = false)
     private String phoneNumber;
 
     @OneToOne(fetch = FetchType.LAZY)
