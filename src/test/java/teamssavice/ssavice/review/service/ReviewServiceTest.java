@@ -11,6 +11,7 @@ import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
+import teamssavice.ssavice.review.infrastructure.repository.ReviewRepository;
 import teamssavice.ssavice.review.service.dto.ReviewCommand;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
@@ -25,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReviewServiceTest {
 
     @Autowired
@@ -40,12 +40,21 @@ class ReviewServiceTest {
     @Autowired
     private ServiceItemRepository serviceItemRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     private Company company;
     private Users user;
     private ServiceItem serviceItem;
 
     @BeforeEach
     void setUp() {
+
+        reviewRepository.deleteAllInBatch();
+        serviceItemRepository.deleteAllInBatch();
+        companyRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
+
         user = userRepository.save(UserFixture.user());
         company = companyRepository.save(CompanyFixture.company(user));
         serviceItem = serviceItemRepository.save(ServiceItemFixture.base(company));
