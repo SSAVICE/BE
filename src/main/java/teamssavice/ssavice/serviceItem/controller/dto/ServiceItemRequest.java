@@ -10,6 +10,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceItemRequest {
@@ -81,6 +82,7 @@ public class ServiceItemRequest {
         // 커서 방식 (안드로이드 무한 스크롤과)
         @PositiveOrZero
         Long lastId,
+        List<String> searchAfter,
         Boolean onSale,
 
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
@@ -97,6 +99,7 @@ public class ServiceItemRequest {
                 .maxPrice(maxPrice)
                 .sortBy(sortBy)
                 .lastId(lastId)
+                .searchAfter(searchAfter)
                 .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
                 .userLatitude(userLatitude)

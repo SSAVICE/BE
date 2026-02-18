@@ -48,6 +48,7 @@ public class ServiceItemCommand {
         Long maxPrice,
         Integer sortBy,
         Long lastId,      // 커서 ID
+        List<String> searchAfter, // opensearch 전용인데 비교용으로 위필드와 같이 있지만 lastId는 삭제 예정
         Pageable pageable,
         boolean onSale,
         Long userId,

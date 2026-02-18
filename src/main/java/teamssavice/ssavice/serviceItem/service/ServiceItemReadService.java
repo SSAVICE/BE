@@ -12,6 +12,8 @@ import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.SearchResult;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchClient;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
@@ -25,6 +27,7 @@ import java.util.List;
 public class ServiceItemReadService {
 
     private final ServiceItemRepository serviceItemRepository;
+    private final ServiceItemSearchClient serviceItemSearchClient;
 
     @Transactional(readOnly = true)
     public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
@@ -95,5 +98,10 @@ public class ServiceItemReadService {
         return serviceItemRepository.findNearbyByGeoHashes(
             latitude, longitude, userLatitude, userLongitude,
             radiusMeters, neighbors, size, lastId);
+    }
+
+    @Transactional(readOnly = true)
+    public SearchResult searchByOpenSearch(ServiceItemCommand.Search command) {
+        return serviceItemSearchClient.search(command);
     }
 }

@@ -15,8 +15,10 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.global.dto.SearchCursorResult;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
+import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.refund.constants.RefundReason;
@@ -27,10 +29,13 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.SearchResult;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,6 +83,7 @@ public class ServiceItemService {
         return savedServiceItem.getId();
     }
 
+    // 기존 비교용 - 삭제 예정
     @Transactional(readOnly = true)
     public CursorResult<ServiceItemModel.Search> search(@Nullable Long userId, ServiceItemCommand.Search command) {
 
@@ -102,6 +108,55 @@ public class ServiceItemService {
         }
 
         return new CursorResult<>(content, nextCursor, items.hasNext());
+    }
+
+    @Transactional(readOnly = true)
+    public SearchCursorResult<ServiceItemModel.Search> searchV2(@Nullable Long userId, ServiceItemCommand.Search command) {
+        SearchResult result = serviceItemReadService.searchByOpenSearch(command);
+
+        // 예약 여부 조회
+        List<Long> serviceItemIds = result.items().stream()
+                .map(item -> item.document().getId())
+                .toList();
+        Set<Long> reservedIds = (userId != null)
+                ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
+                : Collections.emptySet();
+
+        List<ServiceItemModel.Search> content = result.items().stream()
+                .map(item -> {
+                    ServiceItemSearchDocument doc = item.document();
+
+                    // 거리 계산
+                    double distanceKm;
+                    if (item.distanceKm() != null) {
+                        // 거리순 → OpenSearch가 계산한 값
+                        distanceKm = item.distanceKm();
+                    } else if (doc.getLocation() != null
+                            && command.userLatitude() != null
+                            && command.userLongitude() != null) {
+                        // 그 외 → Java에서 계산
+                        distanceKm = GeoHashUtil.calculateDistanceInKm(
+                                command.userLatitude(), command.userLongitude(),
+                                BigDecimal.valueOf(doc.getLocation().getLat()),
+                                BigDecimal.valueOf(doc.getLocation().getLon()));
+                    } else {
+                        distanceKm = 0.0;
+                    }
+
+                    String objectKey = doc.getThumbnailObjectKey() != null
+                            ? doc.getThumbnailObjectKey()
+                            : ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
+
+                    return ServiceItemModel.Search.fromDocument(
+                            doc,
+                            reservedIds.contains(doc.getId()),
+                            s3Service.generateGetPresignedUrl(objectKey),
+                            distanceKm
+                    );
+                })
+                .toList();
+
+        return new SearchCursorResult<>(content, result.nextSearchAfter(), result.hasNext());
     }
 
     @Transactional(readOnly = true)

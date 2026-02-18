@@ -14,6 +14,7 @@ import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.Auth;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.dto.PageResponse;
+import teamssavice.ssavice.global.dto.SearchCursorResult;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.ImageResponse;
 import teamssavice.ssavice.imageresource.constants.ImagePath;
@@ -49,6 +50,7 @@ public class ServiceItemController {
         return ResponseEntity.ok(ServiceItemResponse.Register.from(serviceId));
     }
 
+    // 비교용을 위해서 우선 남겨둠 - 삭제 예정
     @PermitAll
     @GetMapping("/search")
     public ResponseEntity<CursorResult<ServiceItemResponse.Search>> searchServiceItems(
@@ -59,6 +61,19 @@ public class ServiceItemController {
         CursorResult<ServiceItemModel.Search> models = serviceItemService.search(
                 authUser.getIdIfCanAccess(Role.USER), request.toCommand(size));
         CursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
+        return ResponseEntity.ok(response);
+    }
+
+    @PermitAll
+    @GetMapping("/search/v2")
+    public ResponseEntity<SearchCursorResult<ServiceItemResponse.Search>> searchServiceItemsV2(
+            @ModelAttribute @Valid ServiceItemRequest.Search request,
+            @RequestParam(defaultValue = "10") int size,
+            @CurrentAuth(required = false) Auth authUser
+    ) {
+        SearchCursorResult<ServiceItemModel.Search> models = serviceItemService.searchV2(
+                authUser.getIdIfCanAccess(Role.USER), request.toCommand(size));
+        SearchCursorResult<ServiceItemResponse.Search> response = models.map(ServiceItemResponse.Search::from);
         return ResponseEntity.ok(response);
     }
 

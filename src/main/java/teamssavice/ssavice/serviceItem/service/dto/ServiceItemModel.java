@@ -4,7 +4,9 @@ import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -86,6 +88,7 @@ public class ServiceItemModel {
         boolean isBooked,
         double distanceKm
     ) {
+        // 기존 (QueryDSL용) - 나중에 삭제 예정
         public static Search from(ServiceItem entity, boolean isBooked, String imageUrl, double distanceKm) {
             return Search.builder()
                 .serviceId(entity.getId())
@@ -113,6 +116,41 @@ public class ServiceItemModel {
                 .distanceKm(distanceKm)
                 .build();
         }
+
+        public static Search fromDocument(ServiceItemSearchDocument doc, boolean isBooked, String imageUrl, double distanceKm) {
+            return Search.builder()
+                    .serviceId(doc.getId())
+                    .companyId(doc.getCompanyId())
+                    .companyName(doc.getCompanyName())
+                    .serviceImageUrl(imageUrl)
+                    .title(doc.getTitle())
+                    .basePrice(doc.getBasePrice())
+                    .discountRatio(doc.getDiscountRate())
+                    .discountedPrice(doc.getDiscountedPrice())
+                    .status(ServiceStatus.valueOf(doc.getStatus()))
+                    .deadline(parseDateTime(doc.getDeadline()))
+                    .category(doc.getCategory())
+                    .tag(doc.getTags() != null ? String.join(",", doc.getTags()) : null)
+                    .currentMember(doc.getCurrentMember())
+                    .minimumMember(doc.getMinimumMember())
+                    .maximumMember(doc.getMaximumMember())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(doc.getGugun())
+                            .region(doc.getRegion())
+                            .build())
+                    .isBooked(isBooked)
+                    .distanceKm(distanceKm)
+                    .build();
+        }
+    }
+
+    private static LocalDateTime parseDateTime(String dateStr) {
+        if (dateStr == null) return null;
+        if (dateStr.length() == 10) {
+            // "2026-02-25" → "2026-02-25T00:00:00"
+            return LocalDate.parse(dateStr).atStartOfDay();
+        }
+        return LocalDateTime.parse(dateStr);
     }
 
     @Builder
