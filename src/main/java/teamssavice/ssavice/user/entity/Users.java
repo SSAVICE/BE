@@ -53,6 +53,9 @@ public class Users extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Column(unique = true)
+    private String providerId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_resource_id")
     private ImageResource imageResource;
