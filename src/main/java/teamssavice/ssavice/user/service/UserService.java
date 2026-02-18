@@ -13,10 +13,13 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.oauth.service.OAuthReadService;
+import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
+import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.dto.UserCommand;
 import teamssavice.ssavice.user.service.dto.UserModel;
@@ -32,14 +35,13 @@ public class UserService {
     private final ImageReadService imageReadService;
     private final S3Service s3Service;
     private final RegionReadService regionReadService;
+    private final OAuthReadService oAuthReadService;
 
-    public UserModel.Login register(String kakaoToken) {
-        // 토큰 검증
-        String email = "default@email.com";
+    public UserModel.Login register(String oAuthToken, Provider provider) {
+        OAuthUserInfo oAuthUserInfo = oAuthReadService.getUserInfo(provider, oAuthToken);
 
         // user 저장 및 중복 체크
-        Users user = userReadService.findByEmail(email)
-            .orElseGet(() -> userWriteService.save(email));
+        Users user = userWriteService.findOrCreate(oAuthUserInfo, provider);
 
         // 토큰 발행
         Token token = tokenService.issueToken(user.getId(), Role.USER);

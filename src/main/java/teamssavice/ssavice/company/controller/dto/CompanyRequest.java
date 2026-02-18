@@ -4,13 +4,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
+import teamssavice.ssavice.user.constants.Provider;
 
 public class CompanyRequest {
 
     @Builder
     public record Login(
         @NotNull
-        String token
+        String token,
+        @NotNull
+        Provider provider
     ) {
 
     }

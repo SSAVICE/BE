@@ -47,7 +47,7 @@ public class CompanyController {
     public ResponseEntity<CompanyResponse.Login> login(
         @RequestBody @Valid CompanyRequest.Login request
     ) {
-        CompanyModel.Login model = companyService.login(request.token());
+        CompanyModel.Login model = companyService.login(request.token(), request.provider());
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
