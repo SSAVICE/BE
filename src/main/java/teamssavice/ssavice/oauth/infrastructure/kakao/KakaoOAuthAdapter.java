@@ -28,21 +28,23 @@ public class KakaoOAuthAdapter implements OAuthClient {
         try {
             KakaoUserResponse response = kakaoApiClient.getUserInfo("Bearer " + accessToken);
 
-            if (response.getKakaoAccount().getEmail() == null) {
-                throw new AuthenticationException(ErrorCode.KAKAO_INFO_NOT_PROVIDED);
+            if (response.getId() == null) {
+                throw new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED);
             }
-            if (response.getKakaoAccount().getName() == null) {
-                throw new AuthenticationException(ErrorCode.KAKAO_INFO_NOT_PROVIDED);
-            }
-            if (response.getKakaoAccount().getPhoneNumber() == null) {
+
+            KakaoUserResponse.KakaoAccount account = response.getKakaoAccount();
+            if (account == null
+                    || account.getEmail() == null
+                    || account.getName() == null
+                    || account.getPhoneNumber() == null) {
                 throw new AuthenticationException(ErrorCode.KAKAO_INFO_NOT_PROVIDED);
             }
 
             return OAuthUserInfo.builder()
                 .providerId(String.valueOf(response.getId()))
-                .email(response.getKakaoAccount().getEmail())
-                .name(response.getKakaoAccount().getName())
-                .phoneNumber(response.getKakaoAccount().getPhoneNumber())
+                .email(account.getEmail())
+                .name(account.getName())
+                .phoneNumber(account.getPhoneNumber())
                 .build();
 
         } catch (FeignException.Unauthorized e) {

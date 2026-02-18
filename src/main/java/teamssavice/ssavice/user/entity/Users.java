@@ -11,6 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,7 @@ import teamssavice.ssavice.user.constants.UserRole;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id", "provider"}))
 @Builder
 @Getter
 @AllArgsConstructor
@@ -53,7 +56,8 @@ public class Users extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(unique = true)
+    @NotNull
+    @Column(nullable = false)
     private String providerId;
 
     @OneToOne(fetch = FetchType.LAZY)
