@@ -1,13 +1,10 @@
 package teamssavice.ssavice.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.address.AddressCommand;
-import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.user.constants.Provider;
@@ -23,16 +20,7 @@ public class UserWriteService {
     @Transactional
     public Users findOrCreate(OAuthUserInfo oAuthUserInfo, Provider provider) {
         return userRepository.findByProviderIdAndProvider(oAuthUserInfo.providerId(), provider)
-            .orElseGet(() -> saveOrFindOnConflict(oAuthUserInfo, provider));
-    }
-
-    private Users saveOrFindOnConflict(OAuthUserInfo oAuthUserInfo, Provider provider) {
-        try {
-            return save(oAuthUserInfo, provider);
-        } catch (DataIntegrityViolationException e) {
-            return userRepository.findByProviderIdAndProvider(oAuthUserInfo.providerId(), provider)
-                .orElseThrow(() -> new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED));
-        }
+            .orElseGet(() -> save(oAuthUserInfo, provider));
     }
 
     @Transactional
