@@ -58,7 +58,12 @@ public enum ErrorCode {
     ALREADY_CANCELED(HttpStatus.CONFLICT, "ALREADY_CANCELED", "이미 취소된 예약입니다."),
 
     // Wish
-    WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다.");
+    WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다."),
+
+    // Kakao
+    KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
+    KAKAO_EMAIL_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "KAKAO_EMAIL_NOT_PROVIDED", "카카오 계정에 이메일 정보가 없습니다."),
+    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "UNSUPPORTED_PROVIDER", "지원하지 않는 소셜 로그인입니다.");
 
 
     private final HttpStatus status;

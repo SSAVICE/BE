@@ -1,0 +1,50 @@
+package teamssavice.ssavice.oauth.infrastructure.kakao;
+
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.AuthenticationException;
+import teamssavice.ssavice.global.exception.ExternalApiException;
+import teamssavice.ssavice.oauth.infrastructure.kakao.client.KakaoApiClient;
+import teamssavice.ssavice.oauth.infrastructure.kakao.dto.KakaoUserResponse;
+import teamssavice.ssavice.oauth.service.client.OAuthClient;
+import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
+import teamssavice.ssavice.user.constants.Provider;
+
+@Component
+@RequiredArgsConstructor
+public class KakaoOAuthAdapter implements OAuthClient {
+
+    private final KakaoApiClient kakaoApiClient;
+
+    @Override
+    public Provider getProvider() {
+        return Provider.KAKAO;
+    }
+
+    @Override
+    public OAuthUserInfo getUserInfo(String accessToken) {
+        try {
+            KakaoUserResponse response = kakaoApiClient.getUserInfo("Bearer " + accessToken);
+
+            if (response.getKakaoAccount().getEmail() == null) {
+                throw new AuthenticationException(ErrorCode.KAKAO_EMAIL_NOT_PROVIDED);
+            }
+
+            return OAuthUserInfo.builder()
+                .providerId(String.valueOf(response.getId()))
+                .email(response.getKakaoAccount().getEmail())
+                .name(response.getKakaoAccount().getName())
+                .phoneNumber(response.getKakaoAccount().getPhoneNumber())
+                .build();
+
+        } catch (FeignException.Unauthorized e) {
+            throw new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED);
+        } catch (feign.RetryableException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_TIMEOUT);
+        } catch (FeignException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
+        }
+    }
+}
