@@ -137,8 +137,8 @@ public class ServiceItemService {
                         // 그 외 → Java에서 계산
                         distanceKm = GeoHashUtil.calculateDistanceInKm(
                                 command.userLatitude(), command.userLongitude(),
-                                BigDecimal.valueOf(doc.getLocation().getLat()),
-                                BigDecimal.valueOf(doc.getLocation().getLon()));
+                                doc.getLocation().getLat(),
+                                doc.getLocation().getLon());
                     } else {
                         distanceKm = 0.0;
                     }

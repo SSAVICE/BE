@@ -58,7 +58,11 @@ public enum ErrorCode {
     ALREADY_CANCELED(HttpStatus.CONFLICT, "ALREADY_CANCELED", "이미 취소된 예약입니다."),
 
     // Wish
-    WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다.");
+    WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다."),
+
+    // opensearch
+    OPENSEARCH_SEARCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPENSEARCH_SEARCH_FAILED", "검색에 실패했습니다.");
+
 
 
     private final HttpStatus status;

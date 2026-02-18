@@ -137,6 +137,8 @@ public class ServiceItemModel {
                     .region(AddressModel.RegionSummary.builder()
                             .gugun(doc.getGugun())
                             .region(doc.getRegion())
+                            .latitude(doc.getLocation().getLat())
+                            .longitude(doc.getLocation().getLon())
                             .build())
                     .isBooked(isBooked)
                     .distanceKm(distanceKm)

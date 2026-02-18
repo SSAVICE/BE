@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.s3.dto.S3Command;
+import teamssavice.ssavice.serviceItem.constants.SortType;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.math.BigDecimal;
@@ -86,7 +87,11 @@ public class ServiceItemRequest {
         Boolean onSale,
 
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
-        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude
+        @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude,
+
+        @DecimalMin("0.5")
+        @DecimalMax("10")
+        Double distanceKm
     ) {
         public ServiceItemCommand.Search toCommand(int size) {
             return ServiceItemCommand.Search.builder()
@@ -97,13 +102,14 @@ public class ServiceItemRequest {
                 .range(range)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
-                .sortBy(sortBy)
+                .sortType(SortType.from(sortBy))
                 .lastId(lastId)
                 .searchAfter(searchAfter)
                 .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
                 .userLatitude(userLatitude)
                 .userLongitude(userLongitude)
+                .distanceKm(distanceKm)
                 .build();
         }
     }

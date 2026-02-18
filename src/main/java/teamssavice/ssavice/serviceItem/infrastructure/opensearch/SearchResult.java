@@ -1,6 +1,5 @@
 package teamssavice.ssavice.serviceItem.infrastructure.opensearch;
 
-import org.opensearch.client.opensearch._types.FieldValue;
 
 import java.util.List;
 

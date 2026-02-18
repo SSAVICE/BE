@@ -3,8 +3,8 @@ package teamssavice.ssavice.serviceItem.infrastructure.opensearch;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.opensearch.client.opensearch._types.GeoLocation;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -49,7 +49,7 @@ public class ServiceItemSearchDocument {
     @Getter
     @NoArgsConstructor
     public static class GeoLocation {
-        private Double lat;
-        private Double lon;
+        private BigDecimal lat;
+        private BigDecimal lon;
     }
 }
