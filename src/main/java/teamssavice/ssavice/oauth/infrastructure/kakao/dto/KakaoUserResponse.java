@@ -21,11 +21,17 @@ public class KakaoUserResponse {
         @JsonProperty("email")
         private String email;
 
-        @JsonProperty("name")
-        private String name;
+        @JsonProperty("profile")
+        private Profile profile;
 
-        @JsonProperty("phone_number")
-        private String phoneNumber;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Profile {
+
+        @JsonProperty("nickname")
+        private String nickname;
 
     }
 }

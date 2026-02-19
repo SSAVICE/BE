@@ -34,17 +34,17 @@ public class KakaoOAuthAdapter implements OAuthClient {
 
             KakaoUserResponse.KakaoAccount account = response.getKakaoAccount();
             if (account == null
-                    || account.getEmail() == null
-                    || account.getName() == null
-                    || account.getPhoneNumber() == null) {
+                || account.getEmail() == null
+                || account.getProfile() == null
+                || account.getProfile().getNickname() == null) {
                 throw new AuthenticationException(ErrorCode.KAKAO_INFO_NOT_PROVIDED);
             }
 
             return OAuthUserInfo.builder()
                 .providerId(String.valueOf(response.getId()))
                 .email(account.getEmail())
-                .name(account.getName())
-                .phoneNumber(account.getPhoneNumber())
+                .name(account.getProfile().getNickname())
+                .phoneNumber("010-0000-0000") // 현재는 카카오에서 전화번호를 제공하지 않으므로 기본값 설정
                 .build();
 
         } catch (FeignException.Unauthorized e) {
