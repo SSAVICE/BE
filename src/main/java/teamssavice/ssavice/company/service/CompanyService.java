@@ -18,6 +18,8 @@ import teamssavice.ssavice.company.token.CompanySignupVerifyToken;
 import teamssavice.ssavice.company.token.CompanySignupVerifyTokenService;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.oauth.service.OAuthReadService;
+import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
 import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.review.entity.Review;
@@ -27,6 +29,7 @@ import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
+import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 import teamssavice.ssavice.user.service.UserWriteService;
@@ -51,15 +54,13 @@ public class CompanyService {
     private final BusinessVerificationClient businessVerificationClient;
     private final RegionReadService regionReadService;
     private final CompanySignupVerifyTokenService companySignupVerifyTokenService;
+    private final OAuthReadService oAuthReadService;
 
 
-    public CompanyModel.Login login(String kakaoToken) {
-        // 토큰 검증
-        String email = "default@email.com";
+    public CompanyModel.Login login(String oAuthToken, Provider provider) {
+        OAuthUserInfo oAuthUserInfo = oAuthReadService.getUserInfo(provider, oAuthToken);
 
-        // user 저장 및 중복 체크
-        Users user = userReadService.findByEmail(email)
-            .orElseGet(() -> userWriteService.save(email));
+        Users user = userWriteService.findOrCreate(oAuthUserInfo, provider);
 
         // 업체가 있으면 업체 토큰, 없으면 유저 토큰
         Optional<Company> optionalCompany = companyReadService.findByUser(user);
@@ -153,7 +154,7 @@ public class CompanyService {
     }
 
     public CompanyModel.Validate validateBusinessNumber(Long userId,
-        CompanyCommand.Validate command) {
+                                                        CompanyCommand.Validate command) {
         CompanyInfraCommand.Validate infraCommand = command.toInfraCommand();
         businessVerificationClient.validate(infraCommand);
         CompanySignupVerifyToken verifyToken = companySignupVerifyTokenService.issueToken(
