@@ -1,6 +1,6 @@
 package teamssavice.ssavice.oauth.service.client;
 
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 
 public interface OAuthClient {
     Provider getProvider();

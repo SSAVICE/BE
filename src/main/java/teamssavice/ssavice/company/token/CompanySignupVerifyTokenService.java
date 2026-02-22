@@ -10,13 +10,13 @@ public class CompanySignupVerifyTokenService {
 
     private final CompanySignupVerifyTokenProvider provider;
 
-    public CompanySignupVerifyToken issueToken(Long userId, String businessNumber, String startDate, String name, String businessName) {
-        return provider.createToken(userId, businessNumber, startDate, name, businessName);
+    public CompanySignupVerifyToken issueToken(Long accountId, String businessNumber, String startDate, String name, String businessName) {
+        return provider.createToken(accountId, businessNumber, startDate, name, businessName);
     }
 
-    public void validate(Long userId, String businessNumber, String startDate, String name, String businessName, String token) {
+    public void validate(Long accountId, String businessNumber, String startDate, String name, String businessName, String token) {
         Claims claims = provider.parse(token);
-        provider.validateToken(claims, userId, businessNumber, startDate, name, businessName);
+        provider.validateToken(claims, accountId, businessNumber, startDate, name, businessName);
     }
 }
 

@@ -60,12 +60,11 @@ public class CompanyService {
     public CompanyModel.Login login(String oAuthToken, Provider provider) {
         OAuthUserInfo oAuthUserInfo = oAuthReadService.getUserInfo(provider, oAuthToken);
 
-        Users user = userWriteService.findOrCreate(oAuthUserInfo, provider);
+        Account account = companyWriteService.findOrCreateAccount(oAuthUserInfo, provider);
 
-        // 업체가 있으면 업체 토큰, 없으면 유저 토큰
-        Optional<Company> optionalCompany = companyReadService.findByUser(user);
+        Optional<Company> optionalCompany = companyReadService.findOptionalById(account.getId());
         if (optionalCompany.isEmpty()) {
-            Token token = tokenService.issueToken(user.getId(), Role.USER);
+            Token token = tokenService.issueToken(account.getId(), Role.COMPANY);
             return CompanyModel.Login.from(token, false);
         }
 
@@ -77,13 +76,14 @@ public class CompanyService {
     @Transactional
     public CompanyModel.Login register(CompanyCommand.Create command) {
         companySignupVerifyTokenService.validate(
-            command.userId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
+            command.accountId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
 
-        Users user = userReadService.findById(command.userId());
-        companyReadService.checkUserExists(user);
+        Account account = accountRepository.findById(command.accountId())
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+        companyReadService.checkAccountExists(account.getId());
 
         Region region = regionReadService.findByRegionCode(command.regionCode());
-        Company company = companyWriteService.save(command, user,
+        Company company = companyWriteService.save(command, account,
             AddressCommand.RegionInfo.from(command, region));
         Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, true);

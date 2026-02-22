@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 
 public class CompanyRequest {
 
