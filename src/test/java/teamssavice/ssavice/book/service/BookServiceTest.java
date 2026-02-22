@@ -74,8 +74,8 @@ class BookServiceTest {
         user = UserFixture.user();
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        company = CompanyFixture.company(user, AddressFixture.address());
-        ReflectionTestUtils.setField(company, "id", 1L);
+        company = CompanyFixture.company(CompanyFixture.account(), AddressFixture.address());
+        ReflectionTestUtils.setField(company, "id", 2L);
 
         serviceItem = ServiceItemFixture.base(company);
         ReflectionTestUtils.setField(serviceItem, "id", 100L);

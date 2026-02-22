@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.fixture.AddressFixture;
 import teamssavice.ssavice.fixture.CompanyFixture;
@@ -35,10 +36,14 @@ class WishRepositoryConstraintTest {
     @DisplayName("존재하지 않는 userId로 저장 시 FK 제약 조건 이름 확인")
     void failByNonExistentUserId() {
 
-        Users owner = UserFixture.user();
+        Account ownerAccount = UserFixture.account();
+        tem.persist(ownerAccount);
+        Users owner = UserFixture.user(ownerAccount);
         tem.persist(owner);
 
-        Company company = CompanyFixture.company(owner, AddressFixture.address());
+        Account companyAccount = CompanyFixture.account();
+        tem.persist(companyAccount);
+        Company company = CompanyFixture.company(companyAccount, AddressFixture.address());
         tem.persist(company);
 
         ServiceItem serviceItem = ServiceItemFixture.recruiting(company);
@@ -66,7 +71,9 @@ class WishRepositoryConstraintTest {
     @DisplayName("존재하지 않는 serviceItemId로 저장 시 FK 제약 조건 이름 확인")
     void failByNonExistentServiceItemId() {
         // 1. Given: 정상적인 유저는 미리 저장
-        Users user = UserFixture.user();
+        Account account = UserFixture.account();
+        tem.persist(account);
+        Users user = UserFixture.user(account);
         tem.persist(user);
         tem.flush();
 
@@ -92,10 +99,14 @@ class WishRepositoryConstraintTest {
     @DisplayName("동일한 유저가 동일한 상품을 중복 찜할 경우 Unique 제약 조건 위반 확인")
     void failByDuplicateWish() {
         // 1. Given: 정상적인 유저와 서비스 아이템 저장
-        Users user = UserFixture.user();
+        Account account = UserFixture.account();
+        tem.persist(account);
+        Users user = UserFixture.user(account);
         tem.persist(user);
 
-        Company company = CompanyFixture.company(user, AddressFixture.address());
+        Account companyAccount = CompanyFixture.account();
+        tem.persist(companyAccount);
+        Company company = CompanyFixture.company(companyAccount, AddressFixture.address());
         tem.persist(company);
 
         ServiceItem serviceItem = ServiceItemFixture.recruiting(company);
