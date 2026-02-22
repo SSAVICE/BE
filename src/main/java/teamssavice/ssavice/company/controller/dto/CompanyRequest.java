@@ -2,9 +2,9 @@ package teamssavice.ssavice.company.controller.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import teamssavice.ssavice.account.constants.Provider;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
-import teamssavice.ssavice.account.constants.Provider;
 
 public class CompanyRequest {
 
@@ -64,9 +64,13 @@ public class CompanyRequest {
 
     @Builder
     public record Validate(
+        @NotNull
         String name,
+        @NotNull
         String startDate,
+        @NotNull
         String businessNumber,
+        @NotNull
         String businessName
     ) {
 
