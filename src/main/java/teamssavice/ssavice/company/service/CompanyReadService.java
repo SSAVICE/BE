@@ -8,7 +8,6 @@ import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
-import teamssavice.ssavice.user.entity.Users;
 
 import java.util.Optional;
 

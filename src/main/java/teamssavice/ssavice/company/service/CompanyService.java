@@ -6,10 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.account.constants.Provider;
 import teamssavice.ssavice.account.entity.Account;
-import teamssavice.ssavice.account.infrastructure.repository.AccountRepository;
+import teamssavice.ssavice.account.service.AccountReadService;
 import teamssavice.ssavice.address.AddressCommand;
-import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.auth.Token;
 import teamssavice.ssavice.auth.constants.Role;
@@ -44,7 +42,7 @@ public class CompanyService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TokenService tokenService;
-    private final AccountRepository accountRepository;
+    private final AccountReadService accountReadService;
     private final CompanyReadService companyReadService;
     private final CompanyWriteService companyWriteService;
     private final ServiceItemReadService serviceItemReadService;
@@ -78,8 +76,7 @@ public class CompanyService {
         companySignupVerifyTokenService.validate(
             command.accountId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
 
-        Account account = accountRepository.findById(command.accountId())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+        Account account = accountReadService.findById(command.accountId());
         companyReadService.checkAccountExists(account.getId());
 
         Region region = regionReadService.findByRegionCode(command.regionCode());
