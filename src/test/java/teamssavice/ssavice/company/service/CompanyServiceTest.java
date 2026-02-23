@@ -91,9 +91,9 @@ class CompanyServiceTest {
             given(companyWriteService.findOrCreateAccount(oAuthUserInfo, Provider.KAKAO))
                     .willReturn(companyAccount);
             given(companyReadService.findOptionalById(companyAccount.getId()))
-                    .willReturn(Optional.empty());
-            given(tokenService.issueToken(companyAccount.getId(), Role.COMPANY))
-                    .willReturn(token);
+                .willReturn(Optional.empty());
+            given(tokenService.issueToken(companyAccount.getId(), Role.TEMP))
+                .willReturn(token);
 
             // when
             CompanyModel.Login result = companyService.login("oauth-token", Provider.KAKAO);
