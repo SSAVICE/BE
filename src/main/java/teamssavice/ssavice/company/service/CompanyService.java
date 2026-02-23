@@ -62,7 +62,7 @@ public class CompanyService {
 
         Optional<Company> optionalCompany = companyReadService.findOptionalById(account.getId());
         if (optionalCompany.isEmpty()) {
-            Token token = tokenService.issueToken(account.getId(), Role.COMPANY);
+            Token token = tokenService.issueToken(account.getId(), Role.TEMP);
             return CompanyModel.Login.from(token, false);
         }
 

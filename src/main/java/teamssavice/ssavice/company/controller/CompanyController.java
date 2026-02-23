@@ -46,13 +46,13 @@ public class CompanyController {
     }
 
     @PostMapping
-    @RequireRole(Role.COMPANY)
+    @RequireRole(Role.TEMP)
     public ResponseEntity<CompanyResponse.Login> register(
-        @CurrentAuth Auth authCompany,
+        @CurrentAuth Auth authTemp,
         @RequestBody @Valid CompanyRequest.Create request
     ) {
         CompanyModel.Login model = companyService.register(
-            CompanyCommand.Create.from(authCompany.id(), request));
+            CompanyCommand.Create.from(authTemp.id(), request));
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
@@ -117,12 +117,12 @@ public class CompanyController {
 
 
     @PostMapping("/validate")
-    @RequireRole(Role.COMPANY)
+    @RequireRole(Role.TEMP)
     public ResponseEntity<CompanyResponse.Validate> validateBusiness(
-        @CurrentAuth Auth authCompany,
+        @CurrentAuth Auth authTemp,
         @RequestBody @Valid CompanyRequest.Validate request
     ) {
-        CompanyModel.Validate model = companyService.validateBusinessNumber(authCompany.id(),
+        CompanyModel.Validate model = companyService.validateBusinessNumber(authTemp.id(),
             request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
     }
@@ -130,7 +130,7 @@ public class CompanyController {
     @GetMapping("/address")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<AddressResponse.RegionDetail> getAddress(
-            @CurrentAuth Auth authCompany
+        @CurrentAuth Auth authCompany
     ) {
         AddressModel.RegionDetail model = companyService.getCompanyAddress(authCompany.id());
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));
