@@ -1,7 +1,11 @@
 package teamssavice.ssavice.global.config;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.core5.http.HttpHost;
+
+import org.apache.hc.client5.http.auth.AuthScope;
 import org.opensearch.client.RestClient;
 import org.opensearch.client.json.jackson.JacksonJsonpMapper;
 import org.opensearch.client.opensearch.OpenSearchClient;
@@ -18,13 +22,26 @@ public class OpenSearchConfig {
 
     @Bean
     public OpenSearchClient openSearchClient() {
-        RestClient restClient = RestClient.builder(
-                new HttpHost(
-                        openSearchProperties.scheme(),
-                        openSearchProperties.host(),
-                        openSearchProperties.port()
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+                new AuthScope(openSearchProperties.host(), openSearchProperties.port()),
+                new UsernamePasswordCredentials(
+                        openSearchProperties.username(),
+                        openSearchProperties.password().toCharArray()
                 )
-        ).build();
+        );
+
+        RestClient restClient = RestClient.builder(
+                        new HttpHost(
+                                openSearchProperties.scheme(),
+                                openSearchProperties.host(),
+                                openSearchProperties.port()
+                        )
+                )
+                .setHttpClientConfigCallback(httpClientBuilder ->
+                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+                )
+                .build();
 
         RestClientTransport transport = new RestClientTransport(
                 restClient, new JacksonJsonpMapper()

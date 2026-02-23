@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record OpenSearchProperties(
         String host,
         int port,
-        String scheme
+        String scheme,
+        String username,
+        String password
 ) {
 }

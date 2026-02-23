@@ -21,6 +21,8 @@ import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
@@ -36,10 +38,7 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +53,7 @@ public class ServiceItemService {
     private final RegionReadService regionReadService;
     private final RefundService refundService;
     private final WishReadService wishReadService;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -79,6 +79,13 @@ public class ServiceItemService {
             savedServiceItem.addImageId(imageResource.getId());
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
+
+        outboxWriteService.saveEvent(
+                savedServiceItem.getId(),
+                EventType.CREATED,
+                ServiceItemSearchDocument.from(savedServiceItem)
+        );
+
 
         return savedServiceItem.getId();
     }
@@ -145,7 +152,7 @@ public class ServiceItemService {
 
                     String objectKey = doc.getThumbnailObjectKey() != null
                             ? doc.getThumbnailObjectKey()
-                            : ImageConstants.DEFAULT_COMPANY_IMAGE_OBJECT_KEY;
+                            : ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
                     return ServiceItemModel.Search.fromDocument(
                             doc,
@@ -208,6 +215,13 @@ public class ServiceItemService {
         if (!canceledBooks.isEmpty()) {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
         }
+
+        outboxWriteService.saveEvent(
+                serviceItem.getId(),
+                EventType.DELETED,
+                Map.of("id", serviceItem.getId())
+        );
+
     }
 
     @Transactional(readOnly = true)
