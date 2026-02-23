@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.account.constants.Provider;
+import teamssavice.ssavice.account.entity.Account;
+import teamssavice.ssavice.account.service.AccountReadService;
 import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.auth.Token;
@@ -29,10 +32,6 @@ import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
-import teamssavice.ssavice.user.constants.Provider;
-import teamssavice.ssavice.user.entity.Users;
-import teamssavice.ssavice.user.service.UserReadService;
-import teamssavice.ssavice.user.service.UserWriteService;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,8 +42,7 @@ public class CompanyService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TokenService tokenService;
-    private final UserReadService userReadService;
-    private final UserWriteService userWriteService;
+    private final AccountReadService accountReadService;
     private final CompanyReadService companyReadService;
     private final CompanyWriteService companyWriteService;
     private final ServiceItemReadService serviceItemReadService;
@@ -60,12 +58,11 @@ public class CompanyService {
     public CompanyModel.Login login(String oAuthToken, Provider provider) {
         OAuthUserInfo oAuthUserInfo = oAuthReadService.getUserInfo(provider, oAuthToken);
 
-        Users user = userWriteService.findOrCreate(oAuthUserInfo, provider);
+        Account account = companyWriteService.findOrCreateAccount(oAuthUserInfo, provider);
 
-        // 업체가 있으면 업체 토큰, 없으면 유저 토큰
-        Optional<Company> optionalCompany = companyReadService.findByUser(user);
+        Optional<Company> optionalCompany = companyReadService.findOptionalById(account.getId());
         if (optionalCompany.isEmpty()) {
-            Token token = tokenService.issueToken(user.getId(), Role.USER);
+            Token token = tokenService.issueToken(account.getId(), Role.TEMP);
             return CompanyModel.Login.from(token, false);
         }
 
@@ -77,13 +74,13 @@ public class CompanyService {
     @Transactional
     public CompanyModel.Login register(CompanyCommand.Create command) {
         companySignupVerifyTokenService.validate(
-            command.userId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
+            command.accountId(), command.businessNumber(), command.startDate(), command.ownerName(), command.businessName(), command.verifyToken());
 
-        Users user = userReadService.findById(command.userId());
-        companyReadService.checkUserExists(user);
+        Account account = accountReadService.findById(command.accountId());
+        companyReadService.checkAccountExists(account.getId());
 
         Region region = regionReadService.findByRegionCode(command.regionCode());
-        Company company = companyWriteService.save(command, user,
+        Company company = companyWriteService.save(command, account,
             AddressCommand.RegionInfo.from(command, region));
         Token token = tokenService.issueToken(company.getId(), Role.COMPANY);
         return CompanyModel.Login.from(token, true);
@@ -153,12 +150,12 @@ public class CompanyService {
         applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
     }
 
-    public CompanyModel.Validate validateBusinessNumber(Long userId,
+    public CompanyModel.Validate validateBusinessNumber(Long accountId,
                                                         CompanyCommand.Validate command) {
         CompanyInfraCommand.Validate infraCommand = command.toInfraCommand();
         businessVerificationClient.validate(infraCommand);
         CompanySignupVerifyToken verifyToken = companySignupVerifyTokenService.issueToken(
-            userId, command.businessNumber(), command.startDate(), command.name(), command.businessName());
+            accountId, command.businessNumber(), command.startDate(), command.name(), command.businessName());
 
         return CompanyModel.Validate.from(verifyToken);
     }

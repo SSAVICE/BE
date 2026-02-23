@@ -3,7 +3,7 @@ package teamssavice.ssavice.user.controller.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 import teamssavice.ssavice.user.service.dto.UserCommand;
 
 public class UserRequest {

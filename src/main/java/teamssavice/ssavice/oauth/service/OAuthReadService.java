@@ -5,7 +5,7 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.oauth.service.client.OAuthClient;
 import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 
 import java.util.List;
 import java.util.Map;

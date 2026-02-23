@@ -5,7 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.support.TransactionTemplate;
+import teamssavice.ssavice.account.entity.Account;
+import teamssavice.ssavice.account.infrastructure.repository.AccountRepository;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.fixture.CompanyFixture;
@@ -38,10 +41,16 @@ class ReviewServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private ServiceItemRepository serviceItemRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private Company company;
     private Users user;
@@ -49,15 +58,21 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-
         reviewRepository.deleteAllInBatch();
         serviceItemRepository.deleteAllInBatch();
         companyRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
+        accountRepository.deleteAllInBatch();
 
-        user = userRepository.save(UserFixture.user());
-        company = companyRepository.save(CompanyFixture.company(user));
-        serviceItem = serviceItemRepository.save(ServiceItemFixture.base(company));
+        transactionTemplate.execute(status -> {
+            Account userAccount = accountRepository.save(UserFixture.account());
+            user = userRepository.save(UserFixture.user(userAccount));
+
+            Account companyAccount = accountRepository.save(CompanyFixture.account());
+            company = companyRepository.save(CompanyFixture.company(companyAccount));
+            serviceItem = serviceItemRepository.save(ServiceItemFixture.base(company));
+            return null;
+        });
     }
 
     @Test

@@ -17,7 +17,7 @@ import teamssavice.ssavice.global.exception.ExternalApiException;
 import teamssavice.ssavice.oauth.infrastructure.kakao.client.KakaoApiClient;
 import teamssavice.ssavice.oauth.infrastructure.kakao.dto.KakaoUserResponse;
 import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 
 import java.nio.charset.Charset;
 import java.util.Date;

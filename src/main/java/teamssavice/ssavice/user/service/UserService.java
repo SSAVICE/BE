@@ -19,7 +19,7 @@ import teamssavice.ssavice.region.Region;
 import teamssavice.ssavice.region.RegionReadService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
-import teamssavice.ssavice.user.constants.Provider;
+import teamssavice.ssavice.account.constants.Provider;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.dto.UserCommand;
 import teamssavice.ssavice.user.service.dto.UserModel;
