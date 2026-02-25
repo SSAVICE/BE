@@ -20,11 +20,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
@@ -64,6 +66,9 @@ class BookServiceTest {
 
     @Mock
     private S3Service s3Service;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private Users user;
     private Company company;
@@ -113,11 +118,13 @@ class BookServiceTest {
         // given
         Long serviceId = 1L;
         Long userId = 2L;
+        Address address = AddressFixture.address();
 
-        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), null, null);
+        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), company, address);
         ReflectionTestUtils.setField(serviceItem, "id", serviceId);
         ReflectionTestUtils.setField(serviceItem, "minimumMember", 10L);
         ReflectionTestUtils.setField(serviceItem, "currentMember", 9L);
+        ReflectionTestUtils.setField(serviceItem, "createdAt", LocalDateTime.now());
 
 
         Users user = UserFixture.user();
@@ -145,13 +152,15 @@ class BookServiceTest {
         // given
         Long serviceId = 1L;
         Long userId = 2L;
+        Address address = AddressFixture.address();
 
         // 현재 19명, 최대 20명(최소는 이미 넘은 상태)인 서비스 준비
-        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), null, null);
+        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), company, address);
         ReflectionTestUtils.setField(serviceItem, "id", serviceId);
         ReflectionTestUtils.setField(serviceItem, "minimumMember", 10L);
         ReflectionTestUtils.setField(serviceItem, "maximumMember", 20L);
         ReflectionTestUtils.setField(serviceItem, "currentMember", 19L);
+        ReflectionTestUtils.setField(serviceItem, "createdAt", LocalDateTime.now());
 
         Users user = UserFixture.user();
 

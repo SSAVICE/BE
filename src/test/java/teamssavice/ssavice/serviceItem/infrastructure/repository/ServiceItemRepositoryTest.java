@@ -26,6 +26,7 @@ import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
+import teamssavice.ssavice.serviceItem.constants.SortType;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
@@ -984,7 +985,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(null)
             .pageable(PageRequest.of(0, 10))
             .onSale(true)
@@ -1028,7 +1029,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(null)
             .pageable(PageRequest.of(0, 10))
             .onSale(true)
@@ -1073,7 +1074,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command1 = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(null)
             .pageable(PageRequest.of(0, 3))
             .onSale(true)
@@ -1094,7 +1095,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command2 = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(firstPage.getContent().get(2).getId())
             .pageable(PageRequest.of(0, 3))
             .onSale(true)
@@ -1137,7 +1138,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(null)
             .pageable(PageRequest.of(0, 10))
             .onSale(true)
@@ -1227,7 +1228,7 @@ class ServiceItemRepositoryTest {
             .query("검색어포함")
             .minPrice(10000L)
             .maxPrice(20000L)
-            .sortBy(4)
+            .sortType(SortType.DISTANCE)
             .lastId(null)
             .pageable(PageRequest.of(0, 10))
             .onSale(true)
