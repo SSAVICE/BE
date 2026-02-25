@@ -49,7 +49,6 @@ public class ServiceItemSearchDocument {
     private String deadline;
     private String createdAt;
 
-    private String thumbnailObjectKey;
 
     private GeoLocation location;
 
@@ -83,7 +82,6 @@ public class ServiceItemSearchDocument {
                 .endDate(item.getEndDate().format(DATE_FORMAT))
                 .deadline(item.getDeadline().format(DATE_FORMAT))
                 .createdAt(item.getCreatedAt().format(DATE_FORMAT))
-                .thumbnailObjectKey(item.hasThumbnailImage() ? item.getThumbnailImageResource().getTargetKey() : null)
                 .location(geo)
                 .build();
     }

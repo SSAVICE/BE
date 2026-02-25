@@ -20,6 +20,8 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +105,15 @@ public class ServiceItemReadService {
     @Transactional(readOnly = true)
     public SearchResult searchByOpenSearch(ServiceItemCommand.Search command) {
         return serviceItemSearchClient.search(command);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, String> findThumbnailObjectKeysByIds(List<Long> serviceItemIds) {
+        return serviceItemRepository.findAllByIdInWithThumbnail(serviceItemIds).stream()
+                .filter(item -> item.hasThumbnailImage())
+                .collect(Collectors.toMap(
+                        ServiceItem::getId,
+                        item -> item.getThumbnailImageResource().getResolveKey()
+                ));
     }
 }

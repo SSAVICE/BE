@@ -50,5 +50,10 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
             "AND s.endDate > :now")
     Long countSucceededServiceItemsByCompanyId(Long companyId, ServiceStatus succeeded, LocalDateTime now);
 
+    @Query("SELECT s FROM ServiceItem s " +
+            "LEFT JOIN FETCH s.thumbnailImageResource " +
+            "WHERE s.id IN :serviceItemIds")
+    List<ServiceItem> findAllByIdInWithThumbnail(List<Long> serviceItemIds);
+
     Long countAllByCompany_Id(Long companyId);
 }
