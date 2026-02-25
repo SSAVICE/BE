@@ -61,9 +61,9 @@ public enum ErrorCode {
     WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다."),
 
     // opensearch
-    OPENSEARCH_SEARCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPENSEARCH_SEARCH_FAILED", "검색에 실패했습니다.");
+    OPENSEARCH_SEARCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPENSEARCH_SEARCH_FAILED", "검색에 실패했습니다."),
 
-
+    OUTBOX_PAYLOAD_SERIALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OUTBOX_PAYLOAD_SERIALIZE_FAILED", "Outbox payload 직렬화에 실패했습니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -187,6 +187,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 
+    @ExceptionHandler(OutboxSerializeException.class)
+    public ResponseEntity<ProblemDetail> outboxSerializeException(OutboxSerializeException e) {
+        ProblemDetail problemDetail = setCustomProblemDetail(e);
+        return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> dataIntegrityViolationException(DataIntegrityViolationException e) {
         String errorMessage = e.getMessage() != null ? e.getMessage().toUpperCase() : "";
