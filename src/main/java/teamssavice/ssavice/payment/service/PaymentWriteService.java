@@ -45,7 +45,7 @@ public class PaymentWriteService {
 
     @Transactional
     public void completePayment(String orderId, String paymentKey, String method) {
-        Payment payment = paymentRepository.findByOrderIdWithUserAndServiceItem(orderId)
+        Payment payment = paymentRepository.findByOrderIdWithUser(orderId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
 
         payment.confirm(paymentKey, method);

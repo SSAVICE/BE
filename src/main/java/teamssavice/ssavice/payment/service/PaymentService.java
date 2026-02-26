@@ -89,10 +89,7 @@ public class PaymentService {
             paymentClient.cancel(new PaymentCancelCommand(paymentKey, "정원 초과 결제 취소"));
             paymentWriteService.failPayment(orderId);
             throw cause;
-        } catch (RuntimeException cancelException) {
-            if (cancelException == cause) {
-                throw cause;
-            }
+        } catch (ExternalApiException e) {
             throw new ExternalApiException(ErrorCode.TOSS_PAYMENT_CANCEL_FAILED);
         }
     }
