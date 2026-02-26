@@ -275,7 +275,7 @@ class PaymentServiceTest {
             // given
             String orderId = payment.getOrderId();
             RuntimeException cause = new RuntimeException("정원 초과");
-            RuntimeException cancelException = new RuntimeException("Toss 취소 실패");
+            ExternalApiException cancelException = new ExternalApiException(ErrorCode.TOSS_PAYMENT_CANCEL_FAILED);
 
             given(paymentReadService.findByOrderIdWithUserAndServiceItem(orderId))
                     .willReturn(payment);
