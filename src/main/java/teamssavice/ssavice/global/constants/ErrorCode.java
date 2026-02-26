@@ -66,7 +66,13 @@ public enum ErrorCode {
     // Kakao
     KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
     KAKAO_INFO_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "KAKAO_INFO_NOT_PROVIDED", "카카오 계정에서 정보를 불러올 수 없습니다."),
-    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "UNSUPPORTED_PROVIDER", "지원하지 않는 소셜 로그인입니다.");
+    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "UNSUPPORTED_PROVIDER", "지원하지 않는 소셜 로그인입니다."),
+
+    // Payment
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PAYMENT_AMOUNT_MISMATCH", "결제 금액이 일치하지 않습니다."),
+    INVALID_PAYMENT_STATE(HttpStatus.CONFLICT, "INVALID_PAYMENT_STATE", "유효하지 않은 결제 상태입니다."),
+    TOSS_PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_GATEWAY, "TOSS_PAYMENT_CONFIRM_FAILED", "토스 결제 승인에 실패했습니다.");
 
 
     private final HttpStatus status;
