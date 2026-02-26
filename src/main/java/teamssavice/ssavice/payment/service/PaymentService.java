@@ -13,6 +13,8 @@ import teamssavice.ssavice.payment.service.client.PaymentClient;
 import teamssavice.ssavice.payment.service.client.dto.PaymentCancelCommand;
 import teamssavice.ssavice.payment.service.client.dto.PaymentConfirmCommand;
 import teamssavice.ssavice.payment.service.client.dto.PaymentConfirmResult;
+import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.payment.service.dto.PaymentCommand;
 import teamssavice.ssavice.payment.service.dto.PaymentModel;
 
@@ -24,13 +26,18 @@ public class PaymentService {
     private final PaymentReadService paymentReadService;
     private final PaymentWriteService paymentWriteService;
     private final PaymentClient paymentClient;
+    private final BookReadService bookReadService;
 
     /**
      * 결제 준비 - PENDING Payment 생성.
-     * 동일 사용자/서비스 조합의 중복 PENDING Payment가 있으면 ConflictException 발생.
+     * 중복 예약(취소 제외) 또는 중복 PENDING Payment가 있으면 ConflictException 발생.
      */
     @Transactional
     public PaymentModel.Prepare createPendingPayment(PaymentCommand.Prepare command) {
+        if (bookReadService.existsByUserAndServiceAndStatusNot(command.userId(), command.serviceItemId(), BookStatus.CANCELED)) {
+            throw new ConflictException(ErrorCode.ALREADY_APPLIED);
+        }
+
         if (paymentReadService.existsPendingPayment(command.userId(), command.serviceItemId())) {
             throw new ConflictException(ErrorCode.DUPLICATE_PENDING_PAYMENT);
         }
