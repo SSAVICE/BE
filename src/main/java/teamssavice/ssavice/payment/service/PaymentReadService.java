@@ -16,8 +16,8 @@ public class PaymentReadService {
     private final PaymentRepository paymentRepository;
 
     @Transactional(readOnly = true)
-    public Payment findByOrderId(String orderId) {
-        return paymentRepository.findByOrderId(orderId)
+    public Payment findByOrderIdWithUserAndServiceItem(String orderId) {
+        return paymentRepository.findByOrderIdWithUserAndServiceItem(orderId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
