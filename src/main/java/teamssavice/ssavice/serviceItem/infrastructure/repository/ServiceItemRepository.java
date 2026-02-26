@@ -1,9 +1,12 @@
 package teamssavice.ssavice.serviceItem.infrastructure.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
@@ -51,4 +54,8 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
     Long countSucceededServiceItemsByCompanyId(Long companyId, ServiceStatus succeeded, LocalDateTime now);
 
     Long countAllByCompany_Id(Long companyId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM ServiceItem s WHERE s.id = :id")
+    Optional<ServiceItem> findByIdForUpdate(@Param("id") Long id);
 }
