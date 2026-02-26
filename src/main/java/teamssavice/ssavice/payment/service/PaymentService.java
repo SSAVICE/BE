@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ExternalApiException;
@@ -13,10 +15,10 @@ import teamssavice.ssavice.payment.service.client.PaymentClient;
 import teamssavice.ssavice.payment.service.client.dto.PaymentCancelCommand;
 import teamssavice.ssavice.payment.service.client.dto.PaymentConfirmCommand;
 import teamssavice.ssavice.payment.service.client.dto.PaymentConfirmResult;
-import teamssavice.ssavice.book.entity.BookStatus;
-import teamssavice.ssavice.book.service.BookReadService;
 import teamssavice.ssavice.payment.service.dto.PaymentCommand;
 import teamssavice.ssavice.payment.service.dto.PaymentModel;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -43,7 +45,8 @@ public class PaymentService {
         }
 
         Payment payment = paymentWriteService.createPendingPayment(command.userId(), command.serviceItemId());
-        return PaymentModel.Prepare.from(payment);
+        String customerKey = UUID.nameUUIDFromBytes(("user:" + command.userId()).getBytes()).toString();
+        return PaymentModel.Prepare.from(customerKey, payment);
     }
 
     public void confirmPayment(PaymentCommand.Confirm command) {
