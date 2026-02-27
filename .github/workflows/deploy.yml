@@ -54,6 +54,7 @@ jobs:
           echo "NTS_SERVICE_KEY=${{ secrets.NTS_SERVICE_KEY }}" >> .env
           echo "SQS_THUMB_ALARM_QUEUE=${{ secrets.SQS_THUMB_ALARM_QUEUE }}" >> .env
           echo "SQS_OUTBOX_QUEUE=${{ secrets.SQS_OUTBOX_QUEUE }}" >> .env
+          echo "OPENSEARCH_HOST=${{ secrets.OPENSEARCH_HOST }}" >> .env
           echo "OPENSEARCH_USERNAME=${{ secrets.OPENSEARCH_USERNAME }}" >> .env
           echo "OPENSEARCH_PASSWORD=${{ secrets.OPENSEARCH_PASSWORD }}" >> .env
           cat .env
