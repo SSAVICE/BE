@@ -9,16 +9,16 @@ import teamssavice.ssavice.outbox.service.OutboxWriteService;
 
 @Component
 @RequiredArgsConstructor
-public class BookEventHandler {
+public class BookEventListener {
 
     private final OutboxWriteService outboxWriteService;
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void handleBookApplied(BookChangedEvent event) {
+    public void handleBookChanged(BookChangedEvent event) {
         outboxWriteService.saveEvent(
                 event.serviceItemId(),
-                EventType.CREATED,
-                event.document()
+                EventType.UPDATED,
+                event.partialFields()
         );
     }
 }
