@@ -4,9 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import teamssavice.ssavice.global.exception.OutboxSerializeException;
 import teamssavice.ssavice.outbox.constants.EventType;
 import teamssavice.ssavice.outbox.entity.OutboxEvent;
-import teamssavice.ssavice.outbox.repository.OutboxEventRepository;
+import teamssavice.ssavice.outbox.infrastructure.repository.OutboxEventRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class OutboxWriteService {
                             .build()
             );
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Outbox payload 직렬화 실패", e);
+            throw new OutboxSerializeException();
         }
     }
 }

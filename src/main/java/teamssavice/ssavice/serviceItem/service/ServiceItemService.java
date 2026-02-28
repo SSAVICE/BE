@@ -31,6 +31,8 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.event.ServiceItemCreatedEvent;
+import teamssavice.ssavice.serviceItem.event.ServiceItemDeletedEvent;
 import teamssavice.ssavice.serviceItem.infrastructure.opensearch.SearchResult;
 import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
@@ -80,10 +82,11 @@ public class ServiceItemService {
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
 
-        outboxWriteService.saveEvent(
-                savedServiceItem.getId(),
-                EventType.CREATED,
-                ServiceItemSearchDocument.from(savedServiceItem)
+        applicationEventPublisher.publishEvent(
+                new ServiceItemCreatedEvent(
+                        savedServiceItem.getId(),
+                        ServiceItemSearchDocument.from(savedServiceItem)
+                )
         );
 
 
@@ -129,6 +132,8 @@ public class ServiceItemService {
                 ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
                 : Collections.emptySet();
 
+        Map<Long, String> thumbnailObjectKeyMap = serviceItemReadService.findThumbnailObjectKeysByIds(serviceItemIds);
+
         List<ServiceItemModel.Search> content = result.items().stream()
                 .map(item -> {
                     ServiceItemSearchDocument doc = item.document();
@@ -150,9 +155,10 @@ public class ServiceItemService {
                         distanceKm = 0.0;
                     }
 
-                    String objectKey = doc.getThumbnailObjectKey() != null
-                            ? doc.getThumbnailObjectKey()
-                            : ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+                    String objectKey = thumbnailObjectKeyMap.getOrDefault(
+                            doc.getId(),
+                            ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY
+                    );
 
                     return ServiceItemModel.Search.fromDocument(
                             doc,
@@ -216,11 +222,7 @@ public class ServiceItemService {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
         }
 
-        outboxWriteService.saveEvent(
-                serviceItem.getId(),
-                EventType.DELETED,
-                Map.of("id", serviceItem.getId())
-        );
+        applicationEventPublisher.publishEvent(new ServiceItemDeletedEvent(serviceItem.getId()));
 
     }
 
