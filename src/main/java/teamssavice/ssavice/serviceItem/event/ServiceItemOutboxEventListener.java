@@ -7,6 +7,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import teamssavice.ssavice.outbox.constants.EventType;
 import teamssavice.ssavice.outbox.service.OutboxWriteService;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 public class ServiceItemOutboxEventListener {
@@ -19,6 +21,15 @@ public class ServiceItemOutboxEventListener {
                 event.serviceItemId(),
                 EventType.CREATED,
                 event.document()
+        );
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handleServiceItemDeleted(ServiceItemDeletedEvent event) {
+        outboxWriteService.saveEvent(
+                event.serviceItemId(),
+                EventType.DELETED,
+                Map.of("id", event.serviceItemId())
         );
     }
 }
