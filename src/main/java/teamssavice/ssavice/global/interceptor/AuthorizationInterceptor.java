@@ -26,7 +26,11 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 .orElse(handlerMethod.getBeanType().getAnnotation(RequireRole.class));
         if(requireRole == null) return true;
 
-        Role userRole = Role.valueOf((String) request.getAttribute("role"));
+        String roleAttribute = (String) request.getAttribute("role");
+        if (roleAttribute == null) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+        }
+        Role userRole = Role.valueOf(roleAttribute);
 
         boolean hasAccess = Arrays.stream(requireRole.value())
                 .anyMatch(required -> required.canAccess(userRole));
