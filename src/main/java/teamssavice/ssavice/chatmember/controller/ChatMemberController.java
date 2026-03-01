@@ -1,4 +1,4 @@
-package teamssavice.ssavice.chat.controller;
+package teamssavice.ssavice.chatmember.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.chat.controller.dto.ChatResponse;
-import teamssavice.ssavice.chat.service.ChatService;
-import teamssavice.ssavice.chat.service.dto.ChatModel;
+import teamssavice.ssavice.chatmember.controller.dto.ChatMemberResponse;
+import teamssavice.ssavice.chatmember.service.ChatMemberService;
+import teamssavice.ssavice.chatmember.service.dto.ChatMemberModel;
 import teamssavice.ssavice.global.annotation.CurrentAuth;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.Auth;
@@ -21,15 +21,15 @@ import java.util.List;
 @RequestMapping("/api/chat-members")
 public class ChatMemberController {
 
-    private final ChatService chatService;
+    private final ChatMemberService chatMemberService;
 
     @RequireRole({Role.USER, Role.COMPANY})
     @GetMapping("/rooms/{roomId}/members")
-    public ResponseEntity<ChatResponse.Members> getRoomMembers(
+    public ResponseEntity<ChatMemberResponse.Members> getRoomMembers(
         @PathVariable String roomId,
         @CurrentAuth Auth auth
     ) {
-        List<ChatModel.MemberInfo> members = chatService.getRoomMemberInfos(roomId, auth.id());
-        return ResponseEntity.ok(ChatResponse.Members.from(members));
+        List<ChatMemberModel.MemberInfo> members = chatMemberService.getRoomMemberInfos(roomId, auth.id());
+        return ResponseEntity.ok(ChatMemberResponse.Members.from(members));
     }
 }

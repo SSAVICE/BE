@@ -1,16 +1,16 @@
-package teamssavice.ssavice.chat.service;
+package teamssavice.ssavice.chatmember.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import teamssavice.ssavice.chat.entity.ChatMember;
-import teamssavice.ssavice.chat.infrastructure.repository.ChatMemberRepository;
+import teamssavice.ssavice.chatmember.entity.ChatMember;
+import teamssavice.ssavice.chatmember.infrastructure.repository.ChatMemberRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ChatReadService {
+public class ChatMemberReadService {
 
     private final ChatMemberRepository chatMemberRepository;
 

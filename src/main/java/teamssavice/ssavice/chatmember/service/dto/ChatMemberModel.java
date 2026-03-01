@@ -1,8 +1,8 @@
-package teamssavice.ssavice.chat.service.dto;
+package teamssavice.ssavice.chatmember.service.dto;
 
 import lombok.Builder;
 
-public class ChatModel {
+public class ChatMemberModel {
 
     @Builder
     public record MemberInfo(

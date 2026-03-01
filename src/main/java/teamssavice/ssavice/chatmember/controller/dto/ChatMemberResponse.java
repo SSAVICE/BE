@@ -1,16 +1,17 @@
-package teamssavice.ssavice.chat.controller.dto;
+package teamssavice.ssavice.chatmember.controller.dto;
+
+import lombok.Builder;
+import teamssavice.ssavice.chatmember.service.dto.ChatMemberModel;
 
 import java.util.List;
-import lombok.Builder;
-import teamssavice.ssavice.chat.service.dto.ChatModel;
 
-public class ChatResponse {
+public class ChatMemberResponse {
 
     @Builder
     public record Members(
         List<MemberInfo> members
     ) {
-        public static Members from(List<ChatModel.MemberInfo> models) {
+        public static Members from(List<ChatMemberModel.MemberInfo> models) {
             return Members.builder()
                 .members(models.stream().map(MemberInfo::from).toList())
                 .build();
@@ -23,7 +24,7 @@ public class ChatResponse {
         String name,
         String imageUrl
     ) {
-        public static MemberInfo from(ChatModel.MemberInfo model) {
+        public static MemberInfo from(ChatMemberModel.MemberInfo model) {
             return MemberInfo.builder()
                 .accountId(model.accountId())
                 .name(model.name())
