@@ -5,12 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.auth.controller.dto.AuthResponse;
 import teamssavice.ssavice.auth.service.TokenService;
 import teamssavice.ssavice.auth.service.dto.AuthModel;
 import teamssavice.ssavice.global.annotation.CurrentAuth;
 import teamssavice.ssavice.global.annotation.CurrentRefreshToken;
 import teamssavice.ssavice.global.annotation.PermitAll;
+import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.dto.Auth;
 
 @RestController
@@ -37,6 +39,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @RequireRole({Role.USER, Role.COMPANY})
     @GetMapping("/id")
     public ResponseEntity<AuthResponse.Me> me(
         @CurrentAuth Auth auth
