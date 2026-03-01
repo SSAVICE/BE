@@ -9,6 +9,7 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,5 +52,10 @@ public class CompanyReadService {
     public Company findByIdFetchJoinAddressAndImageResource(Long id) {
         return companyRepository.findByIdFetchJoinAddressAndImageResource(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMPANY_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Company> findAllByIdInFetchJoinImageResource(List<Long> ids) {
+        return companyRepository.findAllByIdInFetchJoinImageResource(ids);
     }
 }
