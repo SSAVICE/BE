@@ -26,6 +26,7 @@ public class KafkaEvent {
                     .roomId(String.valueOf(item.getId()))
                     .roomName(item.getTitle())
                     .sender(sender)
+                    .createdAt(LocalDateTime.now())
                     .build();
         }
 
@@ -35,6 +36,7 @@ public class KafkaEvent {
                     .roomType(RoomType.GROUP)
                     .roomId(String.valueOf(item.getId()))
                     .sender(sender)
+                    .createdAt(LocalDateTime.now())
                     .build();
         }
 
@@ -44,6 +46,7 @@ public class KafkaEvent {
                     .roomType(RoomType.GROUP)
                     .roomId(String.valueOf(item.getId()))
                     .sender(sender)
+                    .createdAt(LocalDateTime.now())
                     .build();
         }
     }
