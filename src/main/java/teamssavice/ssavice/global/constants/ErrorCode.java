@@ -78,7 +78,7 @@ public enum ErrorCode {
     PAYMENT_CONFIRM_STATUS_INVALID(HttpStatus.BAD_GATEWAY, "PAYMENT_CONFIRM_STATUS_INVALID", "토스 결제 승인 상태가 DONE이 아닙니다."),
 
     // Chat
-    CHAT_MEMBER_NOT_FOUND(HttpStatus.FORBIDDEN, "CHAT_MEMBER_NOT_FOUND", "채팅방 멤버가 아닙니다.");
+    CHAT_ROOM_ACCESS_DENIED(HttpStatus.FORBIDDEN, "CHAT_ROOM_ACCESS_DENIED", "채팅방에 접근 권한이 없습니다.");
 
 
     private final HttpStatus status;

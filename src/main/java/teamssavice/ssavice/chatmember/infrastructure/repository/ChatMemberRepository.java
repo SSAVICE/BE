@@ -1,11 +1,22 @@
 package teamssavice.ssavice.chatmember.infrastructure.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import teamssavice.ssavice.chatmember.entity.ChatMember;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ChatMemberRepository extends JpaRepository<ChatMember, Long> {
+@Repository
+@RequiredArgsConstructor
+public class ChatMemberRepository {
 
-    List<ChatMember> findAllByRoomIdAndIsLeftFalse(String roomId);
+    private final JdbcTemplate jdbcTemplate;
+
+    public List<Long> findAllByRoomIdAndIsLeftFalse(String roomId) {
+        return jdbcTemplate.queryForList(
+                "SELECT subject FROM chat_member WHERE room_id = ? AND is_left = false",
+                Long.class, roomId)
+            .stream()
+            .toList();
+    }
 }

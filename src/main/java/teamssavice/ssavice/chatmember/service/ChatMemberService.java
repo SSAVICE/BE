@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.account.service.AccountReadService;
 import teamssavice.ssavice.auth.constants.Role;
-import teamssavice.ssavice.chatmember.entity.ChatMember;
 import teamssavice.ssavice.chatmember.service.dto.ChatMemberModel;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -31,15 +30,15 @@ public class ChatMemberService {
 
     @Transactional(readOnly = true)
     public List<ChatMemberModel.MemberInfo> getRoomMemberInfos(String roomId, Long authId) {
-        List<ChatMember> members = chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId);
+        List<Long> memberIds = chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId);
 
-        boolean isMember = members.stream()
-            .anyMatch(member -> member.getSubject().equals(authId));
+        boolean isMember = memberIds.stream()
+            .anyMatch(memberId -> memberId.equals(authId));
         if (!isMember) {
-            throw new ForbiddenException(ErrorCode.CHAT_MEMBER_NOT_FOUND);
+            throw new ForbiddenException(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
         }
 
-        Map<Role, List<Long>> idsByRole = groupIdsByRole(members);
+        Map<Role, List<Long>> idsByRole = groupIdsByRole(memberIds);
 
         List<ChatMemberModel.MemberInfo> result = new ArrayList<>();
         result.addAll(toUserMemberInfos(idsByRole.getOrDefault(Role.USER, List.of())));
@@ -47,12 +46,8 @@ public class ChatMemberService {
         return result;
     }
 
-    private Map<Role, List<Long>> groupIdsByRole(List<ChatMember> members) {
+    private Map<Role, List<Long>> groupIdsByRole(List<Long> memberIds) {
         Map<Role, List<Long>> idsByRole = new HashMap<>();
-
-        List<Long> memberIds = members.stream()
-            .map(ChatMember::getSubject)
-            .toList();
 
         List<Account> accounts = accountReadService.findAllByIdIn(memberIds);
         for (Account account : accounts) {
