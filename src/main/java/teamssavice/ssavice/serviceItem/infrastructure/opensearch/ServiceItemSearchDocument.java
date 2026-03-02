@@ -51,6 +51,7 @@ public class ServiceItemSearchDocument {
 
 
     private GeoLocation location;
+    private boolean isAvailable;
 
     public static ServiceItemSearchDocument from(ServiceItem item) {
         GeoLocation geo = GeoLocation.builder()
@@ -62,7 +63,7 @@ public class ServiceItemSearchDocument {
                 .id(item.getId())
                 .title(item.getTitle())
                 .description(item.getDescription())
-                .category(item.getCategory())
+                .category(item.getCategory().name())
                 .tags(item.getTag() != null ? List.of(item.getTag().split(",")) : List.of())
                 .status(item.getStatus().name())
                 .isDeleted(item.isDeleted())
@@ -83,6 +84,7 @@ public class ServiceItemSearchDocument {
                 .deadline(item.getDeadline().format(DATE_FORMAT))
                 .createdAt(item.getCreatedAt().format(DATE_FORMAT))
                 .location(geo)
+                .isAvailable(item.getCurrentMember() < item.getMaximumMember())
                 .build();
     }
 

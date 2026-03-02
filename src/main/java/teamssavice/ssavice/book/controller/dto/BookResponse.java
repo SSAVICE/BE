@@ -3,6 +3,7 @@ package teamssavice.ssavice.book.controller.dto;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.book.service.dto.BookModel;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ public class BookResponse {
     public record ServiceInfo(
         Long serviceId,
         String thumbnailUrl,
-        String category,
+        ServiceCategory category,
         String companyName,
         Long companyId,
         String title,

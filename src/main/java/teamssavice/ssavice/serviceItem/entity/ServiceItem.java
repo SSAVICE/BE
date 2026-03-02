@@ -14,6 +14,8 @@ import teamssavice.ssavice.imageresource.entity.ImageResource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 
 @Entity
@@ -62,7 +64,8 @@ public class ServiceItem extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime deadline; // 이벤트 마감 기간
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private ServiceCategory category;
 
     private String tag; // 엘라스틱 서치 도입 예정
 

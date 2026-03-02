@@ -24,6 +24,7 @@ import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.global.util.GeoHashUtil;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.constants.SortType;
@@ -337,7 +338,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리")
+            .category(ServiceCategory.CULTURE)
             .company(company)
             .address(address2)
             .status(ServiceStatus.CANCELED)
@@ -356,7 +357,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().minusDays(20))
             .endDate(LocalDateTime.now().plusDays(10))
             .deadline(LocalDateTime.now().minusDays(1))
-            .category("카테고리")
+            .category(ServiceCategory.HEALTH)
             .company(company)
             .address(address3)
             .status(ServiceStatus.RECRUITING)
@@ -536,7 +537,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리")
+            .category(ServiceCategory.CULTURE)
             .company(company)
             .address(address)
             .status(ServiceStatus.RECRUITING)
@@ -1176,7 +1177,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리A")
+            .category(ServiceCategory.HEALTH)
             .company(company)
             .address(address1)
             .status(ServiceStatus.RECRUITING)
@@ -1194,7 +1195,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리B")
+            .category(ServiceCategory.CULTURE)
             .company(company)
             .address(address2)
             .status(ServiceStatus.RECRUITING)
@@ -1212,7 +1213,7 @@ class ServiceItemRepositoryTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리A")
+            .category(ServiceCategory.HEALTH)
             .company(company)
             .address(address3)
             .status(ServiceStatus.RECRUITING)
@@ -1224,7 +1225,7 @@ class ServiceItemRepositoryTest {
         ServiceItemCommand.Search command = ServiceItemCommand.Search.builder()
             .userLatitude(userLat)
             .userLongitude(userLon)
-            .category("카테고리A")
+            .category(ServiceCategory.HEALTH)
             .query("검색어포함")
             .minPrice(10000L)
             .maxPrice(20000L)
@@ -1240,6 +1241,6 @@ class ServiceItemRepositoryTest {
         // then - 모든 필터 조건을 만족하는 아이템만 반환
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("검색어포함 서비스");
-        assertThat(result.getContent().get(0).getCategory()).isEqualTo("카테고리A");
+        assertThat(result.getContent().get(0).getCategory()).isEqualTo(ServiceCategory.HEALTH);
     }
 }

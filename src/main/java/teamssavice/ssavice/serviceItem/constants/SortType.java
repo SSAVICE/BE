@@ -1,25 +1,9 @@
 package teamssavice.ssavice.serviceItem.constants;
 
-import java.util.Arrays;
-
 public enum SortType {
-    LATEST(0),
-    PRICE_ASC(1),
-    PRICE_DESC(2),
-    DISCOUNT_RATE(3),
-    DISTANCE(4);
-
-    private final int code;
-
-    SortType(int code) {
-        this.code = code;
-    }
-
-    public static SortType from(Integer code) {
-        if (code == null) return LATEST;
-        return Arrays.stream(values())
-                .filter(s -> s.code == code)
-                .findFirst()
-                .orElse(LATEST);
-    }
+    LATEST,         // 최신순
+    PRICE_ASC,      // 가격 낮은순
+    PRICE_DESC,     // 가격 높은순
+    DISCOUNT_RATE,  // 할인순
+    DISTANCE        // 거리순
 }

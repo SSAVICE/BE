@@ -15,6 +15,7 @@
     import org.springframework.stereotype.Component;
     import teamssavice.ssavice.global.constants.ErrorCode;
     import teamssavice.ssavice.global.exception.ExternalApiException;
+    import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
     import teamssavice.ssavice.serviceItem.constants.SortType;
     import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
@@ -30,7 +31,6 @@
 
         private static final String INDEX_NAME = "service-items";
         private final OpenSearchClient openSearchClient;
-        private static final String DEFAULT_DISTANCE = "2km";
 
         public SearchResult search(ServiceItemCommand.Search command) {
             try {
@@ -74,35 +74,41 @@
         private Query buildQuery(ServiceItemCommand.Search command) {
             BoolQuery.Builder bool = new BoolQuery.Builder();
 
-            // 삭제되지 않은 문서만
-            bool.must(m -> m.term(t -> t.field("isDeleted").value(FieldValue.of(false))));
+            // 1. (삭제되지 않은 문서)
+            bool.filter(m -> m.term(t -> t.field("isDeleted").value(FieldValue.of(false))));
 
-            // 키워드 검색 (title, description)
-            if (command.query() != null && !command.query().isEmpty()) {
+            // 2. 키워드 검색
+            if (command.query() != null && !command.query().isBlank()) {
                 bool.must(m -> m.multiMatch(mm -> mm
                         .fields("title", "description", "tags.search", "companyName.search")
                         .query(command.query())
                 ));
             }
 
-            // 카테고리 필터
-            if (command.category() != null && !command.category().isEmpty()) {
-                bool.must(m -> m.term(t -> t.field("category").value(FieldValue.of(command.category()))));
+            // 3. 카테고리 필터
+            if (command.category() != ServiceCategory.ALL) {
+                bool.filter(m -> m.term(t -> t.field("category").value(FieldValue.of(command.category().name()))));
             }
 
-            // 지역 필터
-            if (command.region() != null && !command.region().isEmpty()) {
-                bool.must(m -> m.term(t -> t.field("region").value(FieldValue.of(command.region()))));
+            // 4. 지역 및 거리 필터
+            switch (command.range()) {
+                case GUGUN -> {
+                    if (command.gugun() != null && !command.gugun().isBlank()) {
+                        bool.filter(m -> m.term(t -> t.field("gugun").value(FieldValue.of(command.gugun()))));
+                    }
+                }
+                case DONG -> {
+                    if (command.region() != null && !command.region().isBlank()) {
+                        bool.filter(m -> m.term(t -> t.field("region").value(FieldValue.of(command.region()))));
+                    }
+                }
+                case KM_1_5 -> applyGeoFilter(bool, command, "1.5km");
+                case KM_3   -> applyGeoFilter(bool, command, "3km");
             }
 
-            // 구군 필터
-            if (command.gugun() != null && !command.gugun().isEmpty()) {
-                bool.must(m -> m.term(t -> t.field("gugun").value(FieldValue.of(command.gugun()))));
-            }
-
-            // 가격 범위
+            // 5. 가격 범위
             if (command.minPrice() != null || command.maxPrice() != null) {
-                bool.must(m -> m.range(r -> {
+                bool.filter(m -> m.range(r -> {
                     r.field("discountedPrice");
                     if (command.minPrice() != null) r.gte(JsonData.of(command.minPrice()));
                     if (command.maxPrice() != null) r.lte(JsonData.of(command.maxPrice()));
@@ -110,53 +116,30 @@
                 }));
             }
 
-            // 판매중 필터
+            // 6. 판매중 필터
             if (command.onSale()) {
-                String now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                bool.must(m -> m.terms(t -> t
+//                String now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+                bool.filter(m -> m.terms(t -> t
                         .field("status")
                         .terms(v -> v.value(List.of(
                                 FieldValue.of("RECRUITING"),
                                 FieldValue.of("SUCCEEDED")
                         )))
                 ));
-                bool.must(m -> m.range(r -> r.field("deadline").gt(JsonData.of(now))));
-                bool.must(m -> m.term(t -> t.field("isAvailable").value(FieldValue.of(true))));
+                bool.filter(m -> m.range(r -> r.field("deadline").gt(JsonData.of(now))));
+                bool.filter(m -> m.term(t -> t.field("isAvailable").value(FieldValue.of(true))));
             }
-
-            // 거리 필터 (거리순 정렬일 때) - 기본값이 2km 임
-            if (command.sortType() == SortType.DISTANCE
-                    && command.userLatitude() != null
-                    && command.userLongitude() != null) {
-
-                String distance = command.distanceKm() != null
-                        ? command.distanceKm() + "km"
-                        : DEFAULT_DISTANCE;
-
-                bool.must(m -> m.geoDistance(g -> g
-                        .field("location")
-                        .location(l -> l.latlon(ll -> ll
-                                .lat(command.userLatitude().doubleValue())
-                                .lon(command.userLongitude().doubleValue())
-                        ))
-                        .distance(distance)
-                ));
-            }
-
             return new Query.Builder().bool(bool.build()).build();
         }
-
 
         private List<SortOptions> buildSort(ServiceItemCommand.Search command) {
             List<SortOptions> sorts = new ArrayList<>();
 
             SortType sortType = command.sortType();
 
-            if (sortType == SortType.DISTANCE
-                    && command.userLatitude() != null
-                    && command.userLongitude() != null) {
-                // 거리순
-                sorts.add(SortOptions.of(s -> s.geoDistance(g -> g
+            switch (sortType) {
+                case DISTANCE -> sorts.add(SortOptions.of(s -> s.geoDistance(g -> g
                         .field("location")
                         .location(l -> l.latlon(ll -> ll
                                 .lat(command.userLatitude().doubleValue())
@@ -165,24 +148,18 @@
                         .order(SortOrder.Asc)
                         .unit(DistanceUnit.Kilometers)
                 )));
-            } else if (sortType == SortType.PRICE_ASC) {
-                // 가격 낮은순
-                sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountedPrice").order(SortOrder.Asc))));
-            } else if (sortType == SortType.PRICE_DESC) {
-                // 가격 높은순
-                sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountedPrice").order(SortOrder.Desc))));
-            } else if (sortType == SortType.DISCOUNT_RATE) {
-                // 할인율순
-                sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountRate").order(SortOrder.Desc))));
-            } else {
-                // 기본: 최신순
-                sorts.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
+                case PRICE_ASC -> sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountedPrice").order(SortOrder.Asc))));
+                case PRICE_DESC -> sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountedPrice").order(SortOrder.Desc))));
+                case DISCOUNT_RATE -> sorts.add(SortOptions.of(s -> s.field(f -> f.field("discountRate").order(SortOrder.Desc))));
+                case LATEST -> sorts.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
             }
 
+            // id는 항상 보조 정렬
             sorts.add(SortOptions.of(s -> s.field(f -> f.field("id").order(SortOrder.Asc))));
 
             return sorts;
         }
+
 
 
         private SearchResult toSearchResult(SearchResponse<ServiceItemSearchDocument> response, int size, SortType sortType) {
@@ -207,6 +184,17 @@
             }
 
             return new SearchResult(items, nextSearchAfter, hasNext);
+        }
+
+        private void applyGeoFilter(BoolQuery.Builder bool, ServiceItemCommand.Search command, String distance) {
+            bool.filter(m -> m.geoDistance(g -> g
+                    .field("location")
+                    .location(l -> l.latlon(ll -> ll
+                            .lat(command.userLatitude().doubleValue())
+                            .lon(command.userLongitude().doubleValue())
+                    ))
+                    .distance(distance)
+            ));
         }
 
         private Double extractDistance(Hit<ServiceItemSearchDocument> hit, SortType sortType) {

@@ -4,6 +4,8 @@ import lombok.Builder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import teamssavice.ssavice.serviceItem.constants.Range;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.constants.SortType;
 
@@ -26,7 +28,7 @@ public class ServiceItemCommand {
             LocalDateTime startDate,
             LocalDateTime endDate,
             LocalDateTime deadline,
-            String category,
+            ServiceCategory category,
             String tag,
             String regionCode,
             BigDecimal longitude,
@@ -40,11 +42,11 @@ public class ServiceItemCommand {
 
     @Builder
     public record Search (
-        String category,
+        ServiceCategory category,
         String query,
         String gugun,
         String region,
-        Integer range,
+        Range range,
         Long minPrice,
         Long maxPrice,
         SortType sortType,
@@ -54,8 +56,7 @@ public class ServiceItemCommand {
         boolean onSale,
         Long userId,
         BigDecimal userLatitude,
-        BigDecimal userLongitude,
-        Double distanceKm
+        BigDecimal userLongitude
     ) {
     }
 

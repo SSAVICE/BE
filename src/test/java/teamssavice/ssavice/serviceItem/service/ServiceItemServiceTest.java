@@ -15,6 +15,7 @@ import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
@@ -67,7 +68,7 @@ class ServiceItemServiceTest {
             .startDate(LocalDateTime.now().plusDays(10))
             .endDate(LocalDateTime.now().plusDays(30))
             .deadline(LocalDateTime.now().plusDays(5))
-            .category("카테고리")
+            .category(ServiceCategory.HEALTH)
             .company(company)
             .address(address)
             .build();

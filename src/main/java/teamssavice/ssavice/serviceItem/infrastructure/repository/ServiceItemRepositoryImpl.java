@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.util.GeoHashUtil;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
 import teamssavice.ssavice.serviceItem.constants.SortType;
@@ -157,8 +158,9 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         return lastId == null ? null : serviceItem.id.lt(lastId);
     }
 
-    private BooleanExpression eqCategory(String category) {
-        return (category == null || category.isEmpty()) ? null : serviceItem.category.eq(category);
+    private BooleanExpression eqCategory(ServiceCategory category) {
+        if (category == null || category == ServiceCategory.ALL) return null;
+        return serviceItem.category.eq(category);
     }
 
     private BooleanExpression containsQuery(String query) {

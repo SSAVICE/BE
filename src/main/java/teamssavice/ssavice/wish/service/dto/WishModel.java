@@ -3,6 +3,7 @@ package teamssavice.ssavice.wish.service.dto;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.wish.entity.Wish;
 
@@ -12,7 +13,7 @@ public class WishModel {
     public record Summary(
         Long serviceId,
         String thumbnailUrl,
-        String category,
+        ServiceCategory category,
         Long companyId,
         String companyName,
         String title,

@@ -138,21 +138,16 @@ public class ServiceItemService {
                 .map(item -> {
                     ServiceItemSearchDocument doc = item.document();
 
-                    // 거리 계산
                     double distanceKm;
                     if (item.distanceKm() != null) {
-                        // 거리순 → OpenSearch가 계산한 값
+                        // DISTANCE 정렬은 OpenSearch 계산값
                         distanceKm = item.distanceKm();
-                    } else if (doc.getLocation() != null
-                            && command.userLatitude() != null
-                            && command.userLongitude() != null) {
-                        // 그 외 → Java에서 계산
+                    } else {
+                        // 나머지 정렬에 대해서는 GeoHashUtil (JAVA) 를 통해 계산
                         distanceKm = GeoHashUtil.calculateDistanceInKm(
                                 command.userLatitude(), command.userLongitude(),
                                 doc.getLocation().getLat(),
                                 doc.getLocation().getLon());
-                    } else {
-                        distanceKm = 0.0;
                     }
 
                     String objectKey = thumbnailObjectKeyMap.getOrDefault(

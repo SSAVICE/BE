@@ -17,6 +17,7 @@ import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.imageresource.service.ImageService;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.dto.S3Command;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemRequest;
 import teamssavice.ssavice.serviceItem.controller.dto.ServiceItemResponse;
 import teamssavice.ssavice.serviceItem.service.ServiceItemService;
@@ -135,7 +136,7 @@ class ServiceItemControllerTest {
 
             return new ServiceItemRequest.Create(
                     2L,
-                    "청소",
+                    ServiceCategory.CULTURE,
                     "가정집 청소 서비스",
                     "깨끗하게 청소해드립니다",
                     2L,
