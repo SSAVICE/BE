@@ -19,6 +19,7 @@ import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
+import teamssavice.ssavice.kafka.event.KafkaEvent;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
@@ -74,6 +75,8 @@ public class ServiceItemService {
             savedServiceItem.addImageId(imageResource.getId());
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
+
+        applicationEventPublisher.publishEvent(KafkaEvent.Join.createEvent(savedServiceItem, command.companyId()));
 
         return savedServiceItem.getId();
     }
