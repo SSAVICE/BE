@@ -10,13 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.account.service.AccountReadService;
-import teamssavice.ssavice.chatmember.entity.ChatMember;
 import teamssavice.ssavice.chatmember.service.dto.ChatMemberModel;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.fixture.AccountFixture;
 import teamssavice.ssavice.fixture.AddressFixture;
-import teamssavice.ssavice.fixture.ChatMemberFixture;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.constants.ErrorCode;
@@ -85,9 +83,6 @@ class ChatMemberServiceTest {
             Long authId = 1L;    // 요청자 (USER)
             Long companyId = 2L; // COMPANY 멤버
 
-            ChatMember userMember = ChatMemberFixture.chatMember(authId);
-            ChatMember companyMember = ChatMemberFixture.chatMember(companyId);
-
             Account userAccount = AccountFixture.userAccount(authId);
             Account companyAccount = AccountFixture.companyAccount(companyId);
 
@@ -98,7 +93,7 @@ class ChatMemberServiceTest {
             String companyPresignedUrl = "https://s3.example.com/company2.png";
 
             given(chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId))
-                .willReturn(List.of(userMember, companyMember));
+                .willReturn(List.of(authId, companyId));
             given(accountReadService.findAllByIdIn(List.of(authId, companyId)))
                 .willReturn(List.of(userAccount, companyAccount));
             given(userReadService.findAllByIdInFetchJoinImageResource(List.of(authId)))
@@ -132,24 +127,21 @@ class ChatMemberServiceTest {
         }
 
         @Test
-        @DisplayName("실패: 요청자가 채팅방 멤버가 아닐 때 CHAT_MEMBER_NOT_FOUND 예외를 던진다")
+        @DisplayName("실패: 요청자가 채팅방 멤버가 아닐 때 CHAT_ROOM_ACCESS_DENIED 예외를 던진다")
         void fail_whenRequesterIsNotMember() {
             // given
             String roomId = "room-200";
             Long authId = 99L;   // 채팅방에 없는 사용자
-            Long memberId = 1L;
-
-            ChatMember member = ChatMemberFixture.chatMember(memberId);
 
             given(chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId))
-                .willReturn(List.of(member));
+                .willReturn(List.of(1L));
 
             // when & then
             assertThatThrownBy(() -> chatMemberService.getRoomMemberInfos(roomId, authId))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(ex -> {
                     ForbiddenException forbidden = (ForbiddenException) ex;
-                    assertThat(forbidden.getErrorCode()).isEqualTo(ErrorCode.CHAT_MEMBER_NOT_FOUND);
+                    assertThat(forbidden.getErrorCode()).isEqualTo(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
                 });
 
             // 멤버 검증 실패 이후 accountReadService는 호출되지 않아야 한다
@@ -164,9 +156,6 @@ class ChatMemberServiceTest {
             Long userId1 = 1L;
             Long userId2 = 2L;
 
-            ChatMember member1 = ChatMemberFixture.chatMember(userId1);
-            ChatMember member2 = ChatMemberFixture.chatMember(userId2);
-
             Account account1 = AccountFixture.userAccount(userId1);
             Account account2 = AccountFixture.userAccount(userId2);
 
@@ -177,7 +166,7 @@ class ChatMemberServiceTest {
             String presignedUrl2 = "https://s3.example.com/user2.png";
 
             given(chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId))
-                .willReturn(List.of(member1, member2));
+                .willReturn(List.of(userId1, userId2));
             given(accountReadService.findAllByIdIn(List.of(userId1, userId2)))
                 .willReturn(List.of(account1, account2));
             given(userReadService.findAllByIdInFetchJoinImageResource(List.of(userId1, userId2)))
@@ -195,7 +184,6 @@ class ChatMemberServiceTest {
             assertThat(result).extracting(ChatMemberModel.MemberInfo::name)
                 .containsExactlyInAnyOrder("사용자A", "사용자B");
 
-            // Company 조회가 일어날 ID 목록이 비어있으므로 toCompanyMemberInfos는 즉시 반환하여 서비스를 호출하지 않는다
             verifyNoInteractions(companyReadService);
         }
 
@@ -207,9 +195,6 @@ class ChatMemberServiceTest {
             Long companyId1 = 10L;
             Long companyId2 = 20L;
 
-            ChatMember member1 = ChatMemberFixture.chatMember(companyId1);
-            ChatMember member2 = ChatMemberFixture.chatMember(companyId2);
-
             Account account1 = AccountFixture.companyAccount(companyId1);
             Account account2 = AccountFixture.companyAccount(companyId2);
 
@@ -220,7 +205,7 @@ class ChatMemberServiceTest {
             String presignedUrl2 = "https://s3.example.com/company2.png";
 
             given(chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId))
-                .willReturn(List.of(member1, member2));
+                .willReturn(List.of(companyId1, companyId2));
             given(accountReadService.findAllByIdIn(List.of(companyId1, companyId2)))
                 .willReturn(List.of(account1, account2));
             given(companyReadService.findAllByIdInFetchJoinImageResource(List.of(companyId1, companyId2)))
@@ -238,12 +223,11 @@ class ChatMemberServiceTest {
             assertThat(result).extracting(ChatMemberModel.MemberInfo::name)
                 .containsExactlyInAnyOrder("업체A", "업체B");
 
-            // User 조회가 일어날 ID 목록이 비어있으므로 toUserMemberInfos는 즉시 반환하여 서비스를 호출하지 않는다
             verifyNoInteractions(userReadService);
         }
 
         @Test
-        @DisplayName("실패: 채팅방에 활성 멤버가 없을 때 CHAT_MEMBER_NOT_FOUND 예외를 던진다")
+        @DisplayName("실패: 채팅방에 활성 멤버가 없을 때 CHAT_ROOM_ACCESS_DENIED 예외를 던진다")
         void fail_whenNoActiveMembers() {
             // given
             String roomId = "room-500";
@@ -257,7 +241,7 @@ class ChatMemberServiceTest {
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(ex -> {
                     ForbiddenException forbidden = (ForbiddenException) ex;
-                    assertThat(forbidden.getErrorCode()).isEqualTo(ErrorCode.CHAT_MEMBER_NOT_FOUND);
+                    assertThat(forbidden.getErrorCode()).isEqualTo(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
                 });
         }
 
@@ -268,15 +252,13 @@ class ChatMemberServiceTest {
             String roomId = "room-600";
             Long authId = 5L;
 
-            ChatMember selfMember = ChatMemberFixture.chatMember(authId);
-
             Account account = AccountFixture.userAccount(authId);
             Users user = createUser(authId, "혼자인사용자");
 
             String presignedUrl = "https://s3.example.com/solo.png";
 
             given(chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId))
-                .willReturn(List.of(selfMember));
+                .willReturn(List.of(authId));
             given(accountReadService.findAllByIdIn(List.of(authId)))
                 .willReturn(List.of(account));
             given(userReadService.findAllByIdInFetchJoinImageResource(List.of(authId)))
