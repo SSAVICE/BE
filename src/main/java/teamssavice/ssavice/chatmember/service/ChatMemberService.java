@@ -8,8 +8,6 @@ import teamssavice.ssavice.account.service.AccountReadService;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.chatmember.service.dto.ChatMemberModel;
 import teamssavice.ssavice.company.service.CompanyReadService;
-import teamssavice.ssavice.global.constants.ErrorCode;
-import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.user.service.UserReadService;
 
@@ -22,22 +20,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatMemberService {
 
-    private final ChatMemberReadService chatMemberReadService;
     private final AccountReadService accountReadService;
     private final UserReadService userReadService;
     private final CompanyReadService companyReadService;
     private final S3Service s3Service;
 
     @Transactional(readOnly = true)
-    public List<ChatMemberModel.MemberInfo> getRoomMemberInfos(String roomId, Long authId) {
-        List<Long> memberIds = chatMemberReadService.findAllByRoomIdAndIsLeftFalse(roomId);
-
-        boolean isMember = memberIds.stream()
-            .anyMatch(memberId -> memberId.equals(authId));
-        if (!isMember) {
-            throw new ForbiddenException(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
-        }
-
+    public List<ChatMemberModel.MemberInfo> getMemberInfos(List<Long> memberIds) {
         Map<Role, List<Long>> idsByRole = groupIdsByRole(memberIds);
 
         List<ChatMemberModel.MemberInfo> result = new ArrayList<>();
