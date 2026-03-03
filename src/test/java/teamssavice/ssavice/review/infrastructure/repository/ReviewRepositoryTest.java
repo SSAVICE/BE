@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.annotation.DirtiesContext;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ReviewFixture;
@@ -45,11 +46,17 @@ class ReviewRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = UserFixture.user();
-        company = CompanyFixture.company(user);
-        ServiceItem item = ServiceItemFixture.base(company);
+        Account account = UserFixture.account();
+        tem.persist(account);
+        user = UserFixture.user(account);
         tem.persist(user);
+
+        Account companyAccount = CompanyFixture.account();
+        tem.persist(companyAccount);
+        company = CompanyFixture.company(companyAccount);
         tem.persist(company);
+
+        ServiceItem item = ServiceItemFixture.base(company);
         tem.persist(item);
 
         for (int i = 0; i < 10; i++) {

@@ -5,14 +5,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.support.TransactionTemplate;
+import teamssavice.ssavice.account.entity.Account;
+import teamssavice.ssavice.account.infrastructure.repository.AccountRepository;
+import teamssavice.ssavice.book.infrastructure.repository.BookRepository;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
+import teamssavice.ssavice.payment.infrastructure.repository.PaymentRepository;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
 import teamssavice.ssavice.fixture.UserFixture;
+import teamssavice.ssavice.payment.infrastructure.repository.PaymentRepository;
 import teamssavice.ssavice.review.infrastructure.repository.ReviewRepository;
 import teamssavice.ssavice.review.service.dto.ReviewCommand;
+import teamssavice.ssavice.wish.infrastructure.WishRepository;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
 import teamssavice.ssavice.user.entity.Users;
@@ -38,10 +44,25 @@ class ReviewServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private ServiceItemRepository serviceItemRepository;
 
     @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private WishRepository wishRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private Company company;
     private Users user;
@@ -49,15 +70,24 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-
+        paymentRepository.deleteAllInBatch();
         reviewRepository.deleteAllInBatch();
+        wishRepository.deleteAllInBatch();
+        bookRepository.deleteAllInBatch();
         serviceItemRepository.deleteAllInBatch();
         companyRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
+        accountRepository.deleteAllInBatch();
 
-        user = userRepository.save(UserFixture.user());
-        company = companyRepository.save(CompanyFixture.company(user));
-        serviceItem = serviceItemRepository.save(ServiceItemFixture.base(company));
+        transactionTemplate.execute(status -> {
+            Account userAccount = accountRepository.save(UserFixture.account());
+            user = userRepository.save(UserFixture.user(userAccount));
+
+            Account companyAccount = accountRepository.save(CompanyFixture.account());
+            company = companyRepository.save(CompanyFixture.company(companyAccount));
+            serviceItem = serviceItemRepository.save(ServiceItemFixture.base(company));
+            return null;
+        });
     }
 
     @Test

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
+import teamssavice.ssavice.account.entity.Account;
+import teamssavice.ssavice.account.infrastructure.repository.AccountRepository;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.user.entity.Users;
@@ -21,12 +23,15 @@ class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     private Users user;
 
     @BeforeEach
     void setUp() {
-        user = UserFixture.user();
+        Account account = accountRepository.save(UserFixture.account());
+        user = UserFixture.user(account);
     }
 
     @Test

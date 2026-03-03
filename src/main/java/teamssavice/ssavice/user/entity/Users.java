@@ -6,10 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -17,11 +16,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
-import teamssavice.ssavice.user.constants.Provider;
 import teamssavice.ssavice.user.constants.UserRole;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,17 +31,18 @@ import teamssavice.ssavice.user.constants.UserRole;
 public class Users extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    private Account account;
 
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false)
     private UserRole userRole;
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    @Column(nullable = false)
-    private Provider provider;
+
     @NotNull
     @Column(nullable = false)
     private String name;

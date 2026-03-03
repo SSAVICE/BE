@@ -2,54 +2,54 @@ package teamssavice.ssavice.company.service.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.company.controller.dto.CompanyRequest;
+import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
 
 import java.math.BigDecimal;
-import teamssavice.ssavice.company.infrastructure.dto.CompanyInfraCommand;
 
 public class CompanyCommand {
 
     @Builder
     public record Create(
-            Long userId,
-            String verifyToken,
-            String companyName,
-            String businessName,
-            String startDate,
-            String ownerName,
-            String phoneNumber,
-            String businessNumber,
-            String description,
-            String depositor,
-            String accountNumber,
-            String detail,
-            String regionCode,
-            String postCode,
-            String address,
-            String detailAddress,
-            BigDecimal longitude,
-            BigDecimal latitude
+        Long accountId,
+        String verifyToken,
+        String companyName,
+        String businessName,
+        String startDate,
+        String ownerName,
+        String phoneNumber,
+        String businessNumber,
+        String description,
+        String depositor,
+        String accountNumber,
+        String detail,
+        String regionCode,
+        String postCode,
+        String address,
+        String detailAddress,
+        BigDecimal longitude,
+        BigDecimal latitude
     ) {
-        public static CompanyCommand.Create from(Long userId, CompanyRequest.Create request) {
+        public static CompanyCommand.Create from(Long accountId, CompanyRequest.Create request) {
             return Create.builder()
-                    .userId(userId)
-                    .verifyToken(request.verifyToken())
-                    .companyName(request.companyName())
-                    .businessName(request.businessName())
-                    .startDate(request.startDate())
-                    .ownerName(request.ownerName())
-                    .phoneNumber(request.phoneNumber())
-                    .businessNumber(request.businessNumber())
-                    .accountNumber(request.accountNumber())
-                    .depositor(request.depositor())
-                    .description(request.description())
-                    .detail(request.detail())
-                    .regionCode(request.region().regionCode())
-                    .postCode(request.region().postCode())
-                    .address(request.region().address())
-                    .detailAddress(request.region().detailAddress())
-                    .longitude(request.region().longitude())
-                    .latitude(request.region().latitude())
-                    .build();
+                .accountId(accountId)
+                .verifyToken(request.verifyToken())
+                .companyName(request.companyName())
+                .businessName(request.businessName())
+                .startDate(request.startDate())
+                .ownerName(request.ownerName())
+                .phoneNumber(request.phoneNumber())
+                .businessNumber(request.businessNumber())
+                .accountNumber(request.accountNumber())
+                .depositor(request.depositor())
+                .description(request.description())
+                .detail(request.detail())
+                .regionCode(request.region().regionCode())
+                .postCode(request.region().postCode())
+                .address(request.region().address())
+                .detailAddress(request.region().detailAddress())
+                .longitude(request.region().longitude())
+                .latitude(request.region().latitude())
+                .build();
         }
     }
 

@@ -8,23 +8,23 @@ import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.EntityNotFoundException;
-import teamssavice.ssavice.user.entity.Users;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CompanyReadService {
+
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
-    public Optional<Company> findByUser(Users users) {
-        return companyRepository.findByUser(users);
+    public Optional<Company> findOptionalById(Long id) {
+        return companyRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
-    public void checkUserExists(Users user) {
-        if(companyRepository.existsByUser(user)) {
+    public void checkAccountExists(Long accountId) {
+        if (companyRepository.existsById(accountId)) {
             throw new ConflictException(ErrorCode.COMPANY_ALREADY_EXISTS);
         }
     }

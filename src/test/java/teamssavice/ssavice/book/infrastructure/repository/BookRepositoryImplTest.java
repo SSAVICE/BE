@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.book.constants.BookStatusFilter;
 import teamssavice.ssavice.book.constants.BookViewStatus;
 import teamssavice.ssavice.book.entity.Book;
@@ -29,14 +30,6 @@ import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.user.entity.Users;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
 @Import(QueryDSLConfig.class)
@@ -51,10 +44,37 @@ class BookRepositoryImplTest {
     private TestEntityManager tem;
     private Users user;
 
+    /**
+     * Account를 먼저 persist한 뒤 Users를 persist하는 헬퍼 메서드.
+     * @MapsId 관계이므로 Account가 먼저 저장되어야 한다.
+     */
+    private Users persistUser(Users user) {
+        tem.persist(user.getAccount());
+        tem.persist(user);
+        return user;
+    }
+
+    /**
+     * Account를 먼저 persist한 뒤 Company를 persist하는 헬퍼 메서드.
+     */
+    private Company persistCompany(Company company) {
+        tem.persist(company.getAccount());
+        tem.persist(company);
+        return company;
+    }
+
     @BeforeEach
     void setUp() {
-        user = UserFixture.user();
-        Company company = CompanyFixture.company(user, AddressFixture.address());
+        Account userAccount = UserFixture.account();
+        tem.persist(userAccount);
+        user = UserFixture.user(userAccount);
+        tem.persist(user);
+
+        Account companyAccount = CompanyFixture.account();
+        tem.persist(companyAccount);
+        Company company = CompanyFixture.company(companyAccount, AddressFixture.address());
+        tem.persist(company);
+
         ServiceItem recruitingService = ServiceItemFixture.recruiting(company);
         ServiceItem succeededService = ServiceItemFixture.succeeded(company);
         ServiceItem fulledService = ServiceItemFixture.fulled(company);
@@ -63,8 +83,6 @@ class BookRepositoryImplTest {
         ServiceItem failService = ServiceItemFixture.failed(company);
         ServiceItem canceledService = ServiceItemFixture.canceled(company);
 
-        tem.persist(user);
-        tem.persist(company);
         tem.persist(recruitingService);
         tem.persist(succeededService);
         tem.persist(fulledService);
@@ -227,7 +245,14 @@ class BookRepositoryImplTest {
         // given
         Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
             "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        tem.persist(owner.getAccount());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(owner.getAccount().getProvider())
+                .providerId("owner-company-id-1")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
         tem.persist(owner);
         tem.persist(participantCompany);
@@ -237,7 +262,9 @@ class BookRepositoryImplTest {
             "010-1111-1111");
         Users participant2 = UserFixture.of(user.getUserRole(), "참가자2", "p2@test.com",
             "010-2222-2222");
+        tem.persist(participant1.getAccount());
         tem.persist(participant1);
+        tem.persist(participant2.getAccount());
         tem.persist(participant2);
 
         Book book1 = BookFixture.book(participant1, participantServiceItem, BookStatus.RESERVED);
@@ -266,11 +293,14 @@ class BookRepositoryImplTest {
     @DisplayName("findAllByServiceItemIdWithUserAndImageResource - 취소된 예약은 조회되지 않는다")
     void findAllByServiceItemIdWithUserAndImageResource_excludesCanceledBookings() {
         // given
-        Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
-            "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(teamssavice.ssavice.account.constants.Provider.KAKAO)
+                .providerId("owner-company-id-2")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
-        tem.persist(owner);
         tem.persist(participantCompany);
         tem.persist(participantServiceItem);
 
@@ -278,7 +308,9 @@ class BookRepositoryImplTest {
             "010-1111-1111");
         Users participant2 = UserFixture.of(user.getUserRole(), "취소자", "canceled@test.com",
             "010-2222-2222");
+        tem.persist(participant1.getAccount());
         tem.persist(participant1);
+        tem.persist(participant2.getAccount());
         tem.persist(participant2);
 
         Book reservedBook = BookFixture.book(participant1, participantServiceItem,
@@ -306,11 +338,14 @@ class BookRepositoryImplTest {
     @DisplayName("findAllByServiceItemIdWithUserAndImageResource - 예약이 없으면 빈 페이지를 반환한다")
     void findAllByServiceItemIdWithUserAndImageResource_returnsEmptyPageWhenNoBookings() {
         // given
-        Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
-            "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(teamssavice.ssavice.account.constants.Provider.KAKAO)
+                .providerId("owner-company-id-3")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
-        tem.persist(owner);
         tem.persist(participantCompany);
         tem.persist(participantServiceItem);
 
@@ -332,17 +367,21 @@ class BookRepositoryImplTest {
     @DisplayName("findAllByServiceItemIdWithUserAndImageResource - 페이징이 정상적으로 동작한다")
     void findAllByServiceItemIdWithUserAndImageResource_paginationWorks() {
         // given
-        Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
-            "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(teamssavice.ssavice.account.constants.Provider.KAKAO)
+                .providerId("owner-company-id-4")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
-        tem.persist(owner);
         tem.persist(participantCompany);
         tem.persist(participantServiceItem);
 
         for (int i = 0; i < 15; i++) {
             Users participant = UserFixture.of(user.getUserRole(), "참가자" + i,
                 "p" + i + "@test.com", "010-0000-000" + i);
+            tem.persist(participant.getAccount());
             tem.persist(participant);
             Book book = BookFixture.book(participant, participantServiceItem, BookStatus.RESERVED);
             tem.persist(book);
@@ -372,11 +411,14 @@ class BookRepositoryImplTest {
     @DisplayName("findAllByServiceItemIdWithUserAndImageResource - User와 ImageResource가 함께 조회된다")
     void findAllByServiceItemIdWithUserAndImageResource_fetchJoinsUserAndImageResource() {
         // given
-        Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
-            "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(teamssavice.ssavice.account.constants.Provider.KAKAO)
+                .providerId("owner-company-id-5")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
-        tem.persist(owner);
         tem.persist(participantCompany);
         tem.persist(participantServiceItem);
 
@@ -386,6 +428,7 @@ class BookRepositoryImplTest {
         Users participantWithImage = UserFixture.of(user.getUserRole(), "이미지있는참가자",
             "img@test.com", "010-9999-9999");
         participantWithImage.updateImage(imageResource);
+        tem.persist(participantWithImage.getAccount());
         tem.persist(participantWithImage);
 
         Book book = BookFixture.book(participantWithImage, participantServiceItem,
@@ -412,11 +455,14 @@ class BookRepositoryImplTest {
     @DisplayName("findAllByServiceItemIdWithUserAndImageResource - 다른 서비스 아이템의 예약은 조회되지 않는다")
     void findAllByServiceItemIdWithUserAndImageResource_onlyReturnsBookingsForSpecificServiceItem() {
         // given
-        Users owner = UserFixture.of(user.getUserRole(), "참가자서비스소유자",
-            "participant-owner@test.com", "010-9999-0000");
-        Company participantCompany = CompanyFixture.company(owner, AddressFixture.address());
+        Account ownerCompanyAccount = Account.builder()
+                .provider(teamssavice.ssavice.account.constants.Provider.KAKAO)
+                .providerId("owner-company-id-6")
+                .role(teamssavice.ssavice.auth.constants.Role.COMPANY)
+                .build();
+        tem.persist(ownerCompanyAccount);
+        Company participantCompany = CompanyFixture.company(ownerCompanyAccount, AddressFixture.address());
         ServiceItem participantServiceItem = ServiceItemFixture.recruiting(participantCompany);
-        tem.persist(owner);
         tem.persist(participantCompany);
         tem.persist(participantServiceItem);
 
@@ -427,7 +473,9 @@ class BookRepositoryImplTest {
             "010-1111-1111");
         Users participant2 = UserFixture.of(user.getUserRole(), "서비스2참가자", "s2@test.com",
             "010-2222-2222");
+        tem.persist(participant1.getAccount());
         tem.persist(participant1);
+        tem.persist(participant2.getAccount());
         tem.persist(participant2);
 
         Book bookForServiceItem = BookFixture.book(participant1, participantServiceItem,

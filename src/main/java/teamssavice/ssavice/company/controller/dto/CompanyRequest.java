@@ -2,6 +2,7 @@ package teamssavice.ssavice.company.controller.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import teamssavice.ssavice.account.constants.Provider;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 
@@ -10,7 +11,9 @@ public class CompanyRequest {
     @Builder
     public record Login(
         @NotNull
-        String token
+        String token,
+        @NotNull
+        Provider provider
     ) {
 
     }
@@ -61,9 +64,13 @@ public class CompanyRequest {
 
     @Builder
     public record Validate(
+        @NotNull
         String name,
+        @NotNull
         String startDate,
+        @NotNull
         String businessNumber,
+        @NotNull
         String businessName
     ) {
 

@@ -13,6 +13,9 @@ public enum ErrorCode {
     UNKNOWN_TOKEN_ERROR(HttpStatus.UNAUTHORIZED, "UNKNOWN_TOKEN_ERROR", "알 수 없는 토큰 에러"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
 
+    // Account
+    ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_NOT_FOUND", "계정을 찾을 수 없습니다."),
+
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     USER_EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER_EMAIL_ALREADY_EXISTS", "이미 사용 중인 이메일입니다."),
@@ -22,7 +25,7 @@ public enum ErrorCode {
     COMPANY_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_ALREADY_EXISTS", "이미 업체가 등록되어 있습니다."),
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "업체 정보를 찾을 수 없습니다."),
     INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "INVALID_BUSINESS_NUMBER",
-            "유효하지 않은 사업자 등록번호입니다."),
+        "유효하지 않은 사업자 등록번호입니다."),
 
     // serviceItem
     SERVICE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SERVICE_ITEM_NOT_FOUND", "해당하는 서비스를 찾을 수 없습니다."),
@@ -38,7 +41,7 @@ public enum ErrorCode {
 
     // imageResource
     UNSUPPORTED_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "UNSUPPORTED_IMAGE_CONTENT_TYPE",
-            "지원하지 않는 contentType입니다."),
+        "지원하지 않는 contentType입니다."),
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다."),
     IMAGE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "IMAGE_TOO_LARGE", "이미지 용량은 5MB 이하여야 합니다."),
     ALREADY_CONFIRMED_IMAGE(HttpStatus.CONFLICT, "ALREADY_CONFIRMED_IMAGE", "이미 확정된 이미지 리소스입니다."),
@@ -48,9 +51,9 @@ public enum ErrorCode {
 
     // External
     EXTERNAL_API_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_TIMEOUT",
-            "외부 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."),
+        "외부 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."),
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "EXTERNAL_API_ERROR",
-            "외부 서비스 호출 중 오류가 발생했습니다."),
+        "외부 서비스 호출 중 오류가 발생했습니다."),
 
     // Book
     ALREADY_APPLIED(HttpStatus.CONFLICT, "ALREADY_APPLIED", "이미 신청한 서비스입니다."),
@@ -59,6 +62,20 @@ public enum ErrorCode {
 
     // Wish
     WISH_ALREADY_EXISTS(HttpStatus.CONFLICT, "WISH_ALREADY_EXISTS", "이미 위시리스트에 등록된 서비스입니다."),
+
+    // Kakao
+    KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
+    KAKAO_INFO_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "KAKAO_INFO_NOT_PROVIDED", "카카오 계정에서 정보를 불러올 수 없습니다."),
+    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "UNSUPPORTED_PROVIDER", "지원하지 않는 소셜 로그인입니다."),
+
+    // Payment
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PAYMENT_AMOUNT_MISMATCH", "결제 금액이 일치하지 않습니다."),
+    INVALID_PAYMENT_STATE(HttpStatus.CONFLICT, "INVALID_PAYMENT_STATE", "유효하지 않은 결제 상태입니다."),
+    TOSS_PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_GATEWAY, "TOSS_PAYMENT_CONFIRM_FAILED", "토스 결제 승인에 실패했습니다."),
+    TOSS_PAYMENT_CANCEL_FAILED(HttpStatus.BAD_GATEWAY, "TOSS_PAYMENT_CANCEL_FAILED", "정원이 다차서 결제를 취소했습니다만 결제 취소에 실패했습니다. 고객센터에 문의해주세요."),
+    DUPLICATE_PENDING_PAYMENT(HttpStatus.CONFLICT, "DUPLICATE_PENDING_PAYMENT", "이미 진행 중인 결제가 존재합니다."),
+    PAYMENT_CONFIRM_STATUS_INVALID(HttpStatus.BAD_GATEWAY, "PAYMENT_CONFIRM_STATUS_INVALID", "토스 결제 승인 상태가 DONE이 아닙니다."),
 
     // opensearch
     OPENSEARCH_SEARCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OPENSEARCH_SEARCH_FAILED", "검색에 실패했습니다."),

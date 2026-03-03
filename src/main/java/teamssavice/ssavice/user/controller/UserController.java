@@ -43,7 +43,7 @@ public class UserController {
     public ResponseEntity<UserResponse.Login> login(
         @RequestBody @Valid UserRequest.Login request
     ) {
-        UserModel.Login model = userService.register(request.token());
+        UserModel.Login model = userService.register(request.token(), request.provider());
 
         return ResponseEntity.ok(UserResponse.Login.from(model));
     }

@@ -5,13 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.address.AddressResponse;
 import teamssavice.ssavice.auth.constants.Role;
@@ -47,18 +41,18 @@ public class CompanyController {
     public ResponseEntity<CompanyResponse.Login> login(
         @RequestBody @Valid CompanyRequest.Login request
     ) {
-        CompanyModel.Login model = companyService.login(request.token());
+        CompanyModel.Login model = companyService.login(request.token(), request.provider());
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
     @PostMapping
-    @RequireRole(Role.USER)
+    @RequireRole(Role.TEMP)
     public ResponseEntity<CompanyResponse.Login> register(
-        @CurrentAuth Auth authUser,
+        @CurrentAuth Auth authTemp,
         @RequestBody @Valid CompanyRequest.Create request
     ) {
         CompanyModel.Login model = companyService.register(
-            CompanyCommand.Create.from(authUser.id(), request));
+            CompanyCommand.Create.from(authTemp.id(), request));
         return ResponseEntity.ok(CompanyResponse.Login.from(model));
     }
 
@@ -123,12 +117,12 @@ public class CompanyController {
 
 
     @PostMapping("/validate")
-    @RequireRole(Role.USER)
+    @RequireRole(Role.TEMP)
     public ResponseEntity<CompanyResponse.Validate> validateBusiness(
-        @CurrentAuth Auth authUser,
+        @CurrentAuth Auth authTemp,
         @RequestBody @Valid CompanyRequest.Validate request
     ) {
-        CompanyModel.Validate model = companyService.validateBusinessNumber(authUser.id(),
+        CompanyModel.Validate model = companyService.validateBusinessNumber(authTemp.id(),
             request.toCommand());
         return ResponseEntity.ok(CompanyResponse.Validate.from(model));
     }
@@ -136,7 +130,7 @@ public class CompanyController {
     @GetMapping("/address")
     @RequireRole(Role.COMPANY)
     public ResponseEntity<AddressResponse.RegionDetail> getAddress(
-            @CurrentAuth Auth authCompany
+        @CurrentAuth Auth authCompany
     ) {
         AddressModel.RegionDetail model = companyService.getCompanyAddress(authCompany.id());
         return ResponseEntity.ok(AddressResponse.RegionDetail.from(model));

@@ -18,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.infrastructure.repository.CompanyRepository;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.fixture.AddressFixture;
 import teamssavice.ssavice.fixture.CompanyFixture;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
@@ -31,8 +32,6 @@ import teamssavice.ssavice.serviceItem.constants.SortType;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
-import teamssavice.ssavice.user.entity.Users;
-import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -55,8 +54,6 @@ class ServiceItemRepositoryTest {
     ServiceItem failService;
     ServiceItem canceledService;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private ServiceItemRepository serviceItemRepository;
     @Autowired
     private CompanyRepository companyRepository;
@@ -64,13 +61,13 @@ class ServiceItemRepositoryTest {
     private TestEntityManager tem;
     @Autowired
     private EntityManagerFactory emf;
-    private Users user;
+    private Account companyAccount;
     private Company company;
 
     @BeforeEach
     void setUp() {
-        user = UserFixture.user();
-        company = CompanyFixture.company(user, AddressFixture.address());
+        companyAccount = CompanyFixture.account();
+        company = CompanyFixture.company(companyAccount, AddressFixture.address());
         for (int i = 0; i < 5; i++) {
             serviceItems.add(ServiceItemFixture.custom("title" + i, LocalDateTime.now().plusDays(i), company, AddressFixture.address()));
         }
@@ -87,7 +84,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Deadline 늦은 순서대로 5개 조회 테스트")
     void findTop5ByCompanyOrderByDeadlineDescTest() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
         List<ServiceItem> serviceItems = serviceItemRepository.saveAll(this.serviceItems);
 
@@ -105,7 +102,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("ServiceStatusFilter가 ALL일 때 findByCompany() 테스트")
     void findByCompanyTestWhenAll() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         Company company = this.company;
         tem.persist(company);
         tem.persist(recruitingService);
@@ -129,7 +126,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("ServiceStatusFilter가 Recruiting일 때 findByCompany() 테스트")
     void findByCompanyTestWhenRecruiting() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         Company company = this.company;
         tem.persist(company);
         tem.persist(recruitingService);
@@ -153,7 +150,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("ServiceStatusFilter가 Succeeded일 때 findByCompany() 테스트")
     void findByCompanyTestWhenSucceeded() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         Company company = this.company;
         tem.persist(company);
         tem.persist(recruitingService);
@@ -177,7 +174,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("ServiceStatusFilter가 Canceled일 때 findByCompany() 테스트")
     void findByCompanyTestWhenCanceled() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         Company company = this.company;
         tem.persist(company);
         tem.persist(recruitingService);
@@ -202,7 +199,7 @@ class ServiceItemRepositoryTest {
     void countServiceItemsByCompanyTest() {
         // given
         LocalDateTime now = LocalDateTime.now();
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         Company company = this.company;
         tem.persist(company);
         tem.persist(recruitingService);
@@ -230,7 +227,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - 반경 내 아이템만 반환하고 반경 밖 제외")
     void findNearbyByGeoHashes_filters_by_radius() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         // 서울시청 좌표 (중심점)
@@ -270,7 +267,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - 서로 다른 거리의 아이템들이 거리순 정렬")
     void findNearbyByGeoHashes_sorts_by_distance() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -316,7 +313,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - RECRUITING 상태만 반환")
     void findNearbyByGeoHashes_filters_recruiting_only() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -386,7 +383,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - hasNext 정확도 검증 (size보다 많음/같음/적음)")
     void findNearbyByGeoHashes_hasNext_accuracy() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -429,7 +426,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - 결과가 없을 때 빈 Slice 반환")
     void findNearbyByGeoHashes_returns_empty_when_no_results() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -462,7 +459,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("GeoHash 기반 근처 서비스 검색 - fetch join으로 N+1 쿼리 방지 (Hibernate Statistics 검증)")
     void findNearbyByGeoHashes_prevents_n_plus_1() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -548,7 +545,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - lastId가 null이고 결과가 없을 때 빈 Slice 반환")
     void findNearbyByGeoHashes_with_null_lastId_and_no_results_returns_empty_slice() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -576,7 +573,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - lastId로 두 번째 페이지 조회 시 쿼리 수 검증")
     void findNearbyByGeoHashes_with_lastId_returns_second_page() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -636,7 +633,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - lastId로 마지막 페이지 조회 시 hasNext가 false")
     void findNearbyByGeoHashes_with_lastId_on_last_page_has_no_next() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -677,7 +674,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - lastId가 마지막 아이템의 ID일 때 빈 결과 반환")
     void findNearbyByGeoHashes_with_lastId_as_last_item_returns_empty() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -714,7 +711,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - 존재하지 않는 lastId일 때 cursorCondition이 null이 되어 전체 결과 반환")
     void findNearbyByGeoHashes_with_non_existent_lastId_returns_all_results() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -748,7 +745,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - 같은 거리의 아이템들은 id 오름차순으로 정렬됨")
     void findNearbyByGeoHashes_sorts_same_distance_items_by_id_asc() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -786,7 +783,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - lastId와 같은 거리의 다른 아이템은 lastId보다 큰 id만 반환")
     void findNearbyByGeoHashes_with_same_distance_returns_only_greater_ids() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -830,7 +827,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - 복합 시나리오: 서로 다른 거리 + 같은 거리 혼합에서 커서 페이지네이션")
     void findNearbyByGeoHashes_complex_scenario_with_mixed_distances() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal centerLat = new BigDecimal("37.5665");
@@ -906,7 +903,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("Nearby 검색 - 사용자 위치와 검색 중심이 다를 때 커서 페이지네이션 동작")
     void findNearbyByGeoHashes_with_different_user_and_search_center() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         // 검색 중심 좌표 (서울시청)
@@ -958,7 +955,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("search_sortBy4_거리순정렬_가까운순서로반환")
     void search_sortBy4_returns_items_in_distance_order() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal userLat = new BigDecimal("37.5665");
@@ -1007,7 +1004,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("search_sortBy4_2km반경필터")
     void search_sortBy4_filters_by_2km_radius() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal userLat = new BigDecimal("37.5665");
@@ -1048,7 +1045,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("search_sortBy4_커서페이지네이션")
     void search_sortBy4_cursor_pagination_with_lastId() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal userLat = new BigDecimal("37.5665");
@@ -1121,7 +1118,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("search_sortBy4_같은거리_ID순정렬")
     void search_sortBy4_sorts_same_distance_items_by_id_asc() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal userLat = new BigDecimal("37.5665");
@@ -1160,7 +1157,7 @@ class ServiceItemRepositoryTest {
     @DisplayName("search_sortBy4_검색필터와함께")
     void search_sortBy4_works_with_other_filters() {
         // given
-        tem.persist(this.user);
+        tem.persist(this.companyAccount);
         tem.persist(this.company);
 
         BigDecimal userLat = new BigDecimal("37.5665");

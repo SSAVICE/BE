@@ -4,10 +4,9 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -15,12 +14,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
 import teamssavice.ssavice.global.entity.BaseEntity;
 import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
-import teamssavice.ssavice.user.entity.Users;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -30,8 +29,12 @@ import teamssavice.ssavice.user.entity.Users;
 public class Company extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    private Account account;
 
     @NotNull
     @Column(nullable = false)
@@ -91,10 +94,6 @@ public class Company extends BaseEntity {
     )
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
-    //유저
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
 
 
     public void update(CompanyCommand.Update command) {

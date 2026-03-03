@@ -24,13 +24,13 @@ public class CompanySignupVerifyTokenProvider {
 
     private final CompanySignupVerifyTokenProperties properties;
 
-    public CompanySignupVerifyToken createToken(Long userId, String businessNumber, String startDate, String name, String businessName) {
+    public CompanySignupVerifyToken createToken(Long accountId, String businessNumber, String startDate, String name, String businessName) {
         Date now = new Date();
 
         SecretKey key = Keys.hmacShaKeyFor(properties.secretKey().getBytes(StandardCharsets.UTF_8));
 
         String jwt = Jwts.builder()
-            .setSubject(String.valueOf(userId))
+            .setSubject(String.valueOf(accountId))
             .claim("purpose", PURPOSE)
             .claim("businessNumber", businessNumber)
             .claim("startDate", startDate)
@@ -65,13 +65,13 @@ public class CompanySignupVerifyTokenProvider {
         }
     }
 
-    public void validateToken(Claims claims, Long userId, String businessNumber, String startDate, String name, String businessName) {
+    public void validateToken(Claims claims, Long accountId, String businessNumber, String startDate, String name, String businessName) {
 
         String purpose = claims.get("purpose", String.class);
         if (!PURPOSE.equals(purpose)) {
             throw new BusinessAuthenticationException(ErrorCode.UNSUPPORTED_TOKEN);
         }
-        if (!claims.getSubject().equals(String.valueOf(userId))) {
+        if (!claims.getSubject().equals(String.valueOf(accountId))) {
             throw new BusinessAuthenticationException(ErrorCode.INVALID_TOKEN);
         }
         if (!claims.get("businessNumber", String.class).equals(businessNumber)) {

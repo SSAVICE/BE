@@ -3,47 +3,54 @@ package teamssavice.ssavice.user.service;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
+import teamssavice.ssavice.account.constants.Provider;
+import teamssavice.ssavice.account.entity.Account;
+import teamssavice.ssavice.account.infrastructure.repository.AccountRepository;
+import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.fixture.ImageResourceFixture;
 import teamssavice.ssavice.fixture.UserFixture;
 import teamssavice.ssavice.global.config.QueryDSLConfig;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.infrastructure.repository.ImageResourceRepository;
+import teamssavice.ssavice.oauth.service.client.OAuthUserInfo;
+import teamssavice.ssavice.user.constants.UserRole;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.infrastructure.repository.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import({QueryDSLConfig.class, UserWriteService.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import({QueryDSLConfig.class})
 class UserWriteServiceTest {
+
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
     @Autowired
     private ImageResourceRepository imageResourceRepository;
     @Autowired
     EntityManager em;
 
-    private Users user;
-    private ImageResource imageResource;
+    private UserWriteService userWriteService;
 
     @BeforeEach
     void setUp() {
-        user = UserFixture.user();
-        imageResource = ImageResourceFixture.imageResource();
+        userWriteService = new UserWriteService(userRepository, accountRepository);
     }
 
     @Test
     @DisplayName("이미지 active 테스트")
     void updateProfileImageTest() {
         // given
-        Users user = userRepository.save(this.user);
-        ImageResource imageResource = imageResourceRepository.save(this.imageResource);
+        Account account = accountRepository.save(UserFixture.account());
+        Users user = userRepository.save(UserFixture.user(account));
+        ImageResource imageResource = imageResourceRepository.save(ImageResourceFixture.imageResource());
         boolean originalActive = imageResource.isActive();
 
         // when
@@ -55,6 +62,80 @@ class UserWriteServiceTest {
         // then
         assertThat(originalActive).isFalse();
         assertThat(actual.isActive()).isTrue();
+    }
 
+    @Nested
+    @DisplayName("findOrCreate 메서드")
+    class FindOrCreate {
+
+        @Test
+        @DisplayName("성공: Account와 Users가 이미 존재하면 기존 Users를 반환한다")
+        void success_whenUserAlreadyExists() {
+            // given
+            Account account = accountRepository.save(UserFixture.account());
+            Users savedUser = userRepository.save(UserFixture.user(account));
+            OAuthUserInfo oAuthUserInfo = OAuthUserInfo.builder()
+                    .providerId("1234567890")
+                    .email("existing@kakao.com")
+                    .name("기존유저")
+                    .phoneNumber("010-1234-5678")
+                    .build();
+
+            // when
+            Users result = userWriteService.findOrCreate(oAuthUserInfo, Provider.KAKAO);
+
+            // then
+            assertThat(result.getId()).isEqualTo(savedUser.getId());
+        }
+
+        @Test
+        @DisplayName("성공: Account가 없으면 Account와 Users를 새로 생성한다")
+        void success_whenAccountNotExists() {
+            // given
+            OAuthUserInfo oAuthUserInfo = OAuthUserInfo.builder()
+                    .providerId("99999999")
+                    .email("new@kakao.com")
+                    .name("신규유저")
+                    .phoneNumber("010-9999-8888")
+                    .build();
+
+            // when
+            Users result = userWriteService.findOrCreate(oAuthUserInfo, Provider.KAKAO);
+
+            // then
+            assertThat(result.getId()).isNotNull();
+            assertThat(result.getName()).isEqualTo("신규유저");
+            assertThat(result.getEmail()).isEqualTo("new@kakao.com");
+            assertThat(result.getPhoneNumber()).isEqualTo("010-9999-8888");
+            assertThat(result.getUserRole()).isEqualTo(UserRole.USER);
+            assertThat(result.getAccount().getProviderId()).isEqualTo("99999999");
+            assertThat(result.getAccount().getProvider()).isEqualTo(Provider.KAKAO);
+            assertThat(result.getAccount().getRole()).isEqualTo(Role.USER);
+        }
+
+        @Test
+        @DisplayName("성공: Account는 있지만 Users가 없으면 Users만 새로 생성한다")
+        void success_whenAccountExistsButUserNot() {
+            // given
+            Account account = accountRepository.save(Account.builder()
+                    .provider(Provider.KAKAO)
+                    .providerId("77777777")
+                    .role(Role.USER)
+                    .build());
+            OAuthUserInfo oAuthUserInfo = OAuthUserInfo.builder()
+                    .providerId("77777777")
+                    .email("mapped@kakao.com")
+                    .name("매핑유저")
+                    .phoneNumber("010-7777-6666")
+                    .build();
+
+            // when
+            Users result = userWriteService.findOrCreate(oAuthUserInfo, Provider.KAKAO);
+
+            // then
+            assertThat(result.getId()).isEqualTo(account.getId());
+            assertThat(result.getName()).isEqualTo("매핑유저");
+            assertThat(result.getAccount()).isEqualTo(account);
+        }
     }
 }
