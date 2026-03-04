@@ -7,5 +7,5 @@ public interface OAuthClient {
 
     OAuthUserInfo getUserInfo(String accessToken);
 
-    void unlink(String accessToken);
+    void unlink(String providerId);
 }

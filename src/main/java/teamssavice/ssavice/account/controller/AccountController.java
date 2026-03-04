@@ -1,13 +1,10 @@
 package teamssavice.ssavice.account.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import teamssavice.ssavice.account.controller.dto.AccountRequest;
 import teamssavice.ssavice.account.service.AccountService;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.CurrentAuth;
@@ -24,10 +21,9 @@ public class AccountController {
     @DeleteMapping
     @RequireRole({Role.USER, Role.COMPANY})
     public ResponseEntity<Void> deleteAccount(
-        @CurrentAuth Auth auth,
-        @RequestBody @Valid AccountRequest.delete request
+        @CurrentAuth Auth auth
     ) {
-        accountService.delete(auth.id(), request.accessToken());
+        accountService.delete(auth.id());
         return ResponseEntity.noContent().build();
     }
 }

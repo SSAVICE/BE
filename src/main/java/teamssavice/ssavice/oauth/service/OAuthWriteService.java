@@ -20,11 +20,11 @@ public class OAuthWriteService {
             .collect(Collectors.toMap(OAuthClient::getProvider, c -> c));
     }
 
-    public void unlink(Provider provider, String accessToken) {
+    public void unlink(Provider provider, String providerId) {
         OAuthClient client = clients.get(provider);
         if (client == null) {
             throw new AuthenticationException(ErrorCode.UNSUPPORTED_PROVIDER);
         }
-        client.unlink(accessToken);
+        client.unlink(providerId);
     }
 }

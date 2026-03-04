@@ -13,9 +13,9 @@ public class AccountService {
     private final AccountWriteService accountWriteService;
     private final OAuthWriteService oAuthWriteService;
 
-    public void delete(Long accountId, String oAuthAccessToken) {
+    public void delete(Long accountId) {
         Account account = accountReadService.findById(accountId);
-        oAuthWriteService.unlink(account.getProvider(), oAuthAccessToken);
+        oAuthWriteService.unlink(account.getProvider(), account.getProviderId());
         accountWriteService.delete(accountId);
     }
 }
