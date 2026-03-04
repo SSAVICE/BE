@@ -55,4 +55,17 @@ public class KakaoOAuthAdapter implements OAuthClient {
             throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
         }
     }
+
+    @Override
+    public void unlink(String accessToken) {
+        try {
+            kakaoApiClient.unlinkUser("Bearer " + accessToken);
+        } catch (FeignException.Unauthorized e) {
+            throw new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED);
+        } catch (feign.RetryableException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_TIMEOUT);
+        } catch (FeignException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
+        }
+    }
 }
