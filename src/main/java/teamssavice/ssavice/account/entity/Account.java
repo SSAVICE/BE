@@ -43,4 +43,8 @@ public class Account extends BaseEntity {
         this.isDeleted = true;
     }
 
+    public void restore() {
+        this.isDeleted = false;
+    }
+
 }
