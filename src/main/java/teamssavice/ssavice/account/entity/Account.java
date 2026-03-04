@@ -33,4 +33,14 @@ public class Account extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
+    @NotNull
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
+
+
+    public void deleteAccount() {
+        this.isDeleted = true;
+    }
+
 }
