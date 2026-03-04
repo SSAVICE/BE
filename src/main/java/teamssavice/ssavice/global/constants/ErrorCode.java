@@ -75,7 +75,10 @@ public enum ErrorCode {
     TOSS_PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_GATEWAY, "TOSS_PAYMENT_CONFIRM_FAILED", "토스 결제 승인에 실패했습니다."),
     TOSS_PAYMENT_CANCEL_FAILED(HttpStatus.BAD_GATEWAY, "TOSS_PAYMENT_CANCEL_FAILED", "정원이 다차서 결제를 취소했습니다만 결제 취소에 실패했습니다. 고객센터에 문의해주세요."),
     DUPLICATE_PENDING_PAYMENT(HttpStatus.CONFLICT, "DUPLICATE_PENDING_PAYMENT", "이미 진행 중인 결제가 존재합니다."),
-    PAYMENT_CONFIRM_STATUS_INVALID(HttpStatus.BAD_GATEWAY, "PAYMENT_CONFIRM_STATUS_INVALID", "토스 결제 승인 상태가 DONE이 아닙니다.");
+    PAYMENT_CONFIRM_STATUS_INVALID(HttpStatus.BAD_GATEWAY, "PAYMENT_CONFIRM_STATUS_INVALID", "토스 결제 승인 상태가 DONE이 아닙니다."),
+
+    // Chat
+    CHAT_ROOM_ACCESS_DENIED(HttpStatus.FORBIDDEN, "CHAT_ROOM_ACCESS_DENIED", "채팅방에 접근 권한이 없습니다.");
 
 
     private final HttpStatus status;
