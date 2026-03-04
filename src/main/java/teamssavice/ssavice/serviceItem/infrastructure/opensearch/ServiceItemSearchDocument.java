@@ -49,9 +49,11 @@ public class ServiceItemSearchDocument {
     private String deadline;
     private String createdAt;
 
-
     private GeoLocation location;
     private boolean isAvailable;
+
+    private String thumbnailObjectKey;
+
 
     public static ServiceItemSearchDocument from(ServiceItem item) {
         GeoLocation geo = GeoLocation.builder()

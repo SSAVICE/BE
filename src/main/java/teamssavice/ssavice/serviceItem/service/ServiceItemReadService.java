@@ -116,4 +116,10 @@ public class ServiceItemReadService {
                         item -> item.getThumbnailImageResource().getResolveKey()
                 ));
     }
+
+    @Transactional(readOnly = true)
+    public ServiceItem findByThumbnailImageResourceSourceKey(String originKey) {
+        return serviceItemRepository.findByThumbnailImageResourceSourceKey(originKey)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+    }
 }

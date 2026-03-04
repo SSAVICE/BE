@@ -63,4 +63,6 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM ServiceItem s WHERE s.id = :id")
     Optional<ServiceItem> findByIdForUpdate(@Param("id") Long id);
+
+    Optional<ServiceItem> findByThumbnailImageResourceSourceKey(String sourceKey);
 }

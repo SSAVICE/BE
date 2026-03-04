@@ -132,8 +132,6 @@ public class ServiceItemService {
                 ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
                 : Collections.emptySet();
 
-        Map<Long, String> thumbnailObjectKeyMap = serviceItemReadService.findThumbnailObjectKeysByIds(serviceItemIds);
-
         List<ServiceItemModel.Search> content = result.items().stream()
                 .map(item -> {
                     ServiceItemSearchDocument doc = item.document();
@@ -150,10 +148,9 @@ public class ServiceItemService {
                                 doc.getLocation().getLon());
                     }
 
-                    String objectKey = thumbnailObjectKeyMap.getOrDefault(
-                            doc.getId(),
-                            ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY
-                    );
+                    String objectKey = doc.getThumbnailObjectKey() != null
+                            ? doc.getThumbnailObjectKey()
+                            : ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
 
                     return ServiceItemModel.Search.fromDocument(
                             doc,
