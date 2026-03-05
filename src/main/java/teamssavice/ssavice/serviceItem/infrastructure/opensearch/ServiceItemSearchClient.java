@@ -80,7 +80,7 @@
             // 2. 키워드 검색
             if (command.query() != null && !command.query().isBlank()) {
                 bool.must(m -> m.multiMatch(mm -> mm
-                        .fields("title", "description", "tags.search", "companyName.search")
+                        .fields("title", "tags.search", "companyName.search")
                         .query(command.query())
                 ));
             }
