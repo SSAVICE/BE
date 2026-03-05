@@ -1,5 +1,6 @@
 package teamssavice.ssavice.account.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,5 +19,10 @@ public class AccountReadService {
     public Account findById(Long id) {
         return accountRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Account> findAllByIdIn(List<Long> ids) {
+        return accountRepository.findAllByIdIn(ids);
     }
 }

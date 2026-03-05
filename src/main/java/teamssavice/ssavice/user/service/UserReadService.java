@@ -1,5 +1,6 @@
 package teamssavice.ssavice.user.service;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,5 +53,10 @@ public class UserReadService {
     @Transactional(readOnly = true)
     public Users getReferenceById(Long userId) {
         return userRepository.getReferenceById(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Users> findAllByIdInFetchJoinImageResource(List<Long> ids) {
+        return userRepository.findAllByIdInFetchJoinImageResource(ids);
     }
 }

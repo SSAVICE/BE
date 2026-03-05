@@ -2,14 +2,14 @@ package teamssavice.ssavice.global.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Optional;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import teamssavice.ssavice.auth.constants.Role;
 import teamssavice.ssavice.global.annotation.RequireRole;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ForbiddenException;
-
-import java.util.Optional;
 
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
@@ -26,10 +26,16 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 .orElse(handlerMethod.getBeanType().getAnnotation(RequireRole.class));
         if(requireRole == null) return true;
 
-        Role required = requireRole.value();
-        String role = (String) request.getAttribute("role");
+        String roleAttribute = (String) request.getAttribute("role");
+        if (roleAttribute == null) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+        }
+        Role userRole = Role.valueOf(roleAttribute);
 
-        if (!required.canAccess(Role.valueOf(role))) {
+        boolean hasAccess = Arrays.stream(requireRole.value())
+                .anyMatch(required -> required.canAccess(userRole));
+
+        if (!hasAccess) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         }
         return true;

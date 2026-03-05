@@ -1,5 +1,6 @@
 package teamssavice.ssavice.user.infrastructure.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,9 @@ import teamssavice.ssavice.user.entity.Users;
 public interface UserRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByEmail(String email);
+
+    @Query("SELECT u FROM Users u LEFT JOIN FETCH u.imageResource WHERE u.id IN :ids")
+    List<Users> findAllByIdInFetchJoinImageResource(@Param("ids") List<Long> ids);
 
     @Query("SELECT u FROM Users u LEFT JOIN FETCH u.imageResource where u.id = :id")
     Optional<Users> findByIdFetchJoinImageResource(@Param("id") Long id);

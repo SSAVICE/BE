@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import teamssavice.ssavice.company.entity.Company;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
+
+    @Query("SELECT c FROM Company c LEFT JOIN FETCH c.imageResource WHERE c.id IN :ids")
+    List<Company> findAllByIdInFetchJoinImageResource(@Param("ids") List<Long> ids);
 
     @Query("SELECT c FROM Company c JOIN FETCH c.address WHERE c.id = :id")
     Optional<Company> findByCompanyIdFetchJoinAddress(@Param("id") Long id);
