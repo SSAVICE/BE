@@ -14,7 +14,7 @@ public class KafkaProducer {
     private final KafkaTemplate<String, KafkaEvent.Join> kafkaTemplate;
 
     public void publish(String key, KafkaEvent.Join payload) {
-        System.out.println("publish: " + key + " " + payload.messageType());
+//        System.out.println("publish: " + key + " " + payload.messageType());
         kafkaTemplate.send(kafkaProperties.joinTopic(), key, payload);
     }
 }
