@@ -41,6 +41,13 @@ public interface ServiceItemRepository extends JpaRepository<ServiceItem, Long>,
             "WHERE s.id = :id")
     Optional<ServiceItem> findByIdWithAddressAndImageList(Long id);
 
+    @Query("SELECT s FROM ServiceItem s " +
+            "JOIN FETCH s.address " +
+            "JOIN FETCH s.company " +
+            "LEFT JOIN FETCH s.thumbnailImageResource " +
+            "WHERE s.id = :id")
+    Optional<ServiceItem> findByIdWithAddressAndThumbnail(Long id);
+
     @Query("SELECT COUNT(s) FROM ServiceItem s " +
             "WHERE s.company.id = :companyId " +
             "AND s.status = :recruiting " +

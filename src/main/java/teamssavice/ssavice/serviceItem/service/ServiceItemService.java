@@ -123,6 +123,13 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
+    public ServiceItemModel.Summary getServiceItemSummary(Long serviceId) {
+        ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndThumbnail(serviceId);
+        return ServiceItemModel.Summary.from(serviceItem,
+            s3Service.generateGetPresignedUrl(serviceItem.getObjectKey()));
+    }
+
+    @Transactional(readOnly = true)
     public Page<ServiceItemModel.Summary> getServiceItemByCompanyAndStatus(ServiceItemCommand.RetrieveByCompanyAndStatus command) {
         Page<ServiceItem> serviceItems = serviceItemReadService.findByCompanyAndStatus(command);
         return serviceItems.map(serviceItem -> ServiceItemModel.Summary.from(serviceItem,

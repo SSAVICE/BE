@@ -69,6 +69,12 @@ public class ServiceItemReadService {
     }
 
     @Transactional(readOnly = true)
+    public ServiceItem findByIdWithAddressAndThumbnail(Long id) {
+        return serviceItemRepository.findByIdWithAddressAndThumbnail(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
     public Long countRecruitingServiceItemsByCompanyId(Long companyId) {
         return serviceItemRepository.countRecruitingServiceItemsByCompanyId(companyId, ServiceStatus.RECRUITING, LocalDateTime.now());
     }

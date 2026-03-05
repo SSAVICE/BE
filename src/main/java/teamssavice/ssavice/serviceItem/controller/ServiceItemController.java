@@ -74,6 +74,15 @@ public class ServiceItemController {
     }
 
     @PermitAll
+    @GetMapping("/{serviceId}/summary")
+    public ResponseEntity<ServiceItemResponse.Summary> getServiceItemSummary(
+        @PathVariable Long serviceId
+    ) {
+        ServiceItemModel.Summary model = serviceItemService.getServiceItemSummary(serviceId);
+        return ResponseEntity.ok(ServiceItemResponse.Summary.from(model));
+    }
+
+    @PermitAll
     @GetMapping("/{serviceId}")
     public ResponseEntity<ServiceItemResponse.Detail> getServiceDetail(
         @PathVariable Long serviceId,

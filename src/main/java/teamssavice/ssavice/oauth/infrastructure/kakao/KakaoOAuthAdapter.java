@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.AuthenticationException;
 import teamssavice.ssavice.global.exception.ExternalApiException;
+import teamssavice.ssavice.global.property.KakaoProperties;
 import teamssavice.ssavice.oauth.infrastructure.kakao.client.KakaoApiClient;
 import teamssavice.ssavice.oauth.infrastructure.kakao.dto.KakaoUserResponse;
 import teamssavice.ssavice.oauth.service.client.OAuthClient;
@@ -17,6 +18,7 @@ import teamssavice.ssavice.account.constants.Provider;
 public class KakaoOAuthAdapter implements OAuthClient {
 
     private final KakaoApiClient kakaoApiClient;
+    private final KakaoProperties kakaoProperties;
 
     @Override
     public Provider getProvider() {
@@ -47,6 +49,19 @@ public class KakaoOAuthAdapter implements OAuthClient {
                 .phoneNumber("010-0000-0000") // 현재는 카카오에서 전화번호를 제공하지 않으므로 기본값 설정
                 .build();
 
+        } catch (FeignException.Unauthorized e) {
+            throw new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED);
+        } catch (feign.RetryableException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_TIMEOUT);
+        } catch (FeignException e) {
+            throw new ExternalApiException(ErrorCode.EXTERNAL_API_ERROR);
+        }
+    }
+
+    @Override
+    public void unlink(String providerId) {
+        try {
+            kakaoApiClient.unlinkUser("KakaoAK " + kakaoProperties.adminKey(), "user_id", providerId);
         } catch (FeignException.Unauthorized e) {
             throw new AuthenticationException(ErrorCode.KAKAO_AUTH_FAILED);
         } catch (feign.RetryableException e) {

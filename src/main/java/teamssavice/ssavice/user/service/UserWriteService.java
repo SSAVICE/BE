@@ -30,6 +30,9 @@ public class UserWriteService {
                 .providerId(oAuthUserInfo.providerId())
                 .role(Role.USER)
                 .build()));
+        if (account.isDeleted()) {
+            account.restore();
+        }
         return userRepository.findById(account.getId())
             .orElseGet(() -> save(oAuthUserInfo, account));
     }
