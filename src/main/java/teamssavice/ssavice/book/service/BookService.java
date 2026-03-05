@@ -1,9 +1,8 @@
 package teamssavice.ssavice.book.service;
 
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,11 +11,10 @@ import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
-import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ForbiddenException;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
+import teamssavice.ssavice.kafka.event.KafkaEvent;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.s3.S3Service;
@@ -32,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookService {
 
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final BookReadService bookReadService;
     private final BookWriteService bookWriteService;
     private final ServiceItemReadService serviceItemReadService;
@@ -67,10 +66,10 @@ public class BookService {
         Users user = userReadService.findById(userId);
 
         validateApply(user, serviceItem);
-
         serviceItem.participate();
 
         Book book = bookWriteService.apply(user, serviceItem);
+        applicationEventPublisher.publishEvent(KafkaEvent.Join.joinEvent(serviceItem, userId));
 
         return BookModel.Apply.of(book.getId());
     }
@@ -91,6 +90,7 @@ public class BookService {
         bookWriteService.cancel(book);
 
         serviceItem.cancelParticipation();
+        applicationEventPublisher.publishEvent(KafkaEvent.Join.leaveEvent(serviceItem, command.userId()));
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
     }
 
