@@ -77,11 +77,18 @@
             // 1. (삭제되지 않은 문서)
             bool.filter(m -> m.term(t -> t.field("isDeleted").value(FieldValue.of(false))));
 
-            // 2. 키워드 검색
+            // 2. 키워드 필터
             if (command.query() != null && !command.query().isBlank()) {
-                bool.must(m -> m.multiMatch(mm -> mm
-                        .fields("title", "tags.search", "companyName.search")
-                        .query(command.query())
+                bool.must(m -> m.bool(b -> b
+                        .should(s -> s.match(mm -> mm
+                                .field("title")
+                                .query(q -> q.stringValue(command.query()))
+                        ))
+                        .should(s -> s.term(t -> t
+                                .field("tags")
+                                .value(FieldValue.of(command.query()))
+                        ))
+                        .minimumShouldMatch("1")
                 ));
             }
 
