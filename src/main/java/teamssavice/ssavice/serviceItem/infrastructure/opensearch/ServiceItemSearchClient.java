@@ -1,6 +1,7 @@
     package teamssavice.ssavice.serviceItem.infrastructure.opensearch;
 
     import lombok.RequiredArgsConstructor;
+    import lombok.extern.slf4j.Slf4j;
     import org.opensearch.client.json.JsonData;
     import org.opensearch.client.opensearch.OpenSearchClient;
     import org.opensearch.client.opensearch._types.DistanceUnit;
@@ -27,6 +28,7 @@
 
     @Component
     @RequiredArgsConstructor
+    @Slf4j
     public class ServiceItemSearchClient {
 
         private static final String INDEX_NAME = "service-items";
@@ -40,6 +42,7 @@
 
                 return toSearchResult(response, command.pageable().getPageSize(), command.sortType());
             } catch (IOException e) {
+                log.error("OpenSearch 검색 실패", e);
                 throw new ExternalApiException(ErrorCode.OPENSEARCH_SEARCH_FAILED);
             }
         }

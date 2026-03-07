@@ -79,7 +79,8 @@ public class BookService {
                 new BookChangedEvent(
                         serviceItem.getId(),
                         Map.of("currentMember", serviceItem.getCurrentMember(),
-                        "isAvailable", serviceItem.getCurrentMember() < serviceItem.getMaximumMember()
+                        "isAvailable", serviceItem.getCurrentMember() < serviceItem.getMaximumMember(),
+                                "status", serviceItem.getStatus()
                         )
                 )
         );

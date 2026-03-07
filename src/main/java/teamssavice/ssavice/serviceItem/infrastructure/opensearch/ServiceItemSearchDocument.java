@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static teamssavice.ssavice.imageresource.constants.ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,7 +52,7 @@ public class ServiceItemSearchDocument {
     private String createdAt;
 
     private GeoLocation location;
-    private boolean isAvailable;
+    private Boolean isAvailable;
 
     private String thumbnailObjectKey;
 
@@ -87,6 +89,7 @@ public class ServiceItemSearchDocument {
                 .createdAt(item.getCreatedAt().format(DATE_FORMAT))
                 .location(geo)
                 .isAvailable(item.getCurrentMember() < item.getMaximumMember())
+                .thumbnailObjectKey(item.getObjectKey())
                 .build();
     }
 

@@ -120,14 +120,15 @@ public class ServiceItemService {
         return new CursorResult<>(content, nextCursor, items.hasNext());
     }
 
-    @Transactional(readOnly = true)
     public SearchCursorResult<ServiceItemModel.Search> searchV2(@Nullable Long userId, ServiceItemCommand.Search command) {
+
         SearchResult result = serviceItemReadService.searchByOpenSearch(command);
 
         // 예약 여부 조회
         List<Long> serviceItemIds = result.items().stream()
                 .map(item -> item.document().getId())
                 .toList();
+
         Set<Long> reservedIds = (userId != null)
                 ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
                 : Collections.emptySet();
@@ -148,14 +149,10 @@ public class ServiceItemService {
                                 doc.getLocation().getLon());
                     }
 
-                    String objectKey = doc.getThumbnailObjectKey() != null
-                            ? doc.getThumbnailObjectKey()
-                            : ImageConstants.DEFAULT_SERVICE_ITEM_IMAGE_OBJECT_KEY;
-
                     return ServiceItemModel.Search.fromDocument(
                             doc,
                             reservedIds.contains(doc.getId()),
-                            s3Service.generateGetPresignedUrl(objectKey),
+                            s3Service.generateGetPresignedUrl(doc.getThumbnailObjectKey()),
                             distanceKm
                     );
                 })
