@@ -19,6 +19,7 @@ public class BookWriteService {
 
     private final BookRepository bookRepository;
 
+    @Transactional
     public Book apply(Users user, ServiceItem serviceItem) {
         Book book = Book.builder()
                 .user(user)
@@ -28,6 +29,7 @@ public class BookWriteService {
         return bookRepository.save(book);
     }
 
+    @Transactional
     public void cancel(Book book) {
         book.cancel();
     }

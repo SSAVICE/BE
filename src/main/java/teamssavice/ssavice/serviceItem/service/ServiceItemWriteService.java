@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.address.AddressCommand;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.global.constants.ErrorCode;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -49,5 +51,14 @@ public class ServiceItemWriteService {
             .build();
 
         return serviceItemRepository.save(serviceItem);
+    }
+
+    @Transactional
+    public ServiceItem participate(Long serviceId) {
+        ServiceItem serviceItem = serviceItemRepository.findByIdForUpdate(serviceId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+        serviceItem.validateAppliable();
+        serviceItem.participate();
+        return serviceItem;
     }
 }

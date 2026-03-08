@@ -23,6 +23,7 @@ import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
+import teamssavice.ssavice.serviceItem.service.ServiceItemWriteService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
@@ -41,6 +42,7 @@ public class BookService {
     private final RefundService refundService;
     private final S3Service s3Service;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ServiceItemWriteService serviceItemWriteService;
 
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
@@ -66,12 +68,10 @@ public class BookService {
     @Transactional
     public BookModel.Apply apply(Long userId, Long serviceId) {
 
-        ServiceItem serviceItem = serviceItemReadService.findById(serviceId);
+        ServiceItem serviceItem = serviceItemWriteService.participate(serviceId);
         Users user = userReadService.findById(userId);
 
         validateApply(user, serviceItem);
-
-        serviceItem.participate();
 
         Book book = bookWriteService.apply(user, serviceItem);
 
@@ -119,9 +119,6 @@ public class BookService {
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
-
-        serviceItem.validateAppliable();
-
         if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
