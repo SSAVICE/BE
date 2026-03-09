@@ -61,6 +61,15 @@ public class ServiceItemModel {
         }
     }
 
+    public record SearchContext(
+            boolean isBooked,
+            String imageUrl,
+            double distanceKm,
+            Long currentMember,
+            ServiceStatus status
+    ) {}
+
+
     @Builder
     public record Search(
             Long serviceId,
@@ -117,21 +126,21 @@ public class ServiceItemModel {
                 .build();
         }
 
-        public static Search fromDocument(ServiceItemSearchDocument doc, boolean isBooked, String imageUrl, double distanceKm) {
+        public static Search fromDocument(ServiceItemSearchDocument doc,  SearchContext context) {
             return Search.builder()
                     .serviceId(doc.getId())
                     .companyId(doc.getCompanyId())
                     .companyName(doc.getCompanyName())
-                    .serviceImageUrl(imageUrl)
+                    .serviceImageUrl(context.imageUrl())
                     .title(doc.getTitle())
                     .basePrice(doc.getBasePrice())
                     .discountRatio(doc.getDiscountRate())
                     .discountedPrice(doc.getDiscountedPrice())
-                    .status(ServiceStatus.valueOf(doc.getStatus()))
+                    .status(context.status())
                     .deadline(parseDateTime(doc.getDeadline()))
                     .category(doc.getCategory())
                     .tag(doc.getTags() != null ? String.join(",", doc.getTags()) : null)
-                    .currentMember(doc.getCurrentMember())
+                    .currentMember(context.currentMember())
                     .minimumMember(doc.getMinimumMember())
                     .maximumMember(doc.getMaximumMember())
                     .region(AddressModel.RegionSummary.builder()
@@ -140,8 +149,8 @@ public class ServiceItemModel {
                             .latitude(doc.getLocation().getLat())
                             .longitude(doc.getLocation().getLon())
                             .build())
-                    .isBooked(isBooked)
-                    .distanceKm(distanceKm)
+                    .isBooked(context.isBooked())
+                    .distanceKm(context.distanceKm())
                     .build();
         }
     }

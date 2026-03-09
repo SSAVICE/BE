@@ -122,4 +122,12 @@ public class ServiceItemReadService {
         return serviceItemRepository.findByThumbnailImageResourceSourceKey(originKey)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
     }
+
+
+    @Transactional(readOnly = true)
+    public Map<Long, ServiceItem> findAllByServiceItemIds(List<Long> serviceItemIds) {
+        return serviceItemRepository.findAllById(serviceItemIds).stream()
+                .collect(Collectors.toMap(ServiceItem::getId, s -> s));
+
+    }
 }

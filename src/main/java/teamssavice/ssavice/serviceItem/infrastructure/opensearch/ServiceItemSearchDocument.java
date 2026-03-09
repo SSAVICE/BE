@@ -34,7 +34,6 @@ public class ServiceItemSearchDocument {
     private Integer discountRate;
     private Long discountedPrice;
 
-    private Long currentMember;
     private Long maximumMember;
     private Long minimumMember;
 
@@ -74,7 +73,6 @@ public class ServiceItemSearchDocument {
                 .basePrice(item.getPrice().getBasePrice())
                 .discountRate(item.getPrice().getDiscountRate())
                 .discountedPrice(item.getPrice().getDiscountedPrice())
-                .currentMember(item.getCurrentMember())
                 .maximumMember(item.getMaximumMember())
                 .minimumMember(item.getMinimumMember())
                 .companyId(item.getCompany().getId())

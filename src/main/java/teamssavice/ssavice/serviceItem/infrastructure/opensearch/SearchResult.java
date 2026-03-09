@@ -10,7 +10,6 @@ public record SearchResult(
 ) {
     public record Item(
             ServiceItemSearchDocument document,
-            List<String> sortValues,
             Double distanceKm
     ) {
     }

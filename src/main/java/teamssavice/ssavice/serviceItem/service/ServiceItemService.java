@@ -133,6 +133,8 @@ public class ServiceItemService {
                 ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
                 : Collections.emptySet();
 
+        Map<Long, ServiceItem> serviceItemMap = serviceItemReadService.findAllByServiceItemIds(serviceItemIds);
+
         List<ServiceItemModel.Search> content = result.items().stream()
                 .map(item -> {
                     ServiceItemSearchDocument doc = item.document();
@@ -151,10 +153,15 @@ public class ServiceItemService {
 
                     return ServiceItemModel.Search.fromDocument(
                             doc,
-                            reservedIds.contains(doc.getId()),
-                            s3Service.generateGetPresignedUrl(doc.getThumbnailObjectKey()),
-                            distanceKm
+                            new ServiceItemModel.SearchContext(
+                                    reservedIds.contains(doc.getId()),
+                                    s3Service.generateGetPresignedUrl(doc.getThumbnailObjectKey()),
+                                    distanceKm,
+                                    serviceItemMap.get(doc.getId()).getCurrentMember(),
+                                    serviceItemMap.get(doc.getId()).getStatus()
+                            )
                     );
+
                 })
                 .toList();
 

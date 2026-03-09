@@ -37,8 +37,17 @@ public class ServiceItemOutboxEventListener {
     public void handleServiceItemThumbnailUpdated(ServiceItemThumbnailUpdatedEvent event) {
         outboxWriteService.saveEvent(
                 event.serviceItemId(),
-                EventType.UPDATED,
+                EventType.THUMBNAIL_UPDATED,
                 Map.of("thumbnailObjectKey", event.thumbKey())
+        );
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handleServiceItemAvailabilityChanged(ServiceItemAvailabilityChangedEvent event) {
+        outboxWriteService.saveEvent(
+                event.serviceItemId(),
+                EventType.AVAILABILITY_UPDATED,
+                Map.of("isAvailable", event.isAvailable())
         );
     }
 }

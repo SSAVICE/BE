@@ -82,7 +82,7 @@
 
             // 2. 키워드 필터
             if (command.query() != null && !command.query().isBlank()) {
-                bool.must(m -> m.bool(b -> b
+                bool.filter(m -> m.bool(b -> b
                         .should(s -> s.match(mm -> mm
                                 .field("title")
                                 .query(q -> q.stringValue(command.query()))
@@ -181,7 +181,6 @@
             List<SearchResult.Item> items = resultHits.stream()
                     .map(hit -> new SearchResult.Item(
                             hit.source(),
-                            hit.sort().stream().map(FieldValue::_toJsonString).toList(),
                             extractDistance(hit, sortType)
                     ))
                     .toList();
