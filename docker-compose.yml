@@ -17,6 +17,7 @@ services:
       SQS_THUMB_ALARM_QUEUE: ${SQS_THUMB_ALARM_QUEUE}
       TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
       KAKAO_ADMIN_KEY: ${KAKAO_ADMIN_KEY}
+      KAFKA_SERVER_URL: ${KAFKA_SERVER_URL}
       TZ: Asia/Seoul
     # 항상 최신
     pull_policy: always
