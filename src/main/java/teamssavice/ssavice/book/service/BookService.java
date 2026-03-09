@@ -4,14 +4,12 @@ package teamssavice.ssavice.book.service;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
-import teamssavice.ssavice.book.event.BookChangedEvent;
 import teamssavice.ssavice.book.service.dto.BookCommand;
 import teamssavice.ssavice.book.service.dto.BookModel;
 import teamssavice.ssavice.s3.S3Service;
@@ -21,15 +19,11 @@ import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import teamssavice.ssavice.serviceItem.service.ServiceItemWriteService;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +35,6 @@ public class BookService {
     private final UserReadService userReadService;
     private final RefundService refundService;
     private final S3Service s3Service;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final ServiceItemWriteService serviceItemWriteService;
 
     @Transactional(readOnly = true)
@@ -75,16 +68,6 @@ public class BookService {
 
         Book book = bookWriteService.apply(user, serviceItem);
 
-        applicationEventPublisher.publishEvent(
-                new BookChangedEvent(
-                        serviceItem.getId(),
-                        Map.of("currentMember", serviceItem.getCurrentMember(),
-                        "isAvailable", serviceItem.getCurrentMember() < serviceItem.getMaximumMember(),
-                                "status", serviceItem.getStatus()
-                        )
-                )
-        );
-
         return BookModel.Apply.of(book.getId());
     }
 
@@ -105,17 +88,6 @@ public class BookService {
 
         serviceItem.cancelParticipation();
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
-
-        applicationEventPublisher.publishEvent(
-                new BookChangedEvent(
-                        serviceItem.getId(),
-                        Map.of("currentMember", serviceItem.getCurrentMember(),
-                                "isAvailable", serviceItem.getCurrentMember() < serviceItem.getMaximumMember()
-                        )
-                )
-        );
-
-
     }
 
     private void validateApply(Users user, ServiceItem serviceItem) {
