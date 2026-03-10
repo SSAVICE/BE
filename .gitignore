@@ -49,3 +49,4 @@ application-local.properties
 ### 도커 관련
 /db_data
 *.tar
+docker-compose-local.yml

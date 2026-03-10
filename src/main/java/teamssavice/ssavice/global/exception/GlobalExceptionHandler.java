@@ -28,9 +28,14 @@ public class GlobalExceptionHandler {
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         Map<String, Object> errors = new HashMap<>();
-        e.getAllErrors()
-            .forEach(
-                field -> errors.put(((FieldError) field).getField(), field.getDefaultMessage()));
+        e.getAllErrors().forEach(error -> {
+            FieldError fieldError = (FieldError) error;
+            if (fieldError.isBindingFailure()) {
+                errors.put(fieldError.getField(), "허용되지 않는 값입니다.");
+            } else {
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            }
+        });
 
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperties(errors);

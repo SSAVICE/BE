@@ -18,11 +18,9 @@ import teamssavice.ssavice.global.dto.CursorResult;
 import teamssavice.ssavice.global.dto.SearchCursorResult;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
-import teamssavice.ssavice.imageresource.constants.ImageConstants;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
-import teamssavice.ssavice.outbox.constants.EventType;
-import teamssavice.ssavice.outbox.service.OutboxWriteService;
+import teamssavice.ssavice.kafka.event.KafkaEvent;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
@@ -38,8 +36,6 @@ import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSear
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
-
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -55,7 +51,6 @@ public class ServiceItemService {
     private final RegionReadService regionReadService;
     private final RefundService refundService;
     private final WishReadService wishReadService;
-    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
