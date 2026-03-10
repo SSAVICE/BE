@@ -137,5 +137,56 @@ class UserWriteServiceTest {
             assertThat(result.getName()).isEqualTo("매핑유저");
             assertThat(result.getAccount()).isEqualTo(account);
         }
+
+        @Test
+        @DisplayName("성공: 탈퇴된 Account로 재가입 시 Account의 isDeleted가 false로 복구된다")
+        void success_whenDeletedAccountRestored() {
+            // given
+            Account deletedAccount = accountRepository.save(Account.builder()
+                    .provider(Provider.KAKAO)
+                    .providerId("55555555")
+                    .role(Role.USER)
+                    .build());
+            deletedAccount.deleteAccount();
+            accountRepository.save(deletedAccount);
+
+            OAuthUserInfo oAuthUserInfo = OAuthUserInfo.builder()
+                    .providerId("55555555")
+                    .email("restored@kakao.com")
+                    .name("복구유저")
+                    .phoneNumber("010-5555-4444")
+                    .build();
+
+            // when
+            Users result = userWriteService.findOrCreate(oAuthUserInfo, Provider.KAKAO);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(deletedAccount.isDeleted()).isFalse();
+        }
+
+        @Test
+        @DisplayName("성공: 탈퇴된 Account로 재가입 시 기존 Users를 반환한다")
+        void success_returnsExistingUser_whenDeletedAccountRestored() {
+            // given
+            Account account = accountRepository.save(UserFixture.account());
+            Users savedUser = userRepository.save(UserFixture.user(account));
+            account.deleteAccount();
+            accountRepository.save(account);
+
+            OAuthUserInfo oAuthUserInfo = OAuthUserInfo.builder()
+                    .providerId("1234567890") // UserFixture.account()의 providerId
+                    .email("restored@kakao.com")
+                    .name("복구유저")
+                    .phoneNumber("010-1234-5678")
+                    .build();
+
+            // when
+            Users result = userWriteService.findOrCreate(oAuthUserInfo, Provider.KAKAO);
+
+            // then
+            assertThat(result.getId()).isEqualTo(savedUser.getId());
+            assertThat(account.isDeleted()).isFalse();
+        }
     }
 }

@@ -26,12 +26,16 @@ public class CompanyWriteService {
 
     @Transactional
     public Account findOrCreateAccount(OAuthUserInfo oAuthUserInfo, Provider provider) {
-        return accountRepository.findByProviderIdAndProviderAndRole(oAuthUserInfo.providerId(), provider, Role.COMPANY)
+        Account account = accountRepository.findByProviderIdAndProviderAndRole(oAuthUserInfo.providerId(), provider, Role.COMPANY)
             .orElseGet(() -> accountRepository.save(Account.builder()
                 .provider(provider)
                 .providerId(oAuthUserInfo.providerId())
                 .role(Role.COMPANY)
                 .build()));
+        if (account.isDeleted()) {
+            account.restore();
+        }
+        return account;
     }
 
     @Transactional

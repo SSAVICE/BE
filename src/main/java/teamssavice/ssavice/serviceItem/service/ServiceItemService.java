@@ -82,6 +82,8 @@ public class ServiceItemService {
             applicationEventPublisher.publishEvent(S3EventDto.Move.from(imageResource));
         }
 
+        applicationEventPublisher.publishEvent(KafkaEvent.Join.createEvent(savedServiceItem, command.companyId()));
+
         applicationEventPublisher.publishEvent(
                 new ServiceItemCreatedEvent(
                         savedServiceItem.getId(),
@@ -93,7 +95,6 @@ public class ServiceItemService {
         return savedServiceItem.getId();
     }
 
-    // 기존 비교용 - 삭제 예정
     @Transactional(readOnly = true)
     public CursorResult<ServiceItemModel.Search> search(@Nullable Long userId, ServiceItemCommand.Search command) {
 
@@ -181,6 +182,13 @@ public class ServiceItemService {
         boolean isBooked = (userId != null) && bookReadService.isBookedByUserIdAndServiceId(userId, serviceId);
 
         return ServiceItemModel.Detail.from(serviceItem, imageUrls, isLiked, isBooked);
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceItemModel.Summary getServiceItemSummary(Long serviceId) {
+        ServiceItem serviceItem = serviceItemReadService.findByIdWithAddressAndThumbnail(serviceId);
+        return ServiceItemModel.Summary.from(serviceItem,
+            s3Service.generateGetPresignedUrl(serviceItem.getObjectKey()));
     }
 
     @Transactional(readOnly = true)

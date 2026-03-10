@@ -64,6 +64,8 @@ class BookServiceTest {
     private UserReadService userReadService;
     @Mock
     private BookWriteService bookWriteService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     private ServiceItemWriteService serviceItemWriteService;

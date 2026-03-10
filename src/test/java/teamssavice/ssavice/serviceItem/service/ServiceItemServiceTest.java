@@ -13,7 +13,9 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
+import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.global.exception.EntityNotFoundException;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.entity.Price;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -459,6 +462,98 @@ class ServiceItemServiceTest {
 
             // 사용자와 검색 중심이 같으므로, 어느 좌표로 계산해도 결과는 동일
             assertThat(nearbyItem.distanceKm()).isBetween(0.8, 0.9);
+        }
+    }
+
+    @Nested
+    @DisplayName("getServiceItemSummary 메서드")
+    class GetServiceItemSummary {
+
+        @Test
+        @DisplayName("성공: serviceId로 ServiceItem을 조회하고 S3 presigned URL을 포함한 Summary를 반환한다")
+        void success() {
+            // given
+            Long serviceId = 1L;
+            ServiceItem serviceItem = createServiceItem(serviceId, "요약 서비스",
+                new BigDecimal("37.5665"), new BigDecimal("126.9780"));
+            String expectedUrl = "https://s3.example.com/thumbnail.jpg";
+
+            given(serviceItemReadService.findByIdWithAddressAndThumbnail(serviceId))
+                .willReturn(serviceItem);
+            given(s3Service.generateGetPresignedUrl(anyString()))
+                .willReturn(expectedUrl);
+
+            // when
+            ServiceItemModel.Summary result = serviceItemService.getServiceItemSummary(serviceId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.serviceId()).isEqualTo(serviceId);
+            assertThat(result.title()).isEqualTo("요약 서비스");
+            assertThat(result.thumbnailUrl()).isEqualTo(expectedUrl);
+        }
+
+        @Test
+        @DisplayName("성공: Summary에 ServiceItem의 가격 정보가 올바르게 매핑된다")
+        void success_priceFieldsMapped() {
+            // given
+            Long serviceId = 1L;
+            ServiceItem serviceItem = createServiceItem(serviceId, "가격 테스트 서비스",
+                new BigDecimal("37.5665"), new BigDecimal("126.9780"));
+
+            given(serviceItemReadService.findByIdWithAddressAndThumbnail(serviceId))
+                .willReturn(serviceItem);
+            given(s3Service.generateGetPresignedUrl(anyString()))
+                .willReturn("https://s3.example.com/image.jpg");
+
+            // when
+            ServiceItemModel.Summary result = serviceItemService.getServiceItemSummary(serviceId);
+
+            // then
+            assertThat(result.basePrice()).isEqualTo(10000L);
+            assertThat(result.discountRate()).isEqualTo(10);
+            assertThat(result.discountedPrice()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("성공: Summary에 ServiceItem의 지역 정보가 올바르게 매핑된다")
+        void success_regionFieldsMapped() {
+            // given
+            Long serviceId = 1L;
+            ServiceItem serviceItem = createServiceItem(serviceId, "지역 테스트 서비스",
+                new BigDecimal("37.5665"), new BigDecimal("126.9780"));
+
+            given(serviceItemReadService.findByIdWithAddressAndThumbnail(serviceId))
+                .willReturn(serviceItem);
+            given(s3Service.generateGetPresignedUrl(anyString()))
+                .willReturn("https://s3.example.com/image.jpg");
+
+            // when
+            ServiceItemModel.Summary result = serviceItemService.getServiceItemSummary(serviceId);
+
+            // then
+            assertThat(result.region()).isNotNull();
+            assertThat(result.region().gugun()).isEqualTo("중구");
+            assertThat(result.region().region()).isEqualTo("서울");
+            assertThat(result.region().latitude()).isEqualByComparingTo(new BigDecimal("37.5665"));
+            assertThat(result.region().longitude()).isEqualByComparingTo(new BigDecimal("126.9780"));
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 serviceId 조회 시 SERVICE_ITEM_NOT_FOUND 예외가 전파된다")
+        void fail_whenServiceItemNotFound() {
+            // given
+            Long nonExistentId = 999L;
+            given(serviceItemReadService.findByIdWithAddressAndThumbnail(nonExistentId))
+                .willThrow(new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+
+            // when & then
+            assertThatThrownBy(() -> serviceItemService.getServiceItemSummary(nonExistentId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .satisfies(ex -> assertThat(((EntityNotFoundException) ex).getErrorCode())
+                    .isEqualTo(ErrorCode.SERVICE_ITEM_NOT_FOUND));
+
+            then(s3Service).should(org.mockito.Mockito.never()).generateGetPresignedUrl(anyString());
         }
     }
 }

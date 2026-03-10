@@ -143,6 +143,50 @@ class CompanyWriteServiceTest {
             assertThat(result.getRole()).isEqualTo(Role.COMPANY);
             then(accountRepository).should().save(any(Account.class));
         }
+
+        @Test
+        @DisplayName("성공: 탈퇴된 Account로 재가입 시 Account의 isDeleted가 false로 복구된다")
+        void success_whenDeletedAccountRestored() {
+            // given
+            Account deletedAccount = Account.builder()
+                    .provider(provider)
+                    .providerId("company-provider-123")
+                    .role(Role.COMPANY)
+                    .build();
+            deletedAccount.deleteAccount();
+            assertThat(deletedAccount.isDeleted()).isTrue();
+
+            given(accountRepository.findByProviderIdAndProviderAndRole("company-provider-123", provider, Role.COMPANY))
+                    .willReturn(Optional.of(deletedAccount));
+
+            // when
+            Account result = companyWriteService.findOrCreateAccount(oAuthUserInfo, provider);
+
+            // then
+            assertThat(result.isDeleted()).isFalse();
+            then(accountRepository).should(never()).save(any());
+        }
+
+        @Test
+        @DisplayName("성공: 탈퇴되지 않은 기존 Account는 restore를 호출해도 isDeleted가 false를 유지한다")
+        void success_existingActiveAccountNotAffected() {
+            // given
+            Account existingAccount = Account.builder()
+                    .provider(provider)
+                    .providerId("company-provider-123")
+                    .role(Role.COMPANY)
+                    .build();
+            assertThat(existingAccount.isDeleted()).isFalse();
+
+            given(accountRepository.findByProviderIdAndProviderAndRole("company-provider-123", provider, Role.COMPANY))
+                    .willReturn(Optional.of(existingAccount));
+
+            // when
+            Account result = companyWriteService.findOrCreateAccount(oAuthUserInfo, provider);
+
+            // then
+            assertThat(result.isDeleted()).isFalse();
+        }
     }
 
     @Nested

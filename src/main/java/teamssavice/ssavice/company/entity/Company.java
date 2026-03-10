@@ -1,19 +1,8 @@
 package teamssavice.ssavice.company.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import teamssavice.ssavice.account.entity.Account;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.service.dto.CompanyCommand;
@@ -67,10 +56,6 @@ public class Company extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     private String accountNumber;
-    @NotNull
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isDeleted = false;
 
     @Column(nullable = true)
     private String detail;
