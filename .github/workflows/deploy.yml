@@ -53,6 +53,10 @@ jobs:
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
           echo "NTS_SERVICE_KEY=${{ secrets.NTS_SERVICE_KEY }}" >> .env
           echo "SQS_THUMB_ALARM_QUEUE=${{ secrets.SQS_THUMB_ALARM_QUEUE }}" >> .env
+          echo "SQS_OUTBOX_QUEUE=${{ secrets.SQS_OUTBOX_QUEUE }}" >> .env
+          echo "OPENSEARCH_HOST=${{ secrets.OPENSEARCH_HOST }}" >> .env
+          echo "OPENSEARCH_USERNAME=${{ secrets.OPENSEARCH_USERNAME }}" >> .env
+          echo "OPENSEARCH_PASSWORD=${{ secrets.OPENSEARCH_PASSWORD }}" >> .env
           echo "TOSS_SECRET_KEY"=${{ secrets.TOSS_SECRET_KEY }} >> .env
           echo "KAKAO_ADMIN_KEY"=${{ secrets.KAKAO_ADMIN_KEY }} >> .env
           echo "KAFKA_SERVER_URL"=${{ secrets.KAFKA_SERVER_URL }} >> .env

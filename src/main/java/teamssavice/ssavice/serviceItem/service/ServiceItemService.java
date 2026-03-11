@@ -15,11 +15,14 @@ import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.company.service.CompanyReadService;
 import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.dto.CursorResult;
+import teamssavice.ssavice.global.dto.SearchCursorResult;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.kafka.event.KafkaEvent;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
@@ -28,14 +31,12 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.SearchResult;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemModel;
 import teamssavice.ssavice.wish.service.WishReadService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +51,7 @@ public class ServiceItemService {
     private final RegionReadService regionReadService;
     private final RefundService refundService;
     private final WishReadService wishReadService;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -78,6 +80,12 @@ public class ServiceItemService {
 
         applicationEventPublisher.publishEvent(KafkaEvent.Join.createEvent(savedServiceItem, command.companyId()));
 
+        outboxWriteService.saveEvent(
+                savedServiceItem.getId(),
+                EventType.CREATED,
+                ServiceItemSearchDocument.from(savedServiceItem)
+        );
+
         return savedServiceItem.getId();
     }
 
@@ -105,6 +113,54 @@ public class ServiceItemService {
         }
 
         return new CursorResult<>(content, nextCursor, items.hasNext());
+    }
+
+    public SearchCursorResult<ServiceItemModel.Search> searchV2(@Nullable Long userId, ServiceItemCommand.Search command) {
+
+        SearchResult result = serviceItemReadService.searchByOpenSearch(command);
+
+        // 예약 여부 조회
+        List<Long> serviceItemIds = result.items().stream()
+                .map(item -> item.document().getId())
+                .toList();
+
+        Set<Long> reservedIds = (userId != null)
+                ? bookReadService.findReservedServiceItemIdsByIds(userId, serviceItemIds)
+                : Collections.emptySet();
+
+        Map<Long, ServiceItem> serviceItemMap = serviceItemReadService.findAllByServiceItemIds(serviceItemIds);
+
+        List<ServiceItemModel.Search> content = result.items().stream()
+                .map(item -> {
+                    ServiceItemSearchDocument doc = item.document();
+
+                    double distanceKm;
+                    if (item.distanceKm() != null) {
+                        // DISTANCE 정렬은 OpenSearch 계산값
+                        distanceKm = item.distanceKm();
+                    } else {
+                        // 나머지 정렬에 대해서는 GeoHashUtil (JAVA) 를 통해 계산
+                        distanceKm = GeoHashUtil.calculateDistanceInKm(
+                                command.userLatitude(), command.userLongitude(),
+                                doc.getLocation().getLat(),
+                                doc.getLocation().getLon());
+                    }
+
+                    return ServiceItemModel.Search.fromDocument(
+                            doc,
+                            new ServiceItemModel.SearchContext(
+                                    reservedIds.contains(doc.getId()),
+                                    s3Service.generateGetPresignedUrl(doc.getThumbnailObjectKey()),
+                                    distanceKm,
+                                    serviceItemMap.get(doc.getId()).getCurrentMember(),
+                                    serviceItemMap.get(doc.getId()).getStatus()
+                            )
+                    );
+
+                })
+                .toList();
+
+        return new SearchCursorResult<>(content, result.nextSearchAfter(), result.hasNext());
     }
 
     @Transactional(readOnly = true)
@@ -163,6 +219,13 @@ public class ServiceItemService {
         if (!canceledBooks.isEmpty()) {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
         }
+
+        outboxWriteService.saveEvent(
+                serviceItem.getId(),
+                EventType.DELETED,
+                Map.of("id", serviceItem.getId())
+        );
+
     }
 
     @Transactional(readOnly = true)

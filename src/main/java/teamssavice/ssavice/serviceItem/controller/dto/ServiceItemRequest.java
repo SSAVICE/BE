@@ -6,17 +6,21 @@ import org.springframework.data.domain.PageRequest;
 import teamssavice.ssavice.address.AddressRequest;
 import teamssavice.ssavice.imageresource.ImageRequest;
 import teamssavice.ssavice.s3.dto.S3Command;
+import teamssavice.ssavice.serviceItem.constants.Range;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
+import teamssavice.ssavice.serviceItem.constants.SortType;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceItemRequest {
 
     public record Create(
         @NotNull @PositiveOrZero Long imageCnt,
-        @NotBlank String category,
+        @NotNull ServiceCategory category,
         @NotBlank String title,
         @NotBlank String description,
         @NotNull @Min(1) Long minimumMember,
@@ -66,25 +70,27 @@ public class ServiceItemRequest {
 
     @Builder
     public record Search(
-        String category,
+        @NotNull ServiceCategory category,
         String query,
         String gugun,
         String region,
-        Integer range,
+        @NotNull Range range,
         @PositiveOrZero
         Long minPrice,
         @PositiveOrZero
         Long maxPrice,
 
-        Integer sortBy,
+        @NotNull SortType sortBy,
 
         // 커서 방식 (안드로이드 무한 스크롤과)
         @PositiveOrZero
         Long lastId,
+        List<String> searchAfter,
         Boolean onSale,
 
         @NotNull @DecimalMin("-90") @DecimalMax("90") BigDecimal userLatitude,
         @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal userLongitude
+
     ) {
         public ServiceItemCommand.Search toCommand(int size) {
             return ServiceItemCommand.Search.builder()
@@ -95,8 +101,9 @@ public class ServiceItemRequest {
                 .range(range)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
-                .sortBy(sortBy)
+                .sortType(sortBy)
                 .lastId(lastId)
+                .searchAfter(searchAfter)
                 .pageable(PageRequest.of(0, size))
                 .onSale(Boolean.TRUE.equals(onSale))
                 .userLatitude(userLatitude)

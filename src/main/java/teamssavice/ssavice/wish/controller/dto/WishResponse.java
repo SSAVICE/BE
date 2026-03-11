@@ -2,6 +2,7 @@ package teamssavice.ssavice.wish.controller.dto;
 
 import lombok.Builder;
 import teamssavice.ssavice.address.AddressResponse;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.wish.service.dto.WishModel;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public class WishResponse {
     public record Summary(
             Long serviceId,
             String thumbnailUrl,
-            String category,
+            ServiceCategory category,
             Long companyId,
             String companyName,
             String title,

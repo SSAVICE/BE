@@ -30,4 +30,24 @@ public class ServiceItemTest {
                 () -> assertThat(item.getStatus()).isEqualTo(ServiceStatus.SUCCEEDED)
         );
     }
+
+    @Test
+    @DisplayName("최대 인원에 도달하면 isFull이 true가 된다")
+    void participate_reaches_maximum_becomes_full() {
+        // Given: 최소 3명, 최대 3명, 현재 2명
+        ServiceItem item = ServiceItemFixture.custom("테스트", LocalDateTime.now().plusDays(5), null, null);
+        ReflectionTestUtils.setField(item, "minimumMember", 3L);
+        ReflectionTestUtils.setField(item, "maximumMember", 3L);
+        ReflectionTestUtils.setField(item, "currentMember", 2L);
+
+        // When
+        item.participate();
+
+        // Then
+        assertAll(
+                () -> assertThat(item.getCurrentMember()).isEqualTo(3L),
+                () -> assertThat(item.isFull()).isTrue(),
+                () -> assertThat(item.getStatus()).isEqualTo(ServiceStatus.FULLED)
+        );
+    }
 }

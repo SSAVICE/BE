@@ -3,6 +3,7 @@ package teamssavice.ssavice.fixture;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.company.entity.Company;
 import teamssavice.ssavice.global.util.GeoHashUtil;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
@@ -22,7 +23,7 @@ public class ServiceItemFixture {
                 .startDate(LocalDateTime.now().plusDays(10))
                 .endDate(LocalDateTime.now().plusDays(30))
                 .deadline(deadline)
-                .category("category")
+                .category(ServiceCategory.FOOD)
                 .company(company)
                 .address(address)
                 .build();
@@ -38,7 +39,7 @@ public class ServiceItemFixture {
                 .startDate(LocalDateTime.now().plusDays(10))
                 .endDate(LocalDateTime.now().plusDays(30))
                 .deadline(LocalDateTime.now().plusDays(5))
-                .category("category")
+                .category(ServiceCategory.FOOD)
                 .company(company)
                 .address(Address.builder()
                         .gugun("gugun")
@@ -66,7 +67,7 @@ public class ServiceItemFixture {
                 .startDate(LocalDateTime.now().plusDays(10))
                 .endDate(LocalDateTime.now().plusDays(30))
                 .deadline(LocalDateTime.now().plusDays(5))
-                .category("category")
+                .category(ServiceCategory.FOOD)
                 .company(company)
                 .address(Address.builder()
                         .gugun("gugun")

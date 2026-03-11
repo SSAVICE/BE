@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
 import teamssavice.ssavice.book.service.dto.BookModel;
@@ -45,6 +46,7 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
+import teamssavice.ssavice.serviceItem.service.ServiceItemWriteService;
 import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
@@ -64,6 +66,9 @@ class BookServiceTest {
     private BookWriteService bookWriteService;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    private ServiceItemWriteService serviceItemWriteService;
 
     @Mock
     private S3Service s3Service;
@@ -111,21 +116,19 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("참여 시 최소 인원이 충족되면 서비스 상태는 '모집 성공'이 되고, 예약은 'RESERVED'로 저장된다")
+    @DisplayName("참여 시 participate와 bookWriteService.apply가 호출된다")
     void apply_reaches_minimum_trigger_test() {
         // given
         Long serviceId = 1L;
         Long userId = 2L;
+        Address address = AddressFixture.address();
 
-        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), null, null);
+        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), company, address);
         ReflectionTestUtils.setField(serviceItem, "id", serviceId);
-        ReflectionTestUtils.setField(serviceItem, "minimumMember", 10L);
-        ReflectionTestUtils.setField(serviceItem, "currentMember", 9L);
-
 
         Users user = UserFixture.user();
 
-        given(serviceItemReadService.findById(serviceId)).willReturn(serviceItem);
+        given(serviceItemWriteService.participate(serviceId)).willReturn(serviceItem);
         given(userReadService.findById(userId)).willReturn(user);
         given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(false);
 
@@ -136,48 +139,31 @@ class BookServiceTest {
         bookService.apply(userId, serviceId);
 
         // then
-
+        verify(serviceItemWriteService).participate(serviceId);
         verify(bookWriteService).apply(any(), any());
-
-        assertThat(serviceItem.getStatus()).isEqualTo(ServiceStatus.SUCCEEDED);
     }
 
     @Test
-    @DisplayName("참여 시 최대 인원이 충족되면 서비스 상태는 '모집 마감(FULLED)'이 되고, 예약은 'RESERVED'로 저장된다")
+    @DisplayName("참여 시 이미 신청한 경우 예외가 발생하고 bookWriteService.apply가 호출되지 않는다")
     void apply_reaches_maximum_trigger_test() {
         // given
         Long serviceId = 1L;
         Long userId = 2L;
+        Address address = AddressFixture.address();
 
-        // 현재 19명, 최대 20명(최소는 이미 넘은 상태)인 서비스 준비
-        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), null, null);
+        ServiceItem serviceItem = ServiceItemFixture.custom("축구", LocalDateTime.now().plusDays(1), company, address);
         ReflectionTestUtils.setField(serviceItem, "id", serviceId);
-        ReflectionTestUtils.setField(serviceItem, "minimumMember", 10L);
-        ReflectionTestUtils.setField(serviceItem, "maximumMember", 20L);
-        ReflectionTestUtils.setField(serviceItem, "currentMember", 19L);
 
         Users user = UserFixture.user();
 
-        given(serviceItemReadService.findById(serviceId)).willReturn(serviceItem);
         given(userReadService.findById(userId)).willReturn(user);
-        given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(false);
+        given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(true);
 
-        // 저장될 때는 역시나 RESERVED 상태여야 함
-        Book mockBook = BookFixture.book(user, serviceItem, BookStatus.RESERVED);
-        given(bookWriteService.apply(any(), any())).willReturn(mockBook);
+        // when & then
+        assertThatThrownBy(() -> bookService.apply(userId, serviceId))
+                .isInstanceOf(teamssavice.ssavice.global.exception.ConflictException.class);
 
-        // when
-        bookService.apply(userId, serviceId);
-
-        // then
-        // 1. Book 저장 호출 검증
-        verify(bookWriteService).apply(any(), any());
-
-        // 2. 서비스 아이템의 상태가 FULLED 로 변했는지 검증
-        assertThat(serviceItem.getStatus()).isEqualTo(ServiceStatus.FULLED);
-
-        // 3. 인원수가 20명으로 늘어났는지 검증
-        assertThat(serviceItem.getCurrentMember()).isEqualTo(20L);
+        verify(bookWriteService, never()).apply(any(), any());
     }
 
     @Nested

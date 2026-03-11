@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import teamssavice.ssavice.address.Address;
 import teamssavice.ssavice.global.util.GeoHashUtil;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatusFilter;
+import teamssavice.ssavice.serviceItem.constants.SortType;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
@@ -34,7 +36,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
     public Slice<ServiceItem> search(ServiceItemCommand.Search command) {
         LocalDateTime now = LocalDateTime.now();
         int pageSize = command.pageable().getPageSize();
-        boolean isDistanceSort = Integer.valueOf(4).equals(command.sortBy());
+        boolean isDistanceSort = command.sortType() == SortType.DISTANCE;
 
         BooleanBuilder baseCondition = new BooleanBuilder();
         NumberExpression<Double> distanceExpr = null;
@@ -51,7 +53,7 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
             orderSpecifiers = new OrderSpecifier[]{distanceExpr.asc(), serviceItem.id.asc()};
         } else {
             baseCondition.and(ltLastId(command.lastId()));
-            orderSpecifiers = getOrderSpecifier(command.sortBy());
+            orderSpecifiers = getOrderSpecifier(command.sortType());
         }
 
         baseCondition
@@ -156,8 +158,9 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         return lastId == null ? null : serviceItem.id.lt(lastId);
     }
 
-    private BooleanExpression eqCategory(String category) {
-        return (category == null || category.isEmpty()) ? null : serviceItem.category.eq(category);
+    private BooleanExpression eqCategory(ServiceCategory category) {
+        if (category == null || category == ServiceCategory.ALL) return null;
+        return serviceItem.category.eq(category);
     }
 
     private BooleanExpression containsQuery(String query) {
@@ -173,24 +176,19 @@ public class ServiceItemRepositoryImpl implements ServiceItemRepositoryCustom {
         return maxPrice != null ? serviceItem.price.discountedPrice.loe(maxPrice) : null;
     }
 
-    private OrderSpecifier<?>[] getOrderSpecifier(Integer sortBy) {
-        // 기본값: createdAt 내림차순 (최신순)
+    private OrderSpecifier<?>[] getOrderSpecifier(SortType sortType) {
         OrderSpecifier[] defaultSort = {serviceItem.createdAt.desc()};
 
-        if (sortBy == null) {
+        if (sortType == null) {
             return defaultSort;
         }
 
-        switch (sortBy) {
-            case 1: // 가격 낮은 순
-                return new OrderSpecifier[]{serviceItem.price.discountedPrice.asc(), serviceItem.id.desc()};
-            case 2: // 가격 높은 순
-                return new OrderSpecifier[]{serviceItem.price.discountedPrice.desc(), serviceItem.id.desc()};
-            case 3: // 할인율 순
-                return new OrderSpecifier[]{serviceItem.price.discountRate.desc(), serviceItem.id.desc()};
-            default: // 인기순 하고 마감임박순은 아직 기준이 안정해져서 우선 최신순
-                return defaultSort;
-        }
+        return switch (sortType) {
+            case PRICE_ASC -> new OrderSpecifier[]{serviceItem.price.discountedPrice.asc(), serviceItem.id.desc()};
+            case PRICE_DESC -> new OrderSpecifier[]{serviceItem.price.discountedPrice.desc(), serviceItem.id.desc()};
+            case DISCOUNT_RATE -> new OrderSpecifier[]{serviceItem.price.discountRate.desc(), serviceItem.id.desc()};
+            default -> defaultSort;
+        };
     }
 
     private BooleanExpression applyOnSaleCondition(LocalDateTime now, boolean onSale) {

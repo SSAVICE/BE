@@ -6,6 +6,7 @@ import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.book.constants.BookViewStatus;
 import teamssavice.ssavice.book.entity.Book;
 import teamssavice.ssavice.book.entity.BookStatus;
+import teamssavice.ssavice.serviceItem.constants.ServiceCategory;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 
@@ -47,7 +48,7 @@ public class BookModel {
         Long serviceId,
         String title,
         String imageUrl,
-        String category,
+        ServiceCategory category,
         String companyName,
         Long companyId,
 

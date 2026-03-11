@@ -11,11 +11,16 @@ import teamssavice.ssavice.imageresource.constants.ImageVariant;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
+import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,6 +31,8 @@ public class ImageService {
     private final S3ObjectKeyGenerator s3ObjectKeyGenerator;
     private final ImageWriteService imageWriteService;
     private final ImageReadService imageReadService;
+    private final ServiceItemReadService serviceItemReadService;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path, ImageContentType contentType) {
@@ -71,5 +78,13 @@ public class ImageService {
     @Transactional
     public void changeMetaDataToThumbnail(String originKey, String thumbKey) {
         imageWriteService.changeMetaDataToThumb(originKey, thumbKey);
+        ServiceItem serviceItem = serviceItemReadService.findByThumbnailImageResourceSourceKey(originKey);
+        outboxWriteService.saveEvent(
+                serviceItem.getId(),
+                EventType.THUMBNAIL_UPDATED,
+                Map.of("thumbnailObjectKey",
+                        thumbKey)
+        );
+
     }
 }

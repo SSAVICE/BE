@@ -4,7 +4,9 @@ import lombok.Builder;
 import teamssavice.ssavice.address.AddressModel;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
+import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class ServiceItemModel {
             return Summary.builder()
                 .serviceId(entity.getId())
                 .thumbnailUrl(thumbnailUrl)
-                .category(entity.getCategory())
+                .category(entity.getCategory().name())
                 .title(entity.getTitle())
                 .currentMember(entity.getCurrentMember())
                 .minimumMember(entity.getMinimumMember())
@@ -58,6 +60,15 @@ public class ServiceItemModel {
                 .build();
         }
     }
+
+    public record SearchContext(
+            boolean isBooked,
+            String imageUrl,
+            double distanceKm,
+            Long currentMember,
+            ServiceStatus status
+    ) {}
+
 
     @Builder
     public record Search(
@@ -86,6 +97,7 @@ public class ServiceItemModel {
         boolean isBooked,
         double distanceKm
     ) {
+        // 기존 (QueryDSL용) - 나중에 삭제 예정
         public static Search from(ServiceItem entity, boolean isBooked, String imageUrl, double distanceKm) {
             return Search.builder()
                 .serviceId(entity.getId())
@@ -98,7 +110,7 @@ public class ServiceItemModel {
                 .discountedPrice(entity.getPrice().getDiscountedPrice())
                 .status(entity.getStatus())
                 .deadline(entity.getDeadline())
-                .category(entity.getCategory())
+                .category(entity.getCategory().name())
                 .tag(entity.getTag())
                 .currentMember(entity.getCurrentMember())
                 .minimumMember(entity.getMinimumMember())
@@ -113,6 +125,43 @@ public class ServiceItemModel {
                 .distanceKm(distanceKm)
                 .build();
         }
+
+        public static Search fromDocument(ServiceItemSearchDocument doc,  SearchContext context) {
+            return Search.builder()
+                    .serviceId(doc.getId())
+                    .companyId(doc.getCompanyId())
+                    .companyName(doc.getCompanyName())
+                    .serviceImageUrl(context.imageUrl())
+                    .title(doc.getTitle())
+                    .basePrice(doc.getBasePrice())
+                    .discountRatio(doc.getDiscountRate())
+                    .discountedPrice(doc.getDiscountedPrice())
+                    .status(context.status())
+                    .deadline(parseDateTime(doc.getDeadline()))
+                    .category(doc.getCategory())
+                    .tag(doc.getTags() != null ? String.join(",", doc.getTags()) : null)
+                    .currentMember(context.currentMember())
+                    .minimumMember(doc.getMinimumMember())
+                    .maximumMember(doc.getMaximumMember())
+                    .region(AddressModel.RegionSummary.builder()
+                            .gugun(doc.getGugun())
+                            .region(doc.getRegion())
+                            .latitude(doc.getLocation().getLat())
+                            .longitude(doc.getLocation().getLon())
+                            .build())
+                    .isBooked(context.isBooked())
+                    .distanceKm(context.distanceKm())
+                    .build();
+        }
+    }
+
+    private static LocalDateTime parseDateTime(String dateStr) {
+        if (dateStr == null) return null;
+        if (dateStr.length() == 10) {
+            // "2026-02-25" → "2026-02-25T00:00:00"
+            return LocalDate.parse(dateStr).atStartOfDay();
+        }
+        return LocalDateTime.parse(dateStr);
     }
 
     @Builder
@@ -159,7 +208,7 @@ public class ServiceItemModel {
                     .endDate(entity.getEndDate())
                     .deadline(entity.getDeadline())
                     .createdAt(entity.getCreatedAt())
-                    .category(entity.getCategory())
+                    .category(entity.getCategory().name())
                     .tag(entity.getTag())
                     .currentMember(entity.getCurrentMember())
                     .minimumMember(entity.getMinimumMember())
@@ -230,7 +279,7 @@ public class ServiceItemModel {
                     .discountedPrice(entity.getPrice().getDiscountedPrice())
                     .status(entity.getStatus())
                     .deadline(entity.getDeadline())
-                    .category(entity.getCategory())
+                    .category(entity.getCategory().name())
                     .tag(entity.getTag())
                     .currentMember(entity.getCurrentMember())
                     .minimumMember(entity.getMinimumMember())

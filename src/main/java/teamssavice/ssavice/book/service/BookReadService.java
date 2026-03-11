@@ -62,6 +62,8 @@ public class BookReadService {
         return bookRepository.countSucceededBooksByUserId(userId, BookStatus.RESERVED, ServiceStatus.SUCCEEDED, LocalDateTime.now());
     }
 
+    // 기존 serviceItems 로 찾던 메서드인데 밑에껄로 대체되면 삭제 예정
+    // opensearch 는 Entity 가 없어서  Entity 를 자체로 넘길 수 없음
     public Set<Long> findReservedServiceItemIdsFromLatestBooks(@Nullable Long userId, List<ServiceItem> serviceItems) {
         if(userId == null) return Collections.emptySet();
 
@@ -70,6 +72,15 @@ public class BookReadService {
                 .toList();
 
         return bookRepository.findLatestBooksByUserIdAndServiceItemId(userId, serviceIds).stream()
+                .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
+                .map(book -> book.getServiceItem().getId())
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Long> findReservedServiceItemIdsByIds(@Nullable Long userId, List<Long> serviceItemIds) {
+        if (userId == null) return Collections.emptySet();
+
+        return bookRepository.findLatestBooksByUserIdAndServiceItemId(userId, serviceItemIds).stream()
                 .filter(book -> book.getBookStatus() == BookStatus.RESERVED)
                 .map(book -> book.getServiceItem().getId())
                 .collect(Collectors.toSet());
