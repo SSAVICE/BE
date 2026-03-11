@@ -15,6 +15,8 @@ import teamssavice.ssavice.global.constants.ErrorCode;
 import teamssavice.ssavice.global.exception.ConflictException;
 import teamssavice.ssavice.global.exception.ForbiddenException;
 import teamssavice.ssavice.kafka.event.KafkaEvent;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.s3.S3Service;
@@ -26,6 +28,7 @@ import teamssavice.ssavice.user.entity.Users;
 import teamssavice.ssavice.user.service.UserReadService;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,7 @@ public class BookService {
     private final RefundService refundService;
     private final S3Service s3Service;
     private final ServiceItemWriteService serviceItemWriteService;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional(readOnly = true)
     public Page<BookModel.Info> getMyBooksByStatus(BookCommand.RetrieveByStatus command) {
@@ -64,10 +68,19 @@ public class BookService {
     @Transactional
     public BookModel.Apply apply(Long userId, Long serviceId) {
 
-        ServiceItem serviceItem = serviceItemWriteService.participate(serviceId);
         Users user = userReadService.findById(userId);
+        validateApply(user, serviceId);
 
-        validateApply(user, serviceItem);
+        ServiceItem serviceItem = serviceItemWriteService.participate(serviceId);
+
+        // 만약 인원이 가득 차면  opensearch 에 상태 변화에 대한 업데이트 발행
+        if (serviceItem.isFull()) {
+            outboxWriteService.saveEvent(
+                    serviceItem.getId(),
+                    EventType.AVAILABILITY_UPDATED,
+                    Map.of("isAvailable", false)
+            );
+        }
 
         Book book = bookWriteService.apply(user, serviceItem);
         applicationEventPublisher.publishEvent(KafkaEvent.Join.joinEvent(serviceItem, userId));
@@ -95,8 +108,8 @@ public class BookService {
         refundService.registerRefunds(List.of(book), serviceItem.getPrice(), RefundReason.USER_CANCEL);
     }
 
-    private void validateApply(Users user, ServiceItem serviceItem) {
-        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)) {
+    private void validateApply(Users user, Long serviceItemId) {
+        if (bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItemId, BookStatus.CANCELED)) {
             throw new ConflictException(ErrorCode.ALREADY_APPLIED);
         }
     }

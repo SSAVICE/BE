@@ -124,6 +124,8 @@ public class ServiceItem extends BaseEntity {
     }
 
     public void participate() {
+        validateAppliable();
+
         if (this.isFull()) {
             throw new ConflictException(ErrorCode.MEMBER_FULL);
         }

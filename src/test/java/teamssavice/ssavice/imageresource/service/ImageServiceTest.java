@@ -13,21 +13,21 @@ import teamssavice.ssavice.imageresource.constants.ImageVariant;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import teamssavice.ssavice.fixture.ServiceItemFixture;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.event.ServiceItemThumbnailUpdatedEvent;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -54,7 +54,7 @@ class ImageServiceTest {
     private ServiceItemReadService serviceItemReadService;
 
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private OutboxWriteService outboxWriteService;
 
     @Nested
     @DisplayName("updateImage")
@@ -254,17 +254,17 @@ class ImageServiceTest {
         }
 
         @Test
-        @DisplayName("썸네일 메타데이터 변경 시 썸네일 업데이트 이벤트가 발행된다")
+        @DisplayName("썸네일 메타데이터 변경 시 아웃박스에 썸네일 업데이트 이벤트가 저장된다")
         void 썸네일_이벤트_발행() {
             // when
             imageService.changeMetaDataToThumbnail(originKey, thumbKey);
 
             // then
-            ArgumentCaptor<ServiceItemThumbnailUpdatedEvent> captor =
-                    ArgumentCaptor.forClass(ServiceItemThumbnailUpdatedEvent.class);
-            verify(applicationEventPublisher).publishEvent(captor.capture());
-            assertThat(captor.getValue().serviceItemId()).isEqualTo(1L);
-            assertThat(captor.getValue().thumbKey()).isEqualTo(thumbKey);
+            verify(outboxWriteService).saveEvent(
+                    1L,
+                    EventType.THUMBNAIL_UPDATED,
+                    Map.of("thumbnailObjectKey", thumbKey)
+            );
         }
     }
 }

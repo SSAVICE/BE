@@ -1,7 +1,6 @@
 package teamssavice.ssavice.serviceItem.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import teamssavice.ssavice.address.Address;
@@ -13,7 +12,6 @@ import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.serviceItem.entity.Price;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
 import teamssavice.ssavice.serviceItem.infrastructure.repository.ServiceItemRepository;
-import teamssavice.ssavice.serviceItem.event.ServiceItemAvailabilityChangedEvent;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 
 @Service
@@ -21,7 +19,6 @@ import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
 @Transactional
 public class ServiceItemWriteService {
     private final ServiceItemRepository serviceItemRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ServiceItem save(ServiceItemCommand.Create command, Company company, AddressCommand.RegionInfo addressCommand) {
@@ -60,12 +57,8 @@ public class ServiceItemWriteService {
     public ServiceItem participate(Long serviceId) {
         ServiceItem serviceItem = serviceItemRepository.findByIdForUpdate(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.SERVICE_ITEM_NOT_FOUND));
-        serviceItem.validateAppliable();
         serviceItem.participate();
-        // 만약 인원이 가득 차면  opensearch 에 상태 변화에 대한 업ㅂ데이트 발행
-        if (serviceItem.isFull()) {
-            eventPublisher.publishEvent(new ServiceItemAvailabilityChangedEvent(serviceItem.getId(), false));
-        }
+
         return serviceItem;
     }
 }

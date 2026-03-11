@@ -2,7 +2,6 @@ package teamssavice.ssavice.imageresource.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -12,14 +11,16 @@ import teamssavice.ssavice.imageresource.constants.ImageVariant;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.dto.ImageCommand;
 import teamssavice.ssavice.imageresource.service.dto.ImageModel;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.s3.S3ObjectKeyGenerator;
 import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.event.ServiceItemThumbnailUpdatedEvent;
 import teamssavice.ssavice.serviceItem.service.ServiceItemReadService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -31,7 +32,7 @@ public class ImageService {
     private final ImageWriteService imageWriteService;
     private final ImageReadService imageReadService;
     private final ServiceItemReadService serviceItemReadService;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public ImageModel.PutPresignedUrl updateImage(Long id, ImagePath path, ImageContentType contentType) {
@@ -78,6 +79,12 @@ public class ImageService {
     public void changeMetaDataToThumbnail(String originKey, String thumbKey) {
         imageWriteService.changeMetaDataToThumb(originKey, thumbKey);
         ServiceItem serviceItem = serviceItemReadService.findByThumbnailImageResourceSourceKey(originKey);
-        applicationEventPublisher.publishEvent(new ServiceItemThumbnailUpdatedEvent(serviceItem.getId(), thumbKey));
+        outboxWriteService.saveEvent(
+                serviceItem.getId(),
+                EventType.THUMBNAIL_UPDATED,
+                Map.of("thumbnailObjectKey",
+                        thumbKey)
+        );
+
     }
 }

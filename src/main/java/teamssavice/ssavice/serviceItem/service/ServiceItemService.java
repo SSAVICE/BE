@@ -21,6 +21,8 @@ import teamssavice.ssavice.global.util.GeoHashUtil;
 import teamssavice.ssavice.imageresource.entity.ImageResource;
 import teamssavice.ssavice.imageresource.service.ImageReadService;
 import teamssavice.ssavice.kafka.event.KafkaEvent;
+import teamssavice.ssavice.outbox.constants.EventType;
+import teamssavice.ssavice.outbox.service.OutboxWriteService;
 import teamssavice.ssavice.refund.constants.RefundReason;
 import teamssavice.ssavice.refund.service.RefundService;
 import teamssavice.ssavice.region.Region;
@@ -29,8 +31,6 @@ import teamssavice.ssavice.s3.S3Service;
 import teamssavice.ssavice.s3.event.S3EventDto;
 import teamssavice.ssavice.serviceItem.constants.ServiceStatus;
 import teamssavice.ssavice.serviceItem.entity.ServiceItem;
-import teamssavice.ssavice.serviceItem.event.ServiceItemCreatedEvent;
-import teamssavice.ssavice.serviceItem.event.ServiceItemDeletedEvent;
 import teamssavice.ssavice.serviceItem.infrastructure.opensearch.SearchResult;
 import teamssavice.ssavice.serviceItem.infrastructure.opensearch.ServiceItemSearchDocument;
 import teamssavice.ssavice.serviceItem.service.dto.ServiceItemCommand;
@@ -51,6 +51,7 @@ public class ServiceItemService {
     private final RegionReadService regionReadService;
     private final RefundService refundService;
     private final WishReadService wishReadService;
+    private final OutboxWriteService outboxWriteService;
 
     @Transactional
     public Long register(ServiceItemCommand.Create command) {
@@ -79,13 +80,11 @@ public class ServiceItemService {
 
         applicationEventPublisher.publishEvent(KafkaEvent.Join.createEvent(savedServiceItem, command.companyId()));
 
-        applicationEventPublisher.publishEvent(
-                new ServiceItemCreatedEvent(
-                        savedServiceItem.getId(),
-                        ServiceItemSearchDocument.from(savedServiceItem)
-                )
+        outboxWriteService.saveEvent(
+                savedServiceItem.getId(),
+                EventType.CREATED,
+                ServiceItemSearchDocument.from(savedServiceItem)
         );
-
 
         return savedServiceItem.getId();
     }
@@ -221,7 +220,11 @@ public class ServiceItemService {
             refundService.registerRefunds(canceledBooks, serviceItem.getPrice(), RefundReason.SERVICE_DELETED);
         }
 
-        applicationEventPublisher.publishEvent(new ServiceItemDeletedEvent(serviceItem.getId()));
+        outboxWriteService.saveEvent(
+                serviceItem.getId(),
+                EventType.DELETED,
+                Map.of("id", serviceItem.getId())
+        );
 
     }
 

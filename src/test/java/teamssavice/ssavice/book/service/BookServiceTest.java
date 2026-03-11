@@ -156,7 +156,6 @@ class BookServiceTest {
 
         Users user = UserFixture.user();
 
-        given(serviceItemWriteService.participate(serviceId)).willReturn(serviceItem);
         given(userReadService.findById(userId)).willReturn(user);
         given(bookReadService.existsByUserAndServiceAndStatusNot(user.getId(), serviceItem.getId(), BookStatus.CANCELED)).willReturn(true);
 
