@@ -1,18 +1,13 @@
 # SSAVICE
 
 ## 🎯 프로젝트 소개
-- 검색 인프라 진화
-  - MySQL LIKE → GeoHash → OpenSearch + Nori 형태소 분석기
-  - 응답시간 11,750ms → 25ms (99.8% 단축)
-
-- 이미지 업로드 파이프라인
-  - Presigned URL → S3 temp 버킷 → HeadObject 검증 → Lambda 썸네일 → SQS → DB 갱신
-  - 서버 메모리·IO 부하 제거, Spring Retry + 지수 백오프 + Jitter 적용
-
-- 데이터 동기화
-  - Outbox 패턴 + SQS로 DB → OpenSearch 색인
-  - 다중 인스턴스 중복 방지: ShedLock 적용
-
+SSAVICE는 헬스장 PT, 필라테스 등 오프라인 서비스를 혼자보다 여럿이 함께 이용하면 더 저렴하게 이용할 수 있도록 연결해주는 공동구매 중개 플랫폼입니다. 
+<br>
+판매자가 직접 서비스를 등록하고 구매자를 모집하며, 인원이 충족되면 할인된 가격으로 거래가 성사됩니다. 
+<br>
+개인 단위의 대량구매도 지원하여 조건에 맞는 구매 방식을 유연하게 선택할 수 있습니다. 
+<br>
+지도 기반 검색을 통해 내 주변의 공동구매 가능한 서비스를 빠르게 탐색할 수 있는 것이 핵심입니다.
 
 ### 프로젝트 기술 스택
 
@@ -47,3 +42,13 @@
 ## 📊 ERD
 
 ## **프로젝트 중점사항**
+- 위치 기반 검색 인프라
+  - MySQL LIKE → GeoHash → OpenSearch + Nori 형태소 분석기
+
+- 이미지 업로드 파이프라인
+  - Presigned URL → S3 temp 버킷 → HeadObject 검증 → Lambda 썸네일 → SQS → DB 갱신
+  - 서버 메모리·IO 부하 제거, Spring Retry + 지수 백오프 + Jitter 적용
+
+- 데이터 동기화
+  - Outbox 패턴 + SQS로 DB → OpenSearch 색인
+  - 다중 인스턴스 중복 방지: ShedLock 적용
