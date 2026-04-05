@@ -19,7 +19,6 @@
 - **MySQL**: 주 데이터베이스로 활용
 
 ## ⚠️ ISSUE
-- 테스트 자동화 [https://velog.io/@momnpa333/github-actionsspring-test-자동화](https://velog.io/@momnpa333/github-actionsspring-test-%EC%9E%90%EB%8F%99%ED%99%94)
 - [이미지 서비스 구현 설계](https://velog.io/@momnpa333/%EC%9D%B4%EB%AF%B8%EC%A7%80-%EC%84%9C%EB%B9%84%EC%8A%A4-%EA%B5%AC%ED%98%84-%EC%84%A4%EA%B3%84)
 
 ## 🏗 시스템 아키텍쳐
