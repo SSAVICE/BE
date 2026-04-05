@@ -1,6 +1,8 @@
 # SSAVICE
 
 ## 🎯 프로젝트 소개
+<img width="266" height="261" alt="image" src="https://github.com/user-attachments/assets/2b907c6e-bd1a-4170-8fe1-ed6855c101c5" />
+
 SSAVICE는 헬스장 PT, 필라테스 등 오프라인 서비스를 혼자보다 여럿이 함께 이용하면 더 저렴하게 이용할 수 있도록 연결해주는 공동구매 중개 플랫폼입니다. 
 <br>
 판매자가 직접 서비스를 등록하고 구매자를 모집하며, 인원이 충족되면 할인된 가격으로 거래가 성사됩니다. 
@@ -40,6 +42,8 @@ SSAVICE는 헬스장 PT, 필라테스 등 오프라인 서비스를 혼자보다
 ## 🏗 시스템 아키텍쳐
 
 ## 📊 ERD
+<img width="1105" height="691" alt="image" src="https://github.com/user-attachments/assets/f7676967-b7ce-419f-ac29-7593f91deb28" />
+
 
 ## **프로젝트 중점사항**
 - 위치 기반 검색 인프라
